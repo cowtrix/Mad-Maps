@@ -1,0 +1,327 @@
+using System;
+using System.Collections.Generic;
+using Dingo.Common;
+using Dingo.Common.Collections;
+using Dingo.WorldStamp;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace Dingo.Terrains
+{
+    public static class TerrainLayerUtilities
+    {
+        public static List<TerrainWrapper> CollectWrappers(ObjectBounds bounds)
+        {
+            var ret = new List<TerrainWrapper>();
+            bounds.Expand(Vector3.up * 5000);
+            var allColliders = Physics.OverlapBox(bounds.center, bounds.extents, bounds.Rotation);
+            foreach (var allCollider in allColliders)
+            {
+                if (allCollider is TerrainCollider)
+                {
+                    ret.Add(allCollider.GetComponent<TerrainWrapper>());
+                }
+            }
+            return ret;
+        }
+
+        public static Vector3 GetNormalFromHeightmap(this TerrainWrapper wrapper, Vector2 normalizedPos)
+        {
+            var tRes = wrapper.Terrain.terrainData.heightmapResolution;
+            var tSize = wrapper.Terrain.terrainData.size;
+
+            var x = Mathf.FloorToInt(normalizedPos.x * tRes);
+            var z = Mathf.FloorToInt(normalizedPos.y * tRes);
+
+            var p1 = wrapper.Terrain.HeightmapCoordToWorldPos(new Common.Coord(x, z));
+            var p2 = wrapper.Terrain.HeightmapCoordToWorldPos(new Common.Coord(x, z));
+            var p3 = wrapper.Terrain.HeightmapCoordToWorldPos(new Common.Coord(x + 1, z));
+            var p4 = wrapper.Terrain.HeightmapCoordToWorldPos(new Common.Coord(x, z + 1));
+
+            p1.y = wrapper.GetCompoundHeight(null, p1) * tSize.y;
+            p2.y = wrapper.GetCompoundHeight(null, p2) * tSize.y;
+            p3.y = wrapper.GetCompoundHeight(null, p3) * tSize.y;
+            p4.y = wrapper.GetCompoundHeight(null, p4) * tSize.y;
+
+            return Vector3.Cross(p2 - p4, p1 - p3).normalized;
+        }
+
+        public static Dictionary<SplatPrototype, SplatPrototypeWrapper> ResolvePrototypes(SplatPrototype[] prototypes)
+        {
+            var ret = new Dictionary<SplatPrototype, SplatPrototypeWrapper>(new SplatPrototypeWrapper.SplatPrototypeComparer());
+#if UNITY_EDITOR
+            var splatWrapperLookup = new Dictionary<SplatPrototype, SplatPrototypeWrapper>(new SplatPrototypeWrapper.SplatPrototypeComparer());
+            var allWrapperGUIDs = AssetDatabase.FindAssets("t: SplatPrototypeWrapper");
+            foreach (var allWrapperGUID in allWrapperGUIDs)
+            {
+                var splatWrapper =
+                    AssetDatabase.LoadAssetAtPath<SplatPrototypeWrapper>(
+                        AssetDatabase.GUIDToAssetPath(allWrapperGUID));
+                var unityProto = splatWrapper.GetPrototype();
+                if (splatWrapperLookup.ContainsKey(unityProto))
+                {
+                    Debug.LogWarning(String.Format("Duplicate SplatPrototypeWrappers detected: "));
+                    continue;
+                }
+                splatWrapperLookup.Add(splatWrapper.GetPrototype(), splatWrapper);
+            }
+            for (var k = 0; k < prototypes.Length; ++k)
+            {
+                var prototype = prototypes[k];
+                SplatPrototypeWrapper wrapper;
+                if (!splatWrapperLookup.TryGetValue(prototype, out wrapper))
+                {
+                    if (
+                        EditorUtility.DisplayDialog(
+                            String.Format("Unable to find wrapper for {0}", prototype.texture),
+                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
+                    {
+                        var path = EditorExtensions.SaveFilePanel("Create New SplatPrototype Wrapper",
+                            prototype.texture.name + "Wrapper", "asset");
+                        if (!String.IsNullOrEmpty(path))
+                        {
+                            wrapper = ScriptableObject.CreateInstance<SplatPrototypeWrapper>();
+                            wrapper.SetFromPrototype(prototype);
+                            AssetDatabase.CreateAsset(wrapper, path);
+                            AssetDatabase.Refresh();
+
+                            splatWrapperLookup.Add(wrapper.GetPrototype(), wrapper);
+                            ret.Add(wrapper.GetPrototype(), wrapper);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var wrapperPath = EditorExtensions.OpenFilePanel("Get SplatPrototypeWrapper for " + prototype.texture, "asset");
+                        if (!string.IsNullOrEmpty(wrapperPath))
+                        {
+                            wrapper = AssetDatabase.LoadAssetAtPath<SplatPrototypeWrapper>(wrapperPath);
+                            ret.Add(wrapper.GetPrototype(), wrapper);
+                        }
+                    }
+                }
+                else
+                {
+                    ret.Add(wrapper.GetPrototype(), wrapper);
+                }
+            }
+#endif
+            return ret;
+        }
+
+        public static Dictionary<DetailPrototype, DetailPrototypeWrapper> ResolvePrototypes(DetailPrototype[] prototypes)
+        {
+            var ret = new Dictionary<DetailPrototype, DetailPrototypeWrapper>(new DetailPrototypeWrapper.DetailPrototypeComparer());
+#if UNITY_EDITOR
+            var detailWrapperLookup = new Dictionary<DetailPrototype, DetailPrototypeWrapper>(new DetailPrototypeWrapper.DetailPrototypeComparer());
+            var allWrapperGUIDs = AssetDatabase.FindAssets("t: DetailPrototypeWrapper");
+            foreach (var allWrapperGUID in allWrapperGUIDs)
+            {
+                var detailWrapper =
+                    AssetDatabase.LoadAssetAtPath<DetailPrototypeWrapper>(
+                        AssetDatabase.GUIDToAssetPath(allWrapperGUID));
+                var unityProto = detailWrapper.GetPrototype();
+                if (detailWrapperLookup.ContainsKey(unityProto))
+                {
+                    Debug.LogWarning(String.Format("Duplicate DetailPrototypeWrappers detected: {0} : {1}", detailWrapper, detailWrapperLookup[unityProto]), detailWrapper);
+                    continue;
+                }
+                detailWrapperLookup.Add(unityProto, detailWrapper);
+            }
+            for (var k = 0; k < prototypes.Length; ++k)
+            {
+                var prototype = prototypes[k];
+                DetailPrototypeWrapper wrapper;
+                if (!detailWrapperLookup.TryGetValue(prototype, out wrapper))
+                {
+                    if (
+                        EditorUtility.DisplayDialog(
+                            String.Format("Unable to find wrapper for {0}", prototype.prototypeTexture),
+                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
+                    {
+                        var path = EditorExtensions.SaveFilePanel("Create New DetailPrototype Wrapper", 
+                            (((Object)prototype.prototypeTexture ?? prototype.prototype)).name + "Wrapper", "asset");
+                        if (!String.IsNullOrEmpty(path))
+                        {
+                            wrapper = ScriptableObject.CreateInstance<DetailPrototypeWrapper>();
+                            wrapper.SetFromPrototype(prototype);
+                            AssetDatabase.CreateAsset(wrapper, path);
+                            AssetDatabase.Refresh();
+
+                            detailWrapperLookup.Add(prototype, wrapper);
+                            ret.Add(prototype, wrapper);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        var wrapperPath = EditorExtensions.OpenFilePanel("Get DetailPrototypeWrapper for " + prototype.prototypeTexture, "asset");
+                        if (!string.IsNullOrEmpty(wrapperPath))
+                        {
+                            wrapper = AssetDatabase.LoadAssetAtPath<DetailPrototypeWrapper>(wrapperPath);
+                            ret.Add(wrapper.GetPrototype(), wrapper);
+                        }
+                    }
+                }
+                else
+                {
+                    ret.Add(wrapper.GetPrototype(), wrapper);
+                }
+            }
+#endif
+            return ret;
+        }
+        
+        public static void SnapshotObjects(this TerrainLayer layer, Terrain terrain)
+        {
+#if UNITY_EDITOR
+            var terrainSize = terrain.terrainData.size;
+            var terrainPos = terrain.GetPosition();
+            var terrainBounds = new Bounds(terrainPos, Vector3.zero);
+            terrainBounds.Encapsulate(terrainPos + terrainSize);
+            terrainBounds.Expand(Vector3.up * 5000);
+            layer.Objects.Clear();
+            var overlapBox = Physics.OverlapBox(terrainBounds.center, terrainBounds.extents, Quaternion.identity, ~0,
+                QueryTriggerInteraction.Ignore);
+            for (var i = 0; i < overlapBox.Length; i++)
+            {
+                var collider = overlapBox[i];
+                if (!collider.bounds.Intersects(terrainBounds))
+                {
+                    continue;
+                }
+                if (collider is TerrainCollider)
+                {
+                    continue;
+                }
+
+                var go = collider.gameObject;
+                var prefabRoot = PrefabUtility.GetPrefabObject(go);
+                if (prefabRoot == null)
+                {
+                    Debug.LogError("Unable to collect non-prefab object: " + go.name, go);
+                    DebugHelper.DrawCube(collider.bounds.center, collider.bounds.extents, Quaternion.identity, Color.red,
+                        30);
+                    continue;
+                }
+
+                var prefabAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                var rootInScene = PrefabUtility.FindPrefabRoot(go);
+
+                var relativePos = rootInScene.transform.position - terrainPos;
+                relativePos = new Vector3(relativePos.x / terrainSize.x,
+                    (rootInScene.transform.position.y - terrain.SampleHeight(rootInScene.transform.position)) -
+                    terrainPos.y,
+                    relativePos.z / terrainSize.z);
+                layer.Objects.Add(new PrefabObjectData
+                {
+                    Guid = Guid.NewGuid().ToString(),
+                    Prefab = prefabAsset,
+                    Position = relativePos,
+                    Rotation = rootInScene.transform.localRotation.eulerAngles,
+                    Scale = rootInScene.transform.localScale
+                });
+            }
+#endif
+        }
+
+        public static void SnapshotTrees(this TerrainLayer layer, Terrain terrain)
+        {
+            layer.Trees.Clear();
+            var trees = terrain.terrainData.treeInstances;
+            var prototypes = new List<TreePrototype>(terrain.terrainData.treePrototypes);
+            for (var i = 0; i < trees.Length; i++)
+            {
+                layer.Trees.Add(new HurtTreeInstance(trees[i], prototypes));
+            }
+        }
+
+        public static void SnapshotDetails(this TerrainLayer layer, Terrain terrain)
+        {
+            layer.DetailData.Clear();
+            var prototypes = terrain.terrainData.detailPrototypes;
+            var dRes = terrain.terrainData.detailResolution;
+            var wrapperLookup = ResolvePrototypes(prototypes);
+            for (var i = 0; i < prototypes.Length; i++)
+            {
+                DetailPrototypeWrapper wrapper;
+                var prototype = prototypes[i];
+                if (!wrapperLookup.TryGetValue(prototype, out wrapper))
+                {
+                    continue;
+                }
+
+                var data = new Serializable2DByteArray(dRes, dRes);
+                var detailMap = terrain.terrainData.GetDetailLayer(0, 0, terrain.terrainData.detailWidth,
+                    terrain.terrainData.detailHeight, i);
+                int sum = 0;
+                for (var u = 0; u < detailMap.GetLength(0); u++)
+                {
+                    for (var v = 0; v < detailMap.GetLength(1); v++)
+                    {
+                        var sample = (byte)detailMap[u, v];
+                        data[v, u] = sample;
+                        sum += sample;
+                    }
+                }
+
+                if (sum > 0)
+                {
+                    layer.DetailData.Add(wrapper, data);
+                }
+            }
+        }
+
+        public static void SnapshotSplats(this TerrainLayer layer, Terrain terrain)
+        {
+            var rawSplats = terrain.terrainData.GetAlphamaps(0, 0, terrain.terrainData.alphamapWidth,
+                terrain.terrainData.alphamapHeight);
+            layer.SplatData.Clear();
+
+            var splatWrapperLookup = ResolvePrototypes(terrain.terrainData.splatPrototypes);
+
+            for (var k = 0; k < rawSplats.GetLength(2); ++k)
+            {
+                var prototype = terrain.terrainData.splatPrototypes[k];
+                SplatPrototypeWrapper wrapper;
+                if (!splatWrapperLookup.TryGetValue(prototype, out wrapper))
+                {
+                    continue;
+                }
+                var data = new Serializable2DByteArray(terrain.terrainData.alphamapResolution,
+                    terrain.terrainData.alphamapResolution);
+                float sum = 0;
+                for (var u = 0; u < rawSplats.GetLength(0); ++u)
+                {
+                    for (var v = 0; v < rawSplats.GetLength(1); ++v)
+                    {
+                        var sample = (byte)Mathf.Clamp(rawSplats[u, v, k] * 255f, 0, 255);
+                        data[v, u] = sample;
+                        sum += sample;
+                    }
+                }
+                if (sum > 0)
+                {
+                    layer.SplatData[wrapper] = data;
+                }
+            }
+        }
+
+        public static void SnapshotHeights(this TerrainLayer layer, Terrain terrain)
+        {
+            layer.Heights =
+                new Serializable2DFloatArray(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,
+                    terrain.terrainData.heightmapHeight).Flip());
+        }
+    }
+}
