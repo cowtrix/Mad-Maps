@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Dingo.Terrains
 {
     [Serializable]
-    public class HurtTreeInstance
+    public class DingoTreeInstance
     {
         public Color Color;
         public string Guid;
@@ -13,7 +13,7 @@ namespace Dingo.Terrains
         public GameObject Prototype;
         public Vector2 Scale;
 
-        public HurtTreeInstance(Vector3 position, Vector2 scale, GameObject prototype, Color color)
+        public DingoTreeInstance(Vector3 position, Vector2 scale, GameObject prototype, Color color)
         {
             //Wrapper = terrainWrapper;
             Guid = System.Guid.NewGuid().ToString();
@@ -23,7 +23,7 @@ namespace Dingo.Terrains
             Color = color;
         }
 
-        public HurtTreeInstance(TreeInstance instance, List<TreePrototype> treePrototypes)
+        public DingoTreeInstance(TreeInstance instance, List<TreePrototype> treePrototypes)
         {
             //Wrapper = wrapper;
             Position = instance.position;
@@ -72,9 +72,9 @@ namespace Dingo.Terrains
             Debug.DrawLine(worldPos, hit.point, Color.green, 5);
         }
         */
-        public HurtTreeInstance Clone()
+        public DingoTreeInstance Clone()
         {
-            return new HurtTreeInstance(Position, Scale, Prototype, Color)
+            return new DingoTreeInstance(Position, Scale, Prototype, Color)
             {
                 Guid = Guid,
             };

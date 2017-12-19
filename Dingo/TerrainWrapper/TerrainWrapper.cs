@@ -1003,7 +1003,7 @@ namespace Dingo.Terrains
             return heightSum;
         }
 
-        public List<HurtTreeInstance> GetCompoundTrees(LayerBase terminatingLayer, bool includeTerminatingLayer = false, Bounds? bounds = null)
+        public List<DingoTreeInstance> GetCompoundTrees(LayerBase terminatingLayer, bool includeTerminatingLayer = false, Bounds? bounds = null)
         {
             if (!includeTerminatingLayer && _compoundDataCache.ContainsKey(terminatingLayer))
             {
@@ -1012,7 +1012,7 @@ namespace Dingo.Terrains
             }
 
             Profiler.BeginSample("GetCompoundTrees");
-            var result = new Dictionary<string, HurtTreeInstance>();
+            var result = new Dictionary<string, DingoTreeInstance>();
             for (var i = Layers.Count - 1; i >= 0; i--)
             {
                 var layer = Layers[i];
@@ -1020,7 +1020,7 @@ namespace Dingo.Terrains
                 {
                     break;
                 }
-                List<HurtTreeInstance> trees = layer.GetTrees();
+                List<DingoTreeInstance> trees = layer.GetTrees();
                 if (trees != null)
                 {
                     for (int j = 0; j < trees.Count; j++)

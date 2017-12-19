@@ -242,7 +242,7 @@ namespace Dingo.Terrains
             var prototypes = new List<TreePrototype>(terrain.terrainData.treePrototypes);
             for (var i = 0; i < trees.Length; i++)
             {
-                layer.Trees.Add(new HurtTreeInstance(trees[i], prototypes));
+                layer.Trees.Add(new DingoTreeInstance(trees[i], prototypes));
             }
         }
 

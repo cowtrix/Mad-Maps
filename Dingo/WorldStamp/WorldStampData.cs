@@ -34,7 +34,7 @@ namespace Dingo.WorldStamp
         public Serializable2DFloatArray Heights;
         
         // TREES
-        public List<HurtTreeInstance> Trees = new List<HurtTreeInstance>();
+        public List<DingoTreeInstance> Trees = new List<DingoTreeInstance>();
 
         // OBJECTS
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();

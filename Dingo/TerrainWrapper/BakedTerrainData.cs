@@ -56,6 +56,6 @@ namespace Dingo.Terrains
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
         public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> SplatData = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
         public Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> DetailData = new Dictionary<DetailPrototypeWrapper, Serializable2DByteArray>();
-        public List<HurtTreeInstance> Trees = new List<HurtTreeInstance>();
+        public List<DingoTreeInstance> Trees = new List<DingoTreeInstance>();
     }
 }

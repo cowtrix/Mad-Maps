@@ -546,7 +546,7 @@ namespace Dingo.WorldStamp
                 {
                     continue;
                 }
-                var hurtTree = new HurtTreeInstance(tree, prototypes);
+                var hurtTree = new DingoTreeInstance(tree, prototypes);
                 var yDelta = worldPos.y - _focusedTerrain.SampleHeight(worldPos);
                 hurtTree.Position = new Vector3((worldPos.x - _currentBounds.min.x) / _currentBounds.size.x, yDelta, (worldPos.z - _currentBounds.min.z) / _currentBounds.size.z);
                 _tempData.Trees.Add(hurtTree);

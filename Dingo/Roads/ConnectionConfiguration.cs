@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Dingo.Common.Serialization;
 using UnityEngine;
 
 namespace Dingo.Roads

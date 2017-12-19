@@ -29,7 +29,7 @@ namespace Dingo.Terrains
         public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public List<string> TreeRemovals = new List<string>();
-        public List<HurtTreeInstance> Trees = new List<HurtTreeInstance>();
+        public List<DingoTreeInstance> Trees = new List<DingoTreeInstance>();
 
         /// <summary>
         /// Go and capture all of the data on a given terrain and store it in this layer.
@@ -646,7 +646,7 @@ namespace Dingo.Terrains
             Trees.Clear();
             foreach (var tree in trees)
             {
-                var newTree = new HurtTreeInstance(tree, prototypeList);
+                var newTree = new DingoTreeInstance(tree, prototypeList);
                 Trees.Add(newTree);
             }
 
@@ -730,7 +730,7 @@ namespace Dingo.Terrains
             return TreeRemovals;
         }
 
-        public override List<HurtTreeInstance> GetTrees()
+        public override List<DingoTreeInstance> GetTrees()
         {
             return Trees;
         }

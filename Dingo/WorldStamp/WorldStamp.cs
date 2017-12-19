@@ -961,7 +961,7 @@ namespace Dingo.WorldStamp
             {
                 var stampBounds = new ObjectBounds(transform.position, Size / 2, transform.rotation);
                 stampBounds.Expand(Vector3.up * 5000);
-                List<HurtTreeInstance> compoundTrees = terrainWrapper.GetCompoundTrees(layer, RemoveSameLayerTrees);
+                List<DingoTreeInstance> compoundTrees = terrainWrapper.GetCompoundTrees(layer, RemoveSameLayerTrees);
                 foreach (var hurtTreeInstance in compoundTrees)
                 {
                     if (layer.TreeRemovals.Contains(hurtTreeInstance.Guid))

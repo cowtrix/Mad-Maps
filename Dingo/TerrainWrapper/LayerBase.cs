@@ -68,7 +68,7 @@ namespace Dingo.Terrains
         }
 
         [CanBeNull]
-        public virtual List<HurtTreeInstance> GetTrees()
+        public virtual List<DingoTreeInstance> GetTrees()
         {
             return null;
         }

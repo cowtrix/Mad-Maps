@@ -61,7 +61,7 @@ namespace Dingo.Terrains.Lookups
     }
 
     [Serializable]
-    public class TreeLookup : CompositionDictionary<string, HurtTreeInstance>
+    public class TreeLookup : CompositionDictionary<string, DingoTreeInstance>
     {
         private const int Partitioning = 256;
 
@@ -91,7 +91,7 @@ namespace Dingo.Terrains.Lookups
             }
         } 
 
-        public override void Add(string key, HurtTreeInstance value)
+        public override void Add(string key, DingoTreeInstance value)
         {
             var coord = PositionToCoord(value.Position);
             List<string> partitionList;
@@ -110,7 +110,7 @@ namespace Dingo.Terrains.Lookups
 
         public override bool Remove(string key)
         {
-            HurtTreeInstance value;
+            DingoTreeInstance value;
             if (TryGetValue(key, out value))
             {
                 var coord = PositionToCoord(value.Position);

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
-using ParadoxNotion.Design;
 using UnityEngine;
 using Random = System.Random;
 
@@ -92,7 +91,7 @@ namespace Dingo.Roads
 
                 //Debug.DrawLine(wPos, wPos + Vector3.up *10, Color.red, 10);
                 var tPos = wrapper.Terrain.WorldToTreePos(wPos);
-                layer.Trees.Add(new HurtTreeInstance(tPos, Vector2.one * config.Size.GetRand(rand), prefab, config.Color.GetRand(rand)));
+                layer.Trees.Add(new DingoTreeInstance(tPos, Vector2.one * config.Size.GetRand(rand), prefab, config.Color.GetRand(rand)));
                 LastPlantCount++;
             }
         }
