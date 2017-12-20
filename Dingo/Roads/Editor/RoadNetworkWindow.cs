@@ -10,22 +10,21 @@ namespace Dingo.Roads
 {
     public partial class RoadNetworkWindow : EditorWindow
     {
-        
-
-        public static RoadNetwork FocusedRoadNetwork
-        {
-            get { return RoadNetwork.LevelInstance; }
-        }
-        
         public static EditorPersistantVal<bool> DrawConnections = new EditorPersistantVal<bool>("NodeNetworkGUI_DrawConnections", true);
         private static EditorPersistantVal<int> _currentTab = new EditorPersistantVal<int>("NodeNetworkGUI_CurrentTab", 0);
         private static EditorPersistantVal<bool> _configurationIgnoredTypesExpanded = new EditorPersistantVal<bool>("NodeNetworkGUI_IgnoredTypesExpanded", false);
+
+        public RoadNetwork FocusedRoadNetwork;
 
         private static Vector2 _scroll;
         private static Node _currentHoverNode;
         private GameObject _currentIntersection;
         private ConnectionConfiguration _currentConfiguration;
         private static int _nodeIndex = 0;
+        private static Editor _intersectionPreviewEditor;
+        private Vector3 _extraRotation;
+        private Vector2 _intersectionScroll;
+        public static float NodePreviewSize = 5;
 
         private GUIContent[] _tabs;
 
@@ -96,10 +95,25 @@ namespace Dingo.Roads
             }
         }
 
-        [MenuItem("Tools/sRoads/Editor")]
+        public void OnSelectionChange()
+        {
+            var activeGO = Selection.activeGameObject;
+            if (!activeGO)
+            {
+                return;
+            }
+            var rn = activeGO.GetComponent<RoadNetwork>();
+            if (rn)
+            {
+                FocusedRoadNetwork = rn;
+            }
+        }
+
+        [MenuItem("Tools/Dingo/Road Network Editor")]
         public static void OpenWindow()
         {
-            GetWindow<RoadNetworkWindow>().name = "sRoads";
+            var w = GetWindow<RoadNetworkWindow>();
+            w.titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
         }
 
         public void OnGUI()
@@ -109,7 +123,8 @@ namespace Dingo.Roads
                 return;
             }
 
-            titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
+            NodePreviewSize = FocusedRoadNetwork.NodePreviewSize;
+
             _currentTab.Value = GUILayout.Toolbar(_currentTab, _tabs, GUILayout.Height(20));
             EditorExtensions.Seperator();
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
@@ -214,10 +229,6 @@ namespace Dingo.Roads
             FocusedRoadNetwork.CurrentNodeConfiguration.SnapOffset = EditorGUILayout.FloatField("Snapping Offset",
                 FocusedRoadNetwork.CurrentNodeConfiguration.SnapOffset);
         }
-        
-        private static Editor _intersectionPreviewEditor;
-        private Vector3 _extraRotation;
-        private Vector2 _intersectionScroll;
 
         private void DoIntersectionsUI()
         {
@@ -284,7 +295,7 @@ namespace Dingo.Roads
             GUI.enabled = true;
         }
 
-        private static void DoConfigUI()
+        private void DoConfigUI()
         {
             FocusedRoadNetwork.SplineResolution = EditorGUILayout.FloatField("Spline Resolution", FocusedRoadNetwork.SplineResolution);
             FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
@@ -347,9 +358,16 @@ namespace Dingo.Roads
                     }
                 }
             }
+            if (GUILayout.Button("Create Stripped Copy"))
+            {
+                var newObj = Instantiate(FocusedRoadNetwork);
+                newObj.name = newObj.name.Replace("Clone", "Stripped");
+                var rn = newObj.GetComponent<RoadNetwork>();
+                rn.Strip();
+            }
         }
 
-        private static void DoCommands()
+        private void DoCommands()
         {
             EditorExtensions.Seperator();
             if (GUILayout.Button("Rebake"))

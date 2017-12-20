@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
+using ParadoxNotion.Design;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -232,7 +233,8 @@ namespace Dingo.Roads.Connections
                     distanceAccumulator = 0;
                     if (workingMeshes.Count > 0)
                     {
-                        CombineInstance[] combineInstances = workingMeshes.ToArray();
+                        CombineInstance[] combineInstances = workingMeshes
+                            .Where((instance => instance.mesh != null && instance.mesh.bounds.size.magnitude > 0)).ToArray();
                         currentResult.Mesh.CombineMeshes(combineInstances);
                     }
                     for (int j = 0; j < workingMeshes.Count; j++)

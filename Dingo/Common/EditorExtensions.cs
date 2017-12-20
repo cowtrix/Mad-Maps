@@ -13,6 +13,13 @@ namespace Dingo.Common
 {
     public static class EditorExtensions
     {
+        [MenuItem("CONTEXT/MeshCollider/Dump Info")]
+        public static void DumpMeshColliderInfo(MenuCommand command)
+        {
+            var mc = command.context as MeshCollider;
+            Debug.Log(mc.bounds);
+        }
+
         [MenuItem("GameObject/Hierarchy/Alphabeticise")]
         public static void Alphabeticise()
         {

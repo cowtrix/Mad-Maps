@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
+using ParadoxNotion.Design;
 using UnityEngine;
 
 namespace Dingo.Roads.Connections
@@ -33,7 +34,7 @@ namespace Dingo.Roads.Connections
 
         public void OnBake()
         {
-            if (!RoadNetwork.LevelInstance.RecalculateTerrain)
+            if (!Network.RecalculateTerrain)
             {
                 return;
             }
@@ -51,7 +52,7 @@ namespace Dingo.Roads.Connections
             var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
             foreach (var wrapper in terrainWrappers)
             {
-                var layer = RoadNetwork.LevelInstance.GetLayer(wrapper, true);
+                var layer = Network.GetLayer(wrapper, true);
                 layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
                 ProcessTerrainSplat(config, wrapper, layer);
             }
@@ -185,7 +186,7 @@ namespace Dingo.Roads.Connections
         private int GetStencilKey()
         {
             return GetPriority();
-            //return RoadNetwork.LevelInstance.Nodes.IndexOf(NodeConnection.ThisNode) + 1;
+            //return Network.Nodes.IndexOf(NodeConnection.ThisNode) + 1;
         }
 
         private void GenerateSplinePlanes(float planeGive, SplineSegment mainSpline, out Plane startPlane, out Plane endPlane)

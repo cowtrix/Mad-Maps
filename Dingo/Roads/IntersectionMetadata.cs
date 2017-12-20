@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Dingo.Roads
 {
     [StripComponentOnBuild]
-    public class IntersectionMetadata : MonoBehaviour
+    public class IntersectionMetadata : NodeComponent
     {
         [Header("> Two Node Case")]
         public Vector3 TwoNodeRotation;
@@ -15,7 +15,7 @@ namespace Dingo.Roads
             if (insertedNodeConnections.Count == 0)
             {
                 Debug.Log("Simple insertion case on no neighbours.");
-                RoadNetwork.LevelInstance.RemoveObject(insertedNode, false);
+                Network.RemoveObject(insertedNode, false);
                 return;
             }
 
@@ -50,7 +50,7 @@ namespace Dingo.Roads
                 }
                 if (closestLocalNode != null)
                 {
-                    RoadNetwork.LevelInstance.ConnectNodes(neighbour, closestLocalNode, connection.Configuration);
+                    Network.ConnectNodes(neighbour, closestLocalNode, connection.Configuration);
                     insertedNodeConnections.RemoveAt(i);
                 }
             }
@@ -70,7 +70,7 @@ namespace Dingo.Roads
                 insertedNode.Destroy();
                 DestroyImmediate(insertedNode.gameObject);
 
-                RoadNetwork.LevelInstance.ConnectNodes(singleNeighbour, bestToLink);
+                Network.ConnectNodes(singleNeighbour, bestToLink);
 
                 return;
             }

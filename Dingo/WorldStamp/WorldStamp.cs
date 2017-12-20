@@ -460,7 +460,7 @@ namespace Dingo.WorldStamp
             var axisStampBounds = stampBounds.ToAxisBounds();
             var targetMinCoord = terrain.WorldToHeightmapCoord(axisStampBounds.min, TerrainX.RoundType.Ceil);
             var targetMaxCoord = terrain.WorldToHeightmapCoord(axisStampBounds.max, TerrainX.RoundType.Ceil);
-            var heightArraySize = new Coord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
+            var heightArraySize = new Common.Coord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
             
             var stampHeight = (transform.position.y - terrainWrapper.transform.position.y)/
                               terrainWrapper.Terrain.terrainData.size.y;

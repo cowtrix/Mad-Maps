@@ -6,6 +6,7 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
 using UnityEngine;
+using GameObjectExtensions = Dingo.Common.GameObjectExtensions;
 
 namespace Dingo.Roads
 {
@@ -31,7 +32,7 @@ namespace Dingo.Roads
     [StripComponentOnBuild]
 #endif
     [ExecuteInEditMode]
-    public class RoadNetwork : Common.LevelSingleton<RoadNetwork>
+    public class RoadNetwork : MonoBehaviour
     {
         public static HashSet<Node> ThinkCache = new HashSet<Node>();
 
@@ -407,6 +408,16 @@ namespace Dingo.Roads
             {
                 meta.OnInsert(targetNode);
             }
+        }
+
+        public void Strip()
+        {
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                Nodes[i].Strip();
+            }
+            Common.GameObjectExtensions.OptimizeAndFlattenHierarchy(transform);
+            DestroyImmediate(this);
         }
     }
 }

@@ -177,7 +177,7 @@ namespace Dingo.Roads
                     return;
                 }
 
-                Handles.SphereCap(-1, hitPoint, Quaternion.identity, FocusedRoadNetwork.NodePreviewSize);
+                Handles.SphereCap(-1, hitPoint, Quaternion.identity, NodePreviewSize);
                 // Draw the spline preview
                 var currentNode = currentSelection[0];
                 if (currentNode != null)

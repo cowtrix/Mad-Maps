@@ -26,6 +26,20 @@ namespace Dingo.Roads
         public ConnectionConfiguration Configuration;
         public List<ConnectionComponent> Components = new List<ConnectionComponent>();
 
+        private bool _isStripping;
+
+        public RoadNetwork Network
+        {
+            get
+            {
+                if (ThisNode == null)
+                {
+                    return null;
+                }
+                return ThisNode.Network;
+            }
+        }
+
         [Serializable]
         public class IntGameObjectMapping : CompositionDictionary<int, GameObject> { }
 
@@ -111,7 +125,7 @@ namespace Dingo.Roads
 
         private void RecalculateSpline()
         {
-            var instance = RoadNetwork.LevelInstance;
+            var instance = Network;
             _spline.Resolution = instance.SplineResolution;
 
             _spline.FirstControlPoint.Position = ThisNode.NodePosition;
@@ -142,7 +156,7 @@ namespace Dingo.Roads
         public void OnDestroy()
         {
 #if UNITY_EDITOR
-            if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode || UnityEditor.EditorApplication.isPlaying)
+            if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode || UnityEditor.EditorApplication.isPlaying || _isStripping)
             {
                 // Go figure, the first can be false and yet the second true (when stopping playing in editor)
                 return;
@@ -155,7 +169,7 @@ namespace Dingo.Roads
         {
             for (int i = Components.Count - 1; i >= 0; i--)
             {
-                if (!Components[i]) // Don't double destroy
+                if (!Components[i] || Components[i].Equals(null)) // Don't double destroy
                     continue;
                 Components[i].Destroy();
 
@@ -231,6 +245,16 @@ namespace Dingo.Roads
                 connectionComponent.Destroy();
                 DestroyImmediate(connectionComponent);
             }
+        }
+
+        public void Strip()
+        {
+            _isStripping = true;
+            for (int i = 0; i < Components.Count; i++)
+            {
+                 Components[i].Strip();
+            }
+            DestroyImmediate(this);
         }
     }
 }

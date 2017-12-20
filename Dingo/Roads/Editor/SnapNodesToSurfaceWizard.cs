@@ -23,7 +23,7 @@ namespace Dingo.Roads
         private void OnWizardCreate()
         {
             // Snap all
-            var nn = RoadNetworkWindow.FocusedRoadNetwork;
+            /*var nn = RoadNetworkWindow.FocusedRoadNetwork;
             if (nn == null)
             {
                 Debug.LogError("Failed to find NodeNetwork in scene!");
@@ -37,7 +37,7 @@ namespace Dingo.Roads
                 allNodes.Add(node);
             }
 
-            EditorCoroutineManager.StartEditorCoroutine(Snap(allNodes, Mask));
+            EditorCoroutineManager.StartEditorCoroutine(Snap(allNodes, Mask));*/
         }
 
         /*private void OnWizardOtherButton()

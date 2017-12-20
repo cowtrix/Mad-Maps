@@ -5,6 +5,7 @@ using Dingo.Common.Serialization;
 using Dingo.Roads;
 using Dingo.Terrains.Lookups;
 using Dingo.WorldStamp;
+using ParadoxNotion.Serialization;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -32,7 +33,7 @@ namespace Dingo.Terrains
         public List<ProceduralLayerComponent> Components = new List<ProceduralLayerComponent>();
 
         [HideInInspector]
-        public List<DerivedComponentJsonDataRow> ComponentsJSON = new List<DerivedComponentJsonDataRow>();
+        public List<Common.Serialization.DerivedComponentJsonDataRow> ComponentsJSON = new List<Common.Serialization.DerivedComponentJsonDataRow>();
 
         [HideInInspector]
         public List<string> TreeRemovals = new List<string>();
@@ -195,7 +196,7 @@ namespace Dingo.Terrains
             foreach (var proceduralLayerComponent in Components)
             {
                 var type = proceduralLayerComponent.GetType();
-                var jsonRow = new DerivedComponentJsonDataRow()
+                var jsonRow = new Common.Serialization.DerivedComponentJsonDataRow()
                 {
                     AssemblyQualifiedName = type.AssemblyQualifiedName,
                     SerializedObjects = new List<Object>(),

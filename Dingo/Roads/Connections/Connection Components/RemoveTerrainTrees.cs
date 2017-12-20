@@ -1,6 +1,7 @@
 using System;
 using Dingo.Common;
 using Dingo.Terrains;
+using ParadoxNotion.Design;
 using UnityEngine;
 
 namespace Dingo.Roads.Connections
@@ -21,7 +22,7 @@ namespace Dingo.Roads.Connections
 
         public void OnBake()
         {
-            if (!RoadNetwork.LevelInstance.RecalculateTerrain)
+            if (!Network.RecalculateTerrain)
             {
                 return;
             }
@@ -39,7 +40,7 @@ namespace Dingo.Roads.Connections
             var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
             foreach (var wrapper in terrainWrappers)
             {
-                var layer = RoadNetwork.LevelInstance.GetLayer(wrapper, true);
+                var layer = Network.GetLayer(wrapper, true);
                 layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
                 ProcessTerrainTrees(config, wrapper, layer);
             }

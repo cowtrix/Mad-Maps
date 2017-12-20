@@ -8,6 +8,43 @@ namespace Dingo.Common
 {
     public static class GameObjectExtensions
     {
+        public static void OptimizeAndFlattenHierarchy(Transform root)
+        {
+            FlattenHierarchyRecursive(root, root);
+            DestroyEmptyObjectsInHierarchy(root);
+        }
+
+        public static void DestroyEmptyObjectsInHierarchy(Transform root)
+        {
+            var childCache = new List<Transform>();
+            foreach (Transform child in root)
+            {
+                childCache.Add(child);
+            }
+            for (int i = 0; i < childCache.Count; i++)
+            {
+                DestroyEmptyObjectsInHierarchy(childCache[i]);
+                if (childCache[i].GetComponents<Component>().Length == 1)
+                {
+                    Object.DestroyImmediate(childCache[i].gameObject);
+                }
+            }
+        }
+        
+        private static void FlattenHierarchyRecursive(Transform transform, Transform root)
+        {
+            var childCache = new List<Transform>();
+            foreach (Transform child in transform)
+            {
+                childCache.Add(child);
+            }
+            for (int i = 0; i < childCache.Count; i++)
+            {
+                childCache[i].SetParent(root);
+                FlattenHierarchyRecursive(childCache[i], root);
+            }
+        }
+        
         public static List<T> FindObjectsOfTypeAll<T>(this Object obj)
         {
             List<T> results = new List<T>();

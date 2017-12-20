@@ -17,7 +17,7 @@ namespace Dingo.Roads
         {
             var wrapper = TerrainWrapper.GetWrapper(transform.position);
             var splatPos = wrapper.Terrain.WorldToSplatCoord(transform.position);
-            var compoundSplats = wrapper.GetCompoundSplats(RoadNetwork.LevelInstance.GetLayer(wrapper), splatPos.x, splatPos.z, 1, 1, true);
+            var compoundSplats = wrapper.GetCompoundSplats(Network.GetLayer(wrapper), splatPos.x, splatPos.z, 1, 1, true);
             byte max = 0;
             foreach (var pair in compoundSplats)
             {

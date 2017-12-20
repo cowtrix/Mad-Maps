@@ -41,11 +41,6 @@ namespace Dingo.WorldStamp
 
         public void OnBake()
         {
-            if (!RoadNetwork.LevelInstance.RecalculateTerrain)
-            {
-                return;
-            }
-
             var objectBounds = GetObjectBounds();
             var terrainWrappers = TerrainLayerUtilities.CollectWrappers(objectBounds);
             var stencilKey = GetPriority();

@@ -10,8 +10,15 @@ using EditorCellPainter;
 using UnityEditor;
 using UnityEngine;
 
-namespace Dingo.WorldStamp
+namespace Dingo.WorldStamp.Authoring
 {
+    public abstract class WorldStampCreatorLayer
+    {
+        public abstract void Capture(Bounds b);
+        public abstract void OnGUI();
+        public abstract void OnSceneGUI();
+    }
+
     public class WorldStampCreator : SceneViewEditorWindow
     {
         private static float MaskResolution = 128;
@@ -19,7 +26,7 @@ namespace Dingo.WorldStamp
         private static Painter _maskPainter;
         private bool _painting;
 
-        [MenuItem("Window/World Stamp Creator", false, 6)]
+        [MenuItem("Tools/Dingo/World Stamp Creator", false, 6)]
         public static void OpenWindow()
         {
             GetWindow<WorldStampCreator>();
