@@ -1,19 +1,12 @@
-using sMap.Common;
-using sMap.Terrains;
 using UnityEditor;
+using UnityEngine;
 
 namespace sMap.Terrains
 {
     public class TerrainWrapperEditorWindow : EditorWindow
     {
-        public TerrainWrapperGUI GUI;
+        public static TerrainWrapperGUI GUI;
         public TerrainWrapper Wrapper;
-
-        /*[MenuItem("Window/Terrain Wrapper Inspector")]
-        public static void OpenWindow()
-        {
-            var w = GetWindow<TerrainWrapperEditorWindow>();
-        }*/
 
         void OnGUI()
         {
@@ -26,6 +19,7 @@ namespace sMap.Terrains
 
             GUI.Wrapper = Wrapper;
             GUI.IsPopout = true;
+            titleContent = new GUIContent(Wrapper != null ? Wrapper.name : "none");
             ((Editor) GUI).OnInspectorGUI();
         }
     }

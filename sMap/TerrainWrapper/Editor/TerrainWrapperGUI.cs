@@ -64,6 +64,12 @@ namespace sMap.Terrains
 
         public override void OnInspectorGUI()
         {
+            if (TerrainWrapperEditorWindow.GUI != this)
+            {
+                EditorGUILayout.HelpBox("Using Inspector Window", MessageType.Info);
+                return;
+            }
+
             if (Wrapper == null)
             {
                 Wrapper = target as TerrainWrapper;

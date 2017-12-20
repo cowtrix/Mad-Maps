@@ -109,6 +109,7 @@ namespace sMap.Roads
                 return;
             }
 
+            titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
             _currentTab.Value = GUILayout.Toolbar(_currentTab, _tabs, GUILayout.Height(20));
             EditorExtensions.Seperator();
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
