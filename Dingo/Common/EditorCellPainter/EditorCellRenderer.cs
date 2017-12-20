@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_EDITOR
+namespace Dingo.Common.Painter
+{
+#if UNITY_EDITOR && !HURTWORLDSDK
 [SDKScript(Full = true)]
 [ExecuteInEditMode]
 public class EditorCellRenderer : MonoBehaviour
@@ -83,3 +85,4 @@ public class EditorCellRenderer : MonoBehaviour
     }
 }
 #endif
+}

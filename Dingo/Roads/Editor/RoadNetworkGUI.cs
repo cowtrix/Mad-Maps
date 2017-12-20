@@ -4,15 +4,14 @@ using UnityEngine;
 namespace Dingo.Roads
 {
     [CustomEditor(typeof(RoadNetwork))]
-    [CanEditMultipleObjects]
     public class RoadNetworkGUI : Editor
     {
         private RoadNetworkWindow _currentWindow;
 
-        [MenuItem("GameObject/3D Object/sRoad Network")]
+        [MenuItem("GameObject/Dingo/Road Network")]
         public static void CreateInstance()
         {
-            var go = new GameObject("sRoad Network");
+            var go = new GameObject("Road Network");
             go.transform.position = Vector3.zero;
             go.AddComponent<RoadNetwork>();
         }
@@ -23,6 +22,7 @@ namespace Dingo.Roads
             {
                 _currentWindow = EditorWindow.GetWindow<RoadNetworkWindow>();
                 _currentWindow.name = "sRoads";
+                _currentWindow.FocusedRoadNetwork = target as RoadNetwork;
             }
         }
     }

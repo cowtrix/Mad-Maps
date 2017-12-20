@@ -7,6 +7,7 @@
 		Tags {"Queue" = "Transparent" "RenderType"="Transparent" }
 		LOD 200
 		ZWrite Off
+		Offset 0, -50000
 
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types

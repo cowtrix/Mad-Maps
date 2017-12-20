@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
+using ParadoxNotion.Design;
 using UnityEngine;
 using Random = System.Random;
 
@@ -62,7 +63,7 @@ namespace Dingo.Roads
             LastPlantCount = 0;
             var length = spline.Length;
             var step = config.StepDistance;
-            var layer = RoadNetwork.LevelInstance.GetLayer(wrapper);
+            var layer = Network.GetLayer(wrapper);
             var tSize = wrapper.Terrain.terrainData.size;
 
             for (var i = 0f; i < length; i += step.GetRand(rand))

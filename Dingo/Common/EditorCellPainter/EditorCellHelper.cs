@@ -1,10 +1,9 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && !HURTWORLDSDK
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 
-[InitializeOnLoad]
-[SDKScript(Full = true)]
+namespace 
 public static class EditorCellHelper
 {
     private const string ShaderName = "Hidden/EditorCellShader";

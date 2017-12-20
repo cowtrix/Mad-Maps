@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
 using Dingo.WorldStamp;
+using ParadoxNotion.Design;
 using UnityEngine;
 using Random = System.Random;
 
@@ -64,7 +65,7 @@ namespace Dingo.Roads.Connections
             var spline = NodeConnection.GetSpline();
             var length = spline.Length;
             var step = config.Distance;
-            var layer = RoadNetwork.LevelInstance.GetLayer(wrapper);
+            var layer = Network.GetLayer(wrapper);
             var tSize = wrapper.Terrain.terrainData.size;
 
             for (var i = config.InitialOffset; i < length; i += step.GetRand(rand))

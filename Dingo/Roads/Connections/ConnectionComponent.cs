@@ -1,6 +1,5 @@
 ﻿using System;
 using Dingo.Common;
-using UnityEditor;
 using UnityEngine;
 
 namespace Dingo.Roads
@@ -45,6 +44,18 @@ namespace Dingo.Roads
         public ComponentConfigurationRef Configuration;
         public NodeConnection NodeConnection;
 
+        public RoadNetwork Network
+        {
+            get
+            {
+                if (NodeConnection == null)
+                {
+                    return null;
+                }
+                return NodeConnection.Network;
+            }
+        }
+
         public virtual void Think()
         {
             if (NodeConnection == null)
@@ -69,7 +80,7 @@ namespace Dingo.Roads
         {
         }
 
-        [MenuItem("Force Rebake")]
+        [ContextMenu("Force Rebake")]
         public void ForceBake()
         {
             var prebake = this as IOnPrebakeCallback;
@@ -100,6 +111,11 @@ namespace Dingo.Roads
                 return Priority;
             }
             return Configuration != null && Configuration.GetConfig() != null ? Configuration.GetConfig().Priority : 0;
+        }
+
+        public void Strip()
+        {
+            DestroyImmediate(this);
         }
     }
 }

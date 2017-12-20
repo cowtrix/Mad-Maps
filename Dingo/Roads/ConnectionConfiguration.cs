@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dingo.Common.Serialization;
+using ParadoxNotion.Design;
+using ParadoxNotion.Serialization;
 using UnityEngine;
+using DerivedComponentJsonDataRow = Dingo.Common.Serialization.DerivedComponentJsonDataRow;
 
 namespace Dingo.Roads
 {
@@ -16,7 +19,7 @@ namespace Dingo.Roads
 
         [HideInInspector]
         [SerializeField]
-        private List<DerivedComponentJsonDataRow> ComponentsJSON = new List<DerivedComponentJsonDataRow>();
+        private List<Common.Serialization.DerivedComponentJsonDataRow> ComponentsJSON = new List<Common.Serialization.DerivedComponentJsonDataRow>();
         
         public void OnBeforeSerialize()
         {
@@ -24,7 +27,7 @@ namespace Dingo.Roads
             foreach (var connectionComponentConfigBase in Components)
             {
                 var t = connectionComponentConfigBase.GetType();
-                var jsonRow = new DerivedComponentJsonDataRow()
+                var jsonRow = new Common.Serialization.DerivedComponentJsonDataRow()
                 {
                     AssemblyQualifiedName = t.AssemblyQualifiedName,
                 };
@@ -39,9 +42,16 @@ namespace Dingo.Roads
             Components.Clear();
             foreach (var row in ComponentsJSON)
             {
+                var type = Type.GetType(row.AssemblyQualifiedName) ?? LegacyManager.GetTypeFromLegacy(row.AssemblyQualifiedName);
+                
+                if (type == null)
+                {
+                    Debug.LogError("Couldn't get type " + row.AssemblyQualifiedName);
+                }
+
                 Components.Add(
                     (ConnectionConfigurationBase)
-                        JSONSerializer.Deserialize(Type.GetType(row.AssemblyQualifiedName), row.JsonText,
+                        JSONSerializer.Deserialize(type, row.JsonText,
                             row.SerializedObjects));
             }
         }

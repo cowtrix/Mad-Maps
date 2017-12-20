@@ -49,7 +49,20 @@ namespace Dingo.Roads
 
         public NodeConfiguration Configuration = new NodeConfiguration();
         public Vector3 Offset;
-        
+
+        public RoadNetwork Network
+        {
+            get
+            {
+                if (!__network)
+                {
+                    __network = transform.GetComponentInAncestors<RoadNetwork>();
+                }
+                return __network;
+            }
+        }
+        private RoadNetwork __network;
+
         /*
 #region legacy
 
@@ -172,7 +185,7 @@ namespace Dingo.Roads
 
         public Vector3 CalculateTangent(Node nextNode)
         {
-            var breakAngle = RoadNetwork.LevelInstance.BreakAngle;
+            var breakAngle = Network.BreakAngle;
             Vector3 normal = Vector3.zero;
             var connectionCount = InConnections.Count + OutConnections.Count;
             if (connectionCount == 0)
@@ -321,7 +334,7 @@ namespace Dingo.Roads
                 {
                     if (wrapper.Layers.Count > 0)
                     {
-                        var newY = wrapper.GetCompoundHeight(RoadNetwork.LevelInstance.GetLayer(wrapper), pos) * wrapper.Terrain.terrainData.size.y
+                        var newY = wrapper.GetCompoundHeight(Network.GetLayer(wrapper), pos) * wrapper.Terrain.terrainData.size.y
                             + wrapper.Terrain.GetPosition().y + Configuration.SnapOffset;
                         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
                     }
@@ -367,7 +380,7 @@ namespace Dingo.Roads
             {
                 return Configuration.Curviness;
             }
-            return RoadNetwork.LevelInstance.Curviness;
+            return Network.Curviness;
         }
 
         public IEnumerable<NodeConnection> AllConnections()
@@ -516,6 +529,20 @@ namespace Dingo.Roads
                 }
             }
             return ret;
+        }
+
+        public void Strip()
+        {
+            var nodeComponents = GetComponents<NodeComponent>();
+            for (int i = 0; i < nodeComponents.Length; i++)
+            {
+                nodeComponents[i].Strip();
+            }
+            for (int i = 0; i < OutConnections.Count; i++)
+            {
+                OutConnections[i].Strip();
+            }
+            DestroyImmediate(this);
         }
     }
 

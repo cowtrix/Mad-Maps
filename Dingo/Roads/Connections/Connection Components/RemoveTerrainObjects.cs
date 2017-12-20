@@ -2,6 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using Dingo.Terrains;
 using Dingo.Common;
+using ParadoxNotion.Design;
 using UnityEngine;
 
 namespace Dingo.Roads
@@ -29,7 +30,7 @@ namespace Dingo.Roads
 
         public void OnBake()
         {
-            if (!RoadNetwork.LevelInstance.RecalculateTerrain)
+            if (!Network.RecalculateTerrain)
             {
                 return;
             }
@@ -48,7 +49,7 @@ namespace Dingo.Roads
             for (int i = 0; i < terrainWrappers.Count; i++)
             {
                 var wrapper = terrainWrappers[i];
-                var layer = RoadNetwork.LevelInstance.GetLayer(wrapper, true);
+                var layer = Network.GetLayer(wrapper, true);
                 ProcessTerrainObjects(config, wrapper, layer);
             }
         }
@@ -76,7 +77,7 @@ namespace Dingo.Roads
                            new Vector3(data.Position.x * tSize.x, data.Position.y, data.Position.z * tSize.z);
                 if (!bounds.Contains(wPos))
                 {
-                    Debug.DrawLine(wPos, wPos + Vector3.up * 10, Color.cyan, 20);
+                    //Debug.DrawLine(wPos, wPos + Vector3.up * 10, Color.cyan, 20);
                     continue;
                 }
 

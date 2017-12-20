@@ -153,13 +153,27 @@ namespace EditorCellPainter
                 var json = EditorPrefs.GetString("Painter_LastBrushJSON");
                 if (type != null && !string.IsNullOrEmpty(json))
                 {
-                    CurrentBrush = (IBrush) JsonUtility.FromJson(json, type);
+                    try
+                    {
+                        CurrentBrush = (IBrush)JsonUtility.FromJson(json, type);
+                    }
+                    catch (Exception)
+                    {
+                    }
                 } 
             }
 
             if (CurrentBrush == null)
             {
-                CurrentBrush = new DefaultBrush()
+                CurrentBrush = DefaultBrush;
+            }
+        }
+
+        IBrush DefaultBrush
+        {
+            get
+            {
+                return new DefaultBrush()
                 {
                     BrushShape = EBrushShape.Circle,
                     BrushBlendMode = EBrushBlendMode.Add,

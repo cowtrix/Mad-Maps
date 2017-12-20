@@ -9,7 +9,7 @@ using UnityEngine.AI;
 #if HURTWORLDSDK
 [StripComponentOnBuild]
 #endif
-class PathedRoadPoint : MonoBehaviour
+class PathedRoadPoint : NodeComponent
 {
     public PathedRoadPoint[] Connections = new PathedRoadPoint[0];
     public ConnectionConfiguration Configuration;
@@ -71,11 +71,11 @@ class PathedRoadPoint : MonoBehaviour
             }
             if (i == path.corners.Length - 1)
             {
-                RoadNetwork.LevelInstance.ConnectNodes(endPoint.GetNode(), lastNode, Configuration);
+                Network.ConnectNodes(endPoint.GetNode(), lastNode, Configuration);
                 break;
             }
             //TODO: Set these to the terrain normal
-            lastNode = RoadNetwork.LevelInstance.CreateNewNode(corner, Vector3.up, lastNode, Configuration, null);
+            lastNode = Network.CreateNewNode(corner, Vector3.up, lastNode, Configuration, null);
         }
     }
 
@@ -99,7 +99,7 @@ class PathedRoadPoint : MonoBehaviour
     {
         if (_myNode == null)
         {
-            _myNode = RoadNetwork.LevelInstance.CreateNewNode(transform.position, transform.up, null, Configuration, null);
+            _myNode = Network.CreateNewNode(transform.position, transform.up, null, Configuration, null);
         }
         return _myNode;
     }
