@@ -74,9 +74,14 @@ namespace Dingo.WorldStamp.Authoring
             _dirty = true;
         }
 
-        public override void Commit(WorldStampData data)
+        public override void Clear()
         {
-            DataInspector.SetData(Heights);
+            Heights.Clear();
+        }
+
+        protected override void CommitInternal(WorldStampData data)
+        {
+            data.Heights = Heights.JSONClone();
         }
 
         protected override void OnExpandedGUI(WorldStampCreator parent)

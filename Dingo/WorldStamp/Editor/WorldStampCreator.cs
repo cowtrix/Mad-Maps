@@ -70,6 +70,10 @@ namespace Dingo.WorldStamp.Authoring
             for (int i = 0; i < _creators.Length; i++)
             {
                 _creators[i].DrawGUI(this);
+                if (_creators[i].NeedsRecapture)
+                {
+                    _creators[i].Capture(Terrain, Bounds);
+                }
             }
 
             EditorGUILayout.LabelField("", GUILayout.ExpandHeight(true));
@@ -79,18 +83,15 @@ namespace Dingo.WorldStamp.Authoring
                 GameObject go = new GameObject("New WorldStamp");
                 go.transform.position = Bounds.center + Vector3.up * GetCreator<HeightmapLayer>().HeightMin * Terrain.terrainData.size.y;
                 var stamp = go.AddComponent<WorldStamp>();
-
                 var data = new WorldStampData();
                 foreach (var worldStampCreatorLayer in _creators)
                 {
                     worldStampCreatorLayer.Commit(data);
                 }
-
                 stamp.SetData(data);
                 stamp.HaveHeightsBeenFlipped = true;
                 EditorGUIUtility.PingObject(stamp);
             }
-            
         }
 
         protected override void OnSceneGUI(SceneView sceneView)
@@ -105,10 +106,6 @@ namespace Dingo.WorldStamp.Authoring
                 foreach (var worldStampCreatorLayer in _creators)
                 {
                     worldStampCreatorLayer.NeedsRecapture = true;
-                    if (!worldStampCreatorLayer.ManuallyRecapturable)
-                    {
-                        worldStampCreatorLayer.Capture(Terrain, Bounds);
-                    }
                 }
             }
 

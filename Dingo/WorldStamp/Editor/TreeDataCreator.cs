@@ -60,7 +60,12 @@ namespace Dingo.WorldStamp.Authoring
             throw new System.NotImplementedException();
         }
 
-        public override void Commit(WorldStampData data)
+        public override void Clear()
+        {
+            Trees.Clear();
+        }
+
+        protected override void CommitInternal(WorldStampData data)
         {
             data.Trees = Trees.JSONClone();
         }

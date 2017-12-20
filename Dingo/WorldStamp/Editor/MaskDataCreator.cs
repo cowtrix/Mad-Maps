@@ -124,7 +124,12 @@ namespace Dingo.WorldStamp.Authoring
             throw new NotImplementedException();
         }
 
-        public override void Commit(WorldStampData data)
+        public override void Clear()
+        {
+            Mask.Clear();
+        }
+
+        protected override void CommitInternal(WorldStampData data)
         {
             data.Mask = Mask.JSONClone();
         }

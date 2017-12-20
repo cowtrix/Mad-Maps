@@ -109,7 +109,12 @@ namespace Dingo.WorldStamp.Authoring
             DataInspector.SetData(SplatData.Select(x => x.Data).ToList(), SplatData.Select(x => x.Wrapper).ToList());
         }
 
-        public override void Commit(WorldStampData data)
+        public override void Clear()
+        {
+            SplatData.Clear();
+        }
+
+        protected override void CommitInternal(WorldStampData data)
         {
             data.SplatData = SplatData.JSONClone();
         }

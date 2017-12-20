@@ -51,14 +51,14 @@ namespace Dingo.WorldStamp.Authoring
             }
             GUI.color = Color.white;
 
-            GUI.enabled = parent.Terrain != null;
+            /*GUI.enabled = parent.Terrain != null;
             GUI.color = NeedsRecapture ? Color.red : Color.white;
             if (ManuallyRecapturable && GUILayout.Button(EditorGUIUtility.IconContent("TreeEditor.Refresh"), EditorStyles.boldLabel, GUILayout.Width(20), GUILayout.Height(16)))
             {
                 Capture(parent.Terrain, parent.Bounds);
             }
             GUI.color = Color.white;
-            GUI.enabled = true;
+            GUI.enabled = true;*/
 
             EditorGUILayout.EndHorizontal();
 
@@ -70,12 +70,26 @@ namespace Dingo.WorldStamp.Authoring
 
         public void Capture(Terrain terrain, Bounds bounds)
         {
+            if (!Enabled)
+            {
+                Clear();
+                return;
+            }
             if (terrain == null || bounds.size == Vector3.zero)
             {
                 return;
             }
             CaptureInternal(terrain, bounds);
             NeedsRecapture = false;
+        }
+
+        public void Commit(WorldStampData data)
+        {
+            if (!Enabled)
+            {
+                return;
+            }
+            CommitInternal(data);
         }
 
         public void PreviewInScene(WorldStampCreator parent)
@@ -88,8 +102,8 @@ namespace Dingo.WorldStamp.Authoring
         }
         
         public abstract void PreviewInDataInspector();
-        public abstract void Commit(WorldStampData data);
-
+        public abstract void Clear();
+        protected abstract void CommitInternal(WorldStampData data);
         protected abstract void PreviewInSceneInternal(WorldStampCreator parent);
         protected abstract void CaptureInternal(Terrain terrain, Bounds bounds);
         protected abstract void OnExpandedGUI(WorldStampCreator parent);
