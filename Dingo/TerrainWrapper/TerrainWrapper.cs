@@ -6,7 +6,6 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.WorldStamp;
 using UnityEngine;
-using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
 namespace Dingo.Terrains
@@ -71,6 +70,7 @@ namespace Dingo.Terrains
         public bool Dirty { get; set; } // If true, the terrain wrapper will update in the next frame (in editor)
 
 #if UNITY_EDITOR
+#if HURTWORLDSDK
         [UnityEditor.MenuItem("CONTEXT/Terrain/Setup for Hurtworld")]
         public static void SetupOnTerrain(UnityEditor.MenuCommand command)
         {
@@ -79,7 +79,7 @@ namespace Dingo.Terrains
             t.gameObject.GetOrAddComponent<TerrainShaderManager>();
             t.gameObject.GetOrAddComponent<TerrainSettingsManager>();
         }
-
+#endif
         public static bool ComputeShaders
         {
             get { return UnityEditor.EditorPrefs.GetBool("TerrainWrapper_ComputeShaders", true); }

@@ -2,7 +2,9 @@ using UnityEngine;
 
 namespace Dingo.WorldStamp
 {
+    #if HURTWORLDSDK
     [StripComponentOnBuild]
+    #endif
     public class WorldStampDataContainer : MonoBehaviour
     {
         public WorldStampData GetData()

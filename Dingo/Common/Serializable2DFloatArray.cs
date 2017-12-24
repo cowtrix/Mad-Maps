@@ -1,9 +1,7 @@
 using System;
 using System.Linq;
-using JetBrains.Annotations;
 using Dingo.Terrains;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Dingo.Common.Collections
 {
@@ -18,7 +16,6 @@ namespace Dingo.Common.Collections
         {
         }
 
-        [Pure]
         public Serializable2DFloatArray Select(int x, int z, int width, int height)
         {
             if (x + width > Width || z + height > Height)
@@ -36,7 +33,6 @@ namespace Dingo.Common.Collections
             return result;
         }
 
-        [Pure]
         public Serializable2DByteArray ToBytes()
         {
             var ret = new Serializable2DByteArray(Width, Height);

@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using Dingo.Terrains;
 using Dingo.Common;
-using ParadoxNotion.Design;
+using Dingo.Common.GenericEdtitor;
 using UnityEngine;
 
 namespace Dingo.Roads

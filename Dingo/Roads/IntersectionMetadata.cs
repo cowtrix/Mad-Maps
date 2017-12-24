@@ -3,7 +3,9 @@ using UnityEngine;
 
 namespace Dingo.Roads
 {
+    #if HURTWORLDSDK
     [StripComponentOnBuild]
+    #endif
     public class IntersectionMetadata : NodeComponent
     {
         [Header("> Two Node Case")]

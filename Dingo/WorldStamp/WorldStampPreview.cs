@@ -1,5 +1,6 @@
 using System;
 using Dingo.Common;
+using Dingo.Common.Painter;
 using Dingo.Common.Collections;
 using UnityEngine;
 

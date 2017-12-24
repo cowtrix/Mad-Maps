@@ -1,6 +1,6 @@
 using System;
 using Dingo.Common;
-using ParadoxNotion.Design;
+using Dingo.Common.GenericEdtitor;
 using UnityEngine;
 using Random = System.Random;
 

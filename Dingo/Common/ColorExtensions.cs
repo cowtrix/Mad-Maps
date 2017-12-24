@@ -19,5 +19,15 @@ namespace Dingo.Common
         {
             return ((Color)color).ToHexString();
         }
+
+        public static Color WithAlpha(this Color color, float alpha)
+        {
+            return new Color(color.r, color.g, color.b, Mathf.Clamp01(alpha));
+        }
+
+        public static Color32 WithAlpha(this Color32 color, byte alpha)
+        {
+            return new Color32(color.r, color.g, color.b, alpha);
+        }
     }
 }

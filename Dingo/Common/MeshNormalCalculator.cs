@@ -1,9 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System;
 using UnityEngine;
 
 namespace Dingo.Common
 {
+    public static class Mathfx
+    {
+        public static float Frac(this float f)
+        {
+            return f - (float)Math.Truncate(f);
+        }   
+    }
+
     public static class MeshNormalCalculator
     {
         /// <summary>

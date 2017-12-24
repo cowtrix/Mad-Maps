@@ -1,7 +1,7 @@
 using System;
 using Dingo.Common;
 using Dingo.Terrains;
-using ParadoxNotion.Design;
+using Dingo.Common.GenericEdtitor;
 using UnityEngine;
 
 namespace Dingo.Roads.Connections

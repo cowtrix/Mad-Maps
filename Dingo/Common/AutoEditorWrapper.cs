@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using ParadoxNotion.Design;
 using UnityEngine;
 
 public static class AutoEditorWrapper
@@ -9,7 +8,8 @@ public static class AutoEditorWrapper
 #if UNITY_EDITOR
     public static object ShowAutoEditorGUI(object o)
     {
-        return EditorUtils.ShowAutoEditorGUI(o);
+        throw new Exception();
+        //return EditorUtils.ShowAutoEditorGUI(o);
     }
 
     public static IList ListEditorNicer(
@@ -21,7 +21,8 @@ public static class AutoEditorWrapper
         bool reordable = false,
         bool forceLabel = false)
     {
-        return EditorUtils.ListEditorNicer(prefix, list, listType, contextInstance, allowDerived, reordable, forceLabel);
+        throw new Exception();
+        //return EditorUtils.ListEditorNicer(prefix, list, listType, contextInstance, allowDerived, reordable, forceLabel);
     }
 
 

@@ -5,12 +5,13 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Dingo.WorldStamp
 {
     [ExecuteInEditMode]
+    #if HURTWORLDSDK
     [StripComponentOnBuild()]
+    #endif
     public class WorldStamp : MonoBehaviour
     {
         public enum EHeightBlendMode

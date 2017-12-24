@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +7,23 @@ namespace Dingo.Common
 {
     public static class ListExtensions
     {
-        
+        public static bool IsNullOrEmpty(this IList list)
+        {
+            if (list == null || list.Count == 0)
+            {
+                return true;
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                var variable = list[i];
+                if (variable != null)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static T Random<T>(this IList<T> array)
         {
             if (array.Count == 0)

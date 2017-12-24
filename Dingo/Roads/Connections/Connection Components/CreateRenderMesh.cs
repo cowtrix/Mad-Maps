@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
-using ParadoxNotion.Design;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Dingo.Common.GenericEdtitor;
 
 namespace Dingo.Roads.Connections
 {
@@ -25,7 +25,7 @@ namespace Dingo.Roads.Connections
                 public bool CopyToCollider;
                 public float BreakDistance = 50;
 
-                [TOD_Range(0, 1)]
+                [Range(0, 1)]
                 public float SnapStrength = 0.05f;
                 public MeshTools.Axis Axis;
                 public Vector3 Scale = new Vector3(1, 1, 1);
@@ -48,8 +48,7 @@ namespace Dingo.Roads.Connections
                 }
             }
 
-            [AllowDerived]
-            [ReorderableList]
+            [ListGenericUI]
             public List<LodLevel> LodLevels = new List<LodLevel>(); 
 
             public override Type GetMonoType()
