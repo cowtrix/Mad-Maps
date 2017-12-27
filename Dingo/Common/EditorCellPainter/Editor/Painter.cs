@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ParadoxNotion.Serialization;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,8 +7,7 @@ namespace EditorCellPainter
 {
     public delegate Color CellColorDelegate(int cell, Color color);
     public delegate void CellDelegate(int cell);
-
-    [SDKScript(Full = true)]
+    
     public class Painter
     {
         public CellDelegate DoSceneGUIForHoverCell;
