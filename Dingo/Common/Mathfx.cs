@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Dingo.Common
 {
@@ -377,7 +378,7 @@ namespace Dingo.Common
         /// <returns>Returns either -1 or 1</returns>
         public static float Flip()
         {
-            return UnityEngine.Random.value > 0.5f ? 1 : -1;
+            return Random.value > 0.5f ? 1 : -1;
         }
 
         public static int Clamp(int val, int min, int max)

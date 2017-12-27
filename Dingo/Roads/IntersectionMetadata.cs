@@ -3,6 +3,7 @@ using UnityEngine;
 namespace Dingo.Roads
 {
     public class IntersectionMetadata : NodeComponent
+    public class IntersectionMetadata : NodeComponent
     {
         [Header("> Two Node Case")]
         public Vector3 TwoNodeRotation;

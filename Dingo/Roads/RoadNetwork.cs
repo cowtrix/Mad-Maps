@@ -6,6 +6,7 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
 using UnityEngine;
+using GameObjectExtensions = Dingo.Common.GameObjectExtensions;
 
 namespace Dingo.Roads
 {

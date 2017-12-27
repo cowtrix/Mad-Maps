@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dingo.Common.Serialization;
+using Dingo.Common.GenericEdtitor;
 using UnityEngine;
+using DerivedComponentJsonDataRow = Dingo.Common.Serialization.DerivedComponentJsonDataRow;
 
 namespace Dingo.Roads
 {

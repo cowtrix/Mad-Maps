@@ -6,7 +6,6 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.WorldStamp;
 using UnityEngine;
-using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
 namespace Dingo.Terrains
@@ -71,6 +70,7 @@ namespace Dingo.Terrains
         public bool Dirty { get; set; } // If true, the terrain wrapper will update in the next frame (in editor)
 
 #if UNITY_EDITOR
+#if HURTWORLDSDK
         [UnityEditor.MenuItem("CONTEXT/Terrain/Setup for Hurtworld")]
         public static void SetupOnTerrain(UnityEditor.MenuCommand command)
         {
@@ -79,7 +79,7 @@ namespace Dingo.Terrains
             t.gameObject.GetOrAddComponent<TerrainShaderManager>();
             t.gameObject.GetOrAddComponent<TerrainSettingsManager>();
         }
-
+#endif
         public static bool ComputeShaders
         {
             get { return UnityEditor.EditorPrefs.GetBool("TerrainWrapper_ComputeShaders", true); }
@@ -144,9 +144,9 @@ namespace Dingo.Terrains
 
             OnPreFinalise.SafeInvoke(this);
 
-            Profiler.BeginSample("FinaliseApply");
+            UnityEngine.Profiling.Profiler.BeginSample("FinaliseApply");
             FinaliseApply();
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             GC.Collect(3, GCCollectionMode.Forced);
 
             OnPostFinalise.SafeInvoke(this);
@@ -755,7 +755,7 @@ namespace Dingo.Terrains
                 }
             }
 
-            Profiler.BeginSample("GetCompoundHeights");
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundHeights");
             Serializable2DFloatArray result = null;
             for (var i = Layers.Count - 1; i >= 0; i--)
             {
@@ -775,7 +775,7 @@ namespace Dingo.Terrains
                 }
                 result = layer.BlendHeights(x, z, width, height, heightRes, result);
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             return result;
         }
 
@@ -799,7 +799,7 @@ namespace Dingo.Terrains
                 return null;
             }
 
-            Profiler.BeginSample("GetCompoundSplat");
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundSplat");
             Serializable2DByteArray result = null;
             
             for (var i = Layers.Count - 1; i >= 0; i--)
@@ -821,14 +821,14 @@ namespace Dingo.Terrains
                     break;
                 }
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             return result;
         }
 
         public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> GetCompoundSplats(
             LayerBase terminatingLayer, int x, int z, int width, int height, bool includeTerminatingLayer)
         {
-            Profiler.BeginSample("GetCompoundSplats");
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundSplats");
             var result = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
             var allPrototypes = GetCompoundSplatPrototypes(terminatingLayer, includeTerminatingLayer);
             foreach (var splatPrototypeWrapper in allPrototypes)
@@ -840,7 +840,7 @@ namespace Dingo.Terrains
                     result[splatPrototypeWrapper] = data;
                 }
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             return result;
         }
 
@@ -962,7 +962,7 @@ namespace Dingo.Terrains
         public Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> GetCompoundDetails(
             LayerBase terminatingLayer, int x, int z, int width, int height, bool includeTerminatingLayer)
         {
-            Profiler.BeginSample("GetCompoundDetails");
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundDetails");
             var result = new Dictionary<DetailPrototypeWrapper, Serializable2DByteArray>();
             var allPrototypes = GetCompoundDetailPrototypes(terminatingLayer, includeTerminatingLayer);
             foreach (var detailPrototypeWrapper in allPrototypes)
@@ -974,7 +974,7 @@ namespace Dingo.Terrains
                     result[detailPrototypeWrapper] = data;
                 }
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             return result;
         }
 
@@ -1011,7 +1011,7 @@ namespace Dingo.Terrains
                 return data; 
             }
 
-            Profiler.BeginSample("GetCompoundTrees");
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundTrees");
             var result = new Dictionary<string, DingoTreeInstance>();
             for (var i = Layers.Count - 1; i >= 0; i--)
             {
@@ -1047,7 +1047,7 @@ namespace Dingo.Terrains
                     break;
                 }
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
             return result.Values.ToList();
         }
 

@@ -34,7 +34,7 @@ namespace Dingo.Common.Painter
             public Color Color;
         }
         private static List<Cell> _cells = new List<Cell>();
-
+    
         private static double _lastAliveTime;
         private const double AutoClearTime = .1;
         private static bool _dirty;
@@ -49,7 +49,7 @@ namespace Dingo.Common.Painter
         private static void OnSceneGUIDelegate(SceneView sceneview)
         {
             var t = EditorApplication.timeSinceStartup;
-
+            
             if (_dirty)
             {
                 Invalidate();
@@ -157,7 +157,7 @@ namespace Dingo.Common.Painter
             SceneView.RepaintAll();
         }
 
-
+    
 
         private static EditorCellRenderer GetNewRenderer()
         {
@@ -168,7 +168,7 @@ namespace Dingo.Common.Painter
 
             return r;
         }
-
+    
         public static void Clear(bool invalidate)
         {
             _cells.Clear();

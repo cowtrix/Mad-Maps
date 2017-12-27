@@ -40,26 +40,9 @@ namespace Dingo.WorldStamp
 
         // SPLATS
         public List<CompressedSplatData> SplatData = new List<CompressedSplatData>();
-        public CompressedSplatDataLookup Splats = new CompressedSplatDataLookup();
 
         // GRASS
         public List<CompressedDetailData> DetailData = new List<CompressedDetailData>();
-        public CompressedDetailDataLookup Details = new CompressedDetailDataLookup();
 
-        public void Migrate()
-        {
-            DetailData.Clear();
-            foreach (var legacyDetail in Details)
-            {
-                DetailData.Add(new CompressedDetailData {Wrapper = legacyDetail.Key, Data = legacyDetail.Value});
-            }
-            Details.Clear();
-            SplatData.Clear();
-            foreach (var legacySplat in Splats)
-            {
-                SplatData.Add(new CompressedSplatData { Wrapper = legacySplat.Key, Data = legacySplat.Value });
-            }
-            Splats.Clear();
-        }
     }
 }

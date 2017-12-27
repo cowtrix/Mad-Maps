@@ -6,9 +6,103 @@ using Object = UnityEngine.Object;
 
 namespace Dingo.Common
 {
+    public static class TransformExtensions {
+
+        public static T GetComponentInAncestors<T>(this Transform component) where T : Component
+        {
+            var result = component.GetComponent<T>();
+
+            if (result != null)
+            {
+                return result;
+            }
+
+            if (component.transform.parent == null)
+            {
+                return null;
+            }
+            //TODO: Should this be parent?
+            return GetComponentInAncestors<T>(component.transform.parent);
+        }
+
+        public static void ApplyTRSMatrix(this Transform transform, Matrix4x4 matrix)
+        {
+            transform.localScale = matrix.GetScale();
+            transform.rotation = matrix.GetRotation();
+            transform.position = matrix.GetPosition();
+        }
+
+        public static Matrix4x4 GetGlobalTRS(this Transform transform)
+        {
+            return Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
+        }
+
+        public static Matrix4x4 GetLocalTRS(this Transform transform)
+        {
+            return Matrix4x4.TRS(transform.localPosition, transform.localRotation, transform.localScale);
+        }
+
+        public static Quaternion GetRotation(this Matrix4x4 m)
+        {
+            return Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1));
+        }
+
+        public static Vector3 GetPosition(this Matrix4x4 matrix)
+        {
+            var x = matrix.m03;
+            var y = matrix.m13;
+            var z = matrix.m23;
+
+            return new Vector3(x, y, z);
+        }
+
+        public static Vector3 GetScale(this Matrix4x4 m)
+        {
+            return new Vector3(m.GetColumn(0).magnitude,
+                                m.GetColumn(1).magnitude,
+                                m.GetColumn(2).magnitude);
+        }
+    }
+
     public static class GameObjectExtensions
     {
-        public static void SendMessageToAllChildren(this GameObject go, string message, SendMessageOptions messageOptions)
+        public static void OptimizeAndFlattenHierarchy(Transform root)
+        {
+            FlattenHierarchyRecursive(root, root);
+            DestroyEmptyObjectsInHierarchy(root);
+        }
+
+        public static void DestroyEmptyObjectsInHierarchy(Transform root)
+        {
+            var childCache = new List<Transform>();
+            foreach (Transform child in root)
+            {
+                childCache.Add(child);
+            }
+            for (int i = 0; i < childCache.Count; i++)
+            {
+                DestroyEmptyObjectsInHierarchy(childCache[i]);
+                if (childCache[i].GetComponents<Component>().Length == 1)
+                {
+                    Object.DestroyImmediate(childCache[i].gameObject);
+                }
+            }
+        }
+        
+        private static void FlattenHierarchyRecursive(Transform transform, Transform root)
+        {
+            var childCache = new List<Transform>();
+            foreach (Transform child in transform)
+            {
+                childCache.Add(child);
+            }
+            for (int i = 0; i < childCache.Count; i++)
+            {
+                childCache[i].SetParent(root);
+                FlattenHierarchyRecursive(childCache[i], root);
+            }
+        }
+        
         {
             foreach (Transform child in go.transform)
             {

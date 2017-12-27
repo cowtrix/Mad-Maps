@@ -5,12 +5,13 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Dingo.WorldStamp
 {
     [ExecuteInEditMode]
+    #if HURTWORLDSDK
     [StripComponentOnBuild()]
+    #endif
     public class WorldStamp : MonoBehaviour
     {
         public enum EHeightBlendMode
@@ -196,10 +197,13 @@ namespace Dingo.WorldStamp
                 _preview.Dispose();
                 _preview = null;
             }
-            if (PreviewEnabled && _preview == null)
+            if (PreviewEnabled && (_preview == null || _preview.IsDisposed()))
             {
                 _preview = new WorldStampPreview();
-                _preview.Invalidate(this);
+                _preview.Invalidate(
+                    Data.Heights, () => Size, () => transform.position, () => transform.lossyScale,
+                    () => transform.rotation, () => this.Data.Size, HaveHeightsBeenFlipped, GetMask(), Data.GridManager,
+                    () => this, 32);
             }
         }
 
@@ -211,8 +215,8 @@ namespace Dingo.WorldStamp
         
         public static void ApplyAllStamps(TerrainWrapper wrapper, string layerFilter = null)
         {
-            Profiler.BeginSample("ApplyAllStamps");
-            Profiler.BeginSample("CollectAndOrganise");
+            UnityEngine.Profiling.Profiler.BeginSample("ApplyAllStamps");
+            UnityEngine.Profiling.Profiler.BeginSample("CollectAndOrganise");
             // Collect stamps
             var allStamps = new List<WorldStamp>(FindObjectsOfType<WorldStamp>());
             var tBounds = new Bounds(wrapper.Terrain.GetPosition() + wrapper.Terrain.terrainData.size/2,
@@ -289,7 +293,7 @@ namespace Dingo.WorldStamp
                 }
                 layer.Clear(wrapper);
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
 
             for (int i = 0; i < mappings.Count; i++)
             {
@@ -308,23 +312,7 @@ namespace Dingo.WorldStamp
                     layerStampMapping.Stamps[j].StampStencil(wrapper, layer, j+1);
                 }
 
-               MiscUtilities.ClampStencil(layer.Stencil);
-               // MiscUtilities.InvertStencil(layer.Stencil);
-
-                // Copy Splats
-                /*var sRes = wrapper.Terrain.terrainData.alphamapResolution;
-                var allSplats = wrapper.GetCompoundSplats(layer, 0, 0, sRes, sRes, false);
-                foreach (var pair in allSplats)
-                {
-                    layer.SetSplatmap(pair.Key, 0, 0, pair.Value, sRes);
-                }
-
-                var dRes = wrapper.Terrain.terrainData.detailResolution;
-                var allDetails = wrapper.GetCompoundDetails(layer, 0, 0, dRes, dRes, false);
-                foreach (var pair in allDetails)
-                {
-                    layer.SetDetailMap(pair.Key, 0, 0, pair.Value, sRes);
-                }*/
+                MiscUtilities.ClampStencil(layer.Stencil);
 
                 for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
                 {
@@ -360,7 +348,7 @@ namespace Dingo.WorldStamp
                 return;
             }
 #endif
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
         
         private bool ShouldWriteHeights()
@@ -446,8 +434,8 @@ namespace Dingo.WorldStamp
                 return;
             }
 
-            Profiler.BeginSample("StampHeights");
-            Profiler.BeginSample("Setup");
+            UnityEngine.Profiling.Profiler.BeginSample("StampHeights");
+            UnityEngine.Profiling.Profiler.BeginSample("Setup");
 
             // Apply heights
             var terrain = terrainWrapper.Terrain;
@@ -471,9 +459,9 @@ namespace Dingo.WorldStamp
             {
                 layer.Stencil = new Serializable2DFloatArray(tRes, tRes);
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
 
-            Profiler.BeginSample("MainLoop");
+            UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
                 var arrayU = u - targetMinCoord.x;
@@ -507,8 +495,8 @@ namespace Dingo.WorldStamp
             layer.SetHeights(targetMinCoord.x, targetMinCoord.z, layerHeights,
                 terrainWrapper.Terrain.terrainData.heightmapResolution);
 
-            Profiler.EndSample();
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
 
         private void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
@@ -637,7 +625,7 @@ namespace Dingo.WorldStamp
                 return;
             }
 
-            Profiler.BeginSample("StampSplats");
+            UnityEngine.Profiling.Profiler.BeginSample("StampSplats");
             if (SplatBlendMode > ESplatBlendMode.Average)
             {
                 Debug.LogWarning("Using old splat blend mode! Set to SET");
@@ -657,7 +645,7 @@ namespace Dingo.WorldStamp
             var arraySize = new Common.Coord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
 
             var thisLayerSplatData = layer.GetSplatMaps(targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, sRes);
-            Profiler.BeginSample("MainLoop");
+            UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
             Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z);
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
@@ -760,8 +748,8 @@ namespace Dingo.WorldStamp
             }
 
             MiscUtilities.AbsStencil(layer.Stencil, stencilKey);
-            Profiler.EndSample();
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
 
         private void StampDetails(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
@@ -771,7 +759,7 @@ namespace Dingo.WorldStamp
                 return;
             }
 
-            Profiler.BeginSample("StampDetails");
+            UnityEngine.Profiling.Profiler.BeginSample("StampDetails");
             // Apply details
             var terrain = terrainWrapper.Terrain;
             var tSize = terrainWrapper.Terrain.terrainData.size;
@@ -866,89 +854,17 @@ namespace Dingo.WorldStamp
                     }
                 }
             }
-
-            /*foreach (var valuePair in Data.DetailData)
-            {
-                var detailWrapper = valuePair.Wrapper;
-                if (detailWrapper == null || IgnoredDetails.Contains(detailWrapper))
-                {
-                    continue;
-                }
-
-                int sum = 0;
-                //var baseDetails = terrainWrapper.GetCompoundDetails(layer, detailWrapper, targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z);
-                var layerDetails = layer.GetDetailMap(detailWrapper, targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, detailResolution) ?? new Serializable2DByteArray(arraySize.x, arraySize.z);
-                
-
-                        if (DetailBlendMode == ESplatBlendMode.Set && layer.GetStencilStrength(new Vector2(uF, vF), stencilKey) < 0.01f)
-                        {
-                            continue;
-                        }
-
-                        var wPos = terrain.DetailCoordToWorldPos(new TerrainCoord(u, v));
-                        var normalisedStampPosition = Quaternion.Inverse(transform.rotation) * (wPos - transform.position) + Size.xz().x0z() / 2;
-                        normalisedStampPosition = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y / Size.y, normalisedStampPosition.z / Size.z);
-                        if (normalisedStampPosition.x < 0 || normalisedStampPosition.x > 1 ||
-                            normalisedStampPosition.z < 0 || normalisedStampPosition.z > 1)
-                        {
-                            continue;
-                        }
-
-                        var maskPosition = new Vector3(normalisedStampPosition.x * Data.Size.x, normalisedStampPosition.y * Data.Size.y, normalisedStampPosition.z * Data.Size.z);
-                        var maskValue = GetMask().GetBilinear(Data.GridManager, maskPosition);
-
-                        var sampleDetail = valuePair.Data.BilinearSample(normalisedStampPosition.xz()) * maskValue;
-                        //var baseValue = baseDetails != null ? baseDetails[arrayU, arrayV] : 0;
-                        var layerValue = layerDetails[arrayU, arrayV];
-
-                        float newValueF = layerValue;
-                        switch (SplatBlendMode)
-                        {
-                            case ESplatBlendMode.Set:
-                                newValueF = sampleDetail;
-                                break;
-                            case ESplatBlendMode.Add:
-                                newValueF += sampleDetail;
-                                break;
-                            case ESplatBlendMode.Max:
-                                newValueF = Mathf.Max(layerValue, sampleDetail);
-                                break;
-                        }
-                        newValueF *= DetailBoost * maskValue;
-                        var newValByte = (byte)Mathf.RoundToInt(Mathf.Clamp(newValueF, 0, 16));
-                        sum += newValByte;
-                        layerDetails[arrayU, arrayV] = newValByte;
-                    }
-                }
-                if (sum == 0)
-                {
-                    if (detailResolution == 0)
-                    {
-                        Debug.Log(string.Format("Stamp {0} didn't write any values in detail channel {1} - as detail resolution is 0!!", name, detailWrapper), this);
-                    }
-                    else
-                    {
-                        Debug.Log(string.Format("Stamp {0} didn't write any values in detail channel {1}", name, detailWrapper), this);
-                    }
-                    
-                    continue;
-                }
-
-                layer.SetDetailMap(detailWrapper, targetMinCoord.x, targetMinCoord.z, layerDetails,
-                terrain.terrainData.detailResolution);
-            }*/
-
             foreach (var prototypeWrapper in allDetails)
             {
                 layer.SetDetailMap(prototypeWrapper.Key, targetMinCoord.x, targetMinCoord.z, prototypeWrapper.Value, dRes);
             }
 
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
 
         private void StampTrees(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
-            Profiler.BeginSample("StampTrees");
+            UnityEngine.Profiling.Profiler.BeginSample("StampTrees");
             // Stamp trees
             var tSize = terrainWrapper.Terrain.terrainData.size;
             var tPos = terrainWrapper.transform.position;
@@ -989,7 +905,7 @@ namespace Dingo.WorldStamp
 
             if (!WriteTrees)
             {
-                Profiler.EndSample();
+                UnityEngine.Profiling.Profiler.EndSample();
                 return;
             }
 
@@ -1027,19 +943,12 @@ namespace Dingo.WorldStamp
                 layer.Trees.Add(tree);
             }
 
-            /*foreach (var hurtTreeInstance in layer.TreeRemovals)
-            {
-                if (layer.TreeRemovals.Contains(hurtTreeInstance.Guid))
-                {
-                    throw new Exception("Removing tree on own layer!");
-                }
-            }*/
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
 
         private void StampObjects(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
-            Profiler.BeginSample("StampObjects");
+            UnityEngine.Profiling.Profiler.BeginSample("StampObjects");
             // Stamp objects
             var t = terrainWrapper.Terrain;
             var tSize = t.terrainData.size;
@@ -1056,9 +965,6 @@ namespace Dingo.WorldStamp
                     pos = new Vector3(pos.x * tSize.x, pos.y, pos.z * tSize.z) + t.GetPosition();
                     pos = Quaternion.Inverse(transform.rotation) * (pos - transform.position);
                     var wPos = pos;
-                    //pos = new Vector3(pos.x / Size.x, pos.y, pos.z / Size.z);
-                    //pos = new Vector3(pos.x * Data.Size.x, pos.y, pos.z * Data.Size.z) + Data.Size / 2;
-
                     if (stampBounds.Contains(wPos))
                     {
                         var stencilPos = wPos - tPos;
@@ -1070,20 +976,12 @@ namespace Dingo.WorldStamp
                             //Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);
                         }
                     }
-
-                    /*var maskPos = new Vector3(prefabObjectData.Position.x*Data.Size.x, 0, prefabObjectData.Position.z*Data.Size.z);
-                    var mask = GetMask().GetBilinear(Data.GridManager, maskPos);
-                    if (mask > 0.5f)
-                    {
-                        DebugHelper.DrawPoint(wPos, 1, Color.blue, 20);
-                        layer.ObjectRemovals.Add(prefabObjectData.Guid);
-                    }*/
                 }
             }
 
             if (!WriteObjects)
             {
-                Profiler.EndSample();
+                UnityEngine.Profiling.Profiler.EndSample();
                 return;
             }
 
@@ -1169,7 +1067,7 @@ namespace Dingo.WorldStamp
 
                 layer.Objects.Add(prefabObjectData);
             }
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
         }
         
         public List<TerrainWrapper> GetTerrainWrappers()

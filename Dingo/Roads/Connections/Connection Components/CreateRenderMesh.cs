@@ -4,6 +4,7 @@ using System.Linq;
 using Dingo.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Dingo.Common.GenericEdtitor;
 
 namespace Dingo.Roads.Connections
 {

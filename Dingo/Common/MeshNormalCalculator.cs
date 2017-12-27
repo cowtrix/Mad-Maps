@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Dingo.Common
 {
+
     public static class MeshNormalCalculator
     {
         /// <summary>

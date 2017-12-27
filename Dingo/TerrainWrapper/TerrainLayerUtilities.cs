@@ -75,7 +75,7 @@ namespace Dingo.Terrains
                 SplatPrototypeWrapper wrapper;
                 if (!splatWrapperLookup.TryGetValue(prototype, out wrapper))
                 {
-                    if (
+                    /*if (
                         EditorUtility.DisplayDialog(
                             String.Format("Unable to find wrapper for {0}", prototype.texture),
                             "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
@@ -105,7 +105,7 @@ namespace Dingo.Terrains
                             wrapper = AssetDatabase.LoadAssetAtPath<SplatPrototypeWrapper>(wrapperPath);
                             ret.Add(wrapper.GetPrototype(), wrapper);
                         }
-                    }
+                    }*/
                 }
                 else
                 {
@@ -141,7 +141,7 @@ namespace Dingo.Terrains
                 DetailPrototypeWrapper wrapper;
                 if (!detailWrapperLookup.TryGetValue(prototype, out wrapper))
                 {
-                    if (
+                    /*if (
                         EditorUtility.DisplayDialog(
                             String.Format("Unable to find wrapper for {0}", prototype.prototypeTexture),
                             "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
@@ -171,7 +171,7 @@ namespace Dingo.Terrains
                             wrapper = AssetDatabase.LoadAssetAtPath<DetailPrototypeWrapper>(wrapperPath);
                             ret.Add(wrapper.GetPrototype(), wrapper);
                         }
-                    }
+                    }*/
                 }
                 else
                 {

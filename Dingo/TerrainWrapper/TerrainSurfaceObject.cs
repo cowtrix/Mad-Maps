@@ -34,7 +34,9 @@ public class TerrainSurfaceObjectGUI : Editor
 }
 #endif
 
+#if HURTWORLDSDK
 [StripComponentOnBuild]
+#endif
 public class TerrainSurfaceObject : MonoBehaviour
 {
 #if UNITY_EDITOR

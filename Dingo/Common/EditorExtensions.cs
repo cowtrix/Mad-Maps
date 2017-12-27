@@ -113,6 +113,7 @@ namespace Dingo.Common
             GUILayout.Box(GUIContent.none, _seperator, GUILayout.Height(1), GUILayout.ExpandWidth(true));
         }
         
+
         public static object GetParent(this SerializedProperty prop)
         {
             var path = prop.propertyPath.Replace(".Array.data[", "[");

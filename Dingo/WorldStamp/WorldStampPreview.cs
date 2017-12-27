@@ -1,4 +1,7 @@
+using System;
 using Dingo.Common;
+using Dingo.Common.Painter;
+using Dingo.Common.Collections;
 using UnityEngine;
 
 namespace Dingo.WorldStamp
@@ -7,12 +10,32 @@ namespace Dingo.WorldStamp
     {
         private Mesh _mesh;
         private Material _material;
-        private WorldStamp _stamp;
         private int _lastFrame;
+        private bool _isDisposed;
 
-        public void Invalidate(WorldStamp stamp)
+        private Func<bool> _existenceHook;
+        private Func<Vector3> _displaySize;
+        private Func<Vector3> _dataSize;
+        private Func<Vector3> _position;
+        private Func<Vector3> _scale;
+        private Func<Quaternion> _rotation;
+
+        public void Invalidate(Serializable2DFloatArray heights, 
+            Func<Vector3> displaySizeGetter, 
+            Func<Vector3> positionGetter, 
+            Func<Vector3> scaleGetter,
+            Func<Quaternion> rotationGetter, 
+            Func<Vector3> dataSizeGetter, bool flipHeights,
+            WorldStampMask mask, GridManagerInt gridManager, 
+            Func<bool> existenceHook, int res)
         {
-            _stamp = stamp;
+            _dataSize = dataSizeGetter;
+            _displaySize = displaySizeGetter;
+            _existenceHook = existenceHook;
+            _position = positionGetter;
+            _scale = scaleGetter;
+            _rotation = rotationGetter;
+
             if (_mesh == null)
             {
                 _mesh = new Mesh();
@@ -21,26 +44,29 @@ namespace Dingo.WorldStamp
             {
                 _material = Resources.Load<Material>("WorldStamp/WorldStampPreviewMaterial");
             }
-            var heights = stamp.Data.Heights;
-            const int res = 32;
             var verts = new Vector3[(res+1) * (res+1)];
             var uv = new Vector2[verts.Length];
             var colors = new Color[verts.Length];
             int counter = 0;
+            var dataSize = dataSizeGetter();
             for (int u = 0; u <= res; u++)
             {
                 var uF = u/(float) res;
                 for (int v = 0; v <= res; v++)
                 {
                     var vF = v / (float)res;
-                    var samplePoint = stamp.HaveHeightsBeenFlipped ? new Vector2(uF, vF) : new Vector2(vF, uF);
+                    var samplePoint = flipHeights ? new Vector2(uF, vF) : new Vector2(vF, uF);
                     var height = heights.BilinearSample(samplePoint);
 
+                    var pos = new Vector3(uF * dataSize.x, height * dataSize.y, vF * dataSize.z) - dataSize.xz().x0z() / 2;
 
-                    var pos = new Vector3(uF * stamp.Data.Size.x, height * stamp.Data.Size.y, vF * stamp.Data.Size.z) - stamp.Data.Size.xz().x0z() / 2;
-                    var val = stamp.GetMask().GetBilinear(stamp.Data.GridManager, new Vector3(pos.x, 0, pos.z) + stamp.Data.Size.xz().x0z() / 2);
-                    pos.y *= val;
-
+                    float val = 1;
+                    if (mask != null && gridManager != null)
+                    {
+                        val = mask.GetBilinear(gridManager, new Vector3(pos.x, 0, pos.z) + dataSize.xz().x0z() / 2);
+                        pos.y *= val;
+                    }
+                    
                     verts[counter] = pos;
                     uv[counter] = new Vector2(uF, vF);
                     colors[counter] = Color.Lerp(Color.clear, Color.white, val);
@@ -89,8 +115,8 @@ namespace Dingo.WorldStamp
             }
 
             _mesh.triangles = tris;
-
             _mesh.RecalculateNormals(0);
+            _mesh.RecalculateBounds();
 
 #if UNITY_EDITOR
             UnityEditor.SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
@@ -101,14 +127,10 @@ namespace Dingo.WorldStamp
 #if UNITY_EDITOR
         private void OnSceneGUIDelegate(UnityEditor.SceneView sceneView)
         {
-            if (!_stamp || _stamp.Equals(null) || _stamp.Data == null)
+            if (!_existenceHook())
             {
                 UnityEditor.SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
-                return;
-            }
-
-            if (!_stamp.gameObject.activeInHierarchy)
-            {
+                Dispose();
                 return;
             }
 
@@ -116,12 +138,21 @@ namespace Dingo.WorldStamp
             {
                 return;
             }
+
             _lastFrame = Time.renderedFrameCount;
 
-            var scale = new Vector3(_stamp.Size.x/_stamp.Data.Size.x, _stamp.Size.y/_stamp.Data.Size.y,
-                _stamp.Size.z/_stamp.Data.Size.z);
-            scale = new Vector3(_stamp.transform.lossyScale.x * scale.x, _stamp.transform.lossyScale.y * scale.y, _stamp.transform.lossyScale.z * scale.z);
-            var mat = Matrix4x4.TRS(_stamp.transform.position, _stamp.transform.rotation, scale);
+            var dSize = _dataSize();
+            dSize = new Vector3(Mathf.Max(dSize.x, float.Epsilon), Mathf.Max(dSize.y, float.Epsilon), Mathf.Max(dSize.z, float.Epsilon));
+            var displaySize = _displaySize();
+
+            var displaySizeScale = new Vector3(displaySize.x/dSize.x, displaySize.y/dSize.y,displaySize.z/dSize.z);
+            var scale = _scale();
+            scale = new Vector3(scale.x * displaySizeScale.x, scale.y * displaySizeScale.y, scale.z * displaySizeScale.z);
+
+            var position = _position();
+            var rotation = _rotation();
+
+            var mat = Matrix4x4.TRS(position, rotation, scale);
             Graphics.DrawMesh(_mesh, mat, _material, 0);
         }
 #endif
@@ -132,6 +163,12 @@ namespace Dingo.WorldStamp
             UnityEditor.SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
 #endif
             UnityEngine.Object.DestroyImmediate(_mesh);
+            _isDisposed = true;
+        }
+
+        public bool IsDisposed()
+        {
+            return _isDisposed;
         }
     }
 }

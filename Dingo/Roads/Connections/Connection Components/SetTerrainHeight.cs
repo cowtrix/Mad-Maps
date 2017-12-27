@@ -2,8 +2,8 @@ using System;
 using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
+using Dingo.Common.GenericEdtitor;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 namespace Dingo.Roads.Connections
 {
@@ -120,7 +120,6 @@ namespace Dingo.Roads.Connections
             }
 
             //DebugHelper.DrawCube(objectBounds.center, objectBounds.extents, objectBounds.Rotation, Color.blue, 20);
-            Profiler.BeginSample("Main Loop");
             for (var dz = 0; dz < floatArraySize.z; ++dz)
             {
                 for (var dx = 0; dx < floatArraySize.x; ++dx)
@@ -201,7 +200,6 @@ namespace Dingo.Roads.Connections
                         out existingStencilStrength);*/
                 }
             }
-            Profiler.EndSample();
 
             layer.SetHeights(matrixMin.x, matrixMin.z,
                 layerHeights, wrapper.Terrain.terrainData.heightmapResolution);

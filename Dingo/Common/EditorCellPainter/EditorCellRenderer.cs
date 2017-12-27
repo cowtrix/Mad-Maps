@@ -4,7 +4,6 @@ using UnityEngine;
 namespace Dingo.Common.Painter
 {
 #if UNITY_EDITOR && !HURTWORLDSDK
-[ExecuteInEditMode]
 public class EditorCellRenderer : MonoBehaviour
 {
     public int VertCount { get { return _verts.Count; } }
