@@ -1,5 +1,4 @@
-﻿using Dingo.Roads;
-using UnityEditor;
+﻿using UnityEditor;
 
 [CustomEditor(typeof(ConnectionConfiguration))]
 public class ConnectionConfigurationGUI : Editor 

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dingo.Common.Serialization;
-using ParadoxNotion.Design;
-using ParadoxNotion.Serialization;
 using UnityEngine;
-using DerivedComponentJsonDataRow = Dingo.Common.Serialization.DerivedComponentJsonDataRow;
 
 namespace Dingo.Roads
 {
@@ -12,9 +9,7 @@ namespace Dingo.Roads
     public class ConnectionConfiguration : ScriptableObject, ISerializationCallbackReceiver
     {
         public Color Color = UnityEngine.Color.white;
-
-        [AllowDerived]
-        [ReorderableList]
+        
         public List<ConnectionConfigurationBase> Components = new List<ConnectionConfigurationBase>();
 
         [HideInInspector]

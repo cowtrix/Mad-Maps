@@ -4,7 +4,6 @@ using UnityEngine;
 namespace Dingo.Common.Painter
 {
 #if UNITY_EDITOR && !HURTWORLDSDK
-[SDKScript(Full = true)]
 [ExecuteInEditMode]
 public class EditorCellRenderer : MonoBehaviour
 {

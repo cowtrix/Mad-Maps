@@ -35,7 +35,6 @@ namespace Dingo.Roads
         }
     }
 
-    [StripComponentOnBuild]
     public abstract class ConnectionComponent : sBehaviour
     {
         public bool OverridePriority;

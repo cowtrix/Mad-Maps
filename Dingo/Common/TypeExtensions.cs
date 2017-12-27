@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace Dingo.Common
 {
+
     public static class TypeExtensions
     {
         public static List<Type> GetAllChildTypes(this Type type)

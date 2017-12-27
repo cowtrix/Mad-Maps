@@ -1,6 +1,5 @@
 using System;
 using Dingo.Common.Collections;
-using Dingo.Common;
 using UnityEngine;
 
 namespace Dingo.Common

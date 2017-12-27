@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using Dingo.Common.Collections;
 using UnityEngine;
-using Dingo.WorldStamp;
 using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
