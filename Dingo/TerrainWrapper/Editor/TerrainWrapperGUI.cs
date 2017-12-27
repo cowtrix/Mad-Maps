@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
+using Dingo.Common;
+using Dingo.Common.Painter;
 
 namespace Dingo.Terrains
 {
@@ -32,10 +34,6 @@ namespace Dingo.Terrains
 
         public void OnEnable()
         {
-            if (!Wrapper)
-            {
-                Wrapper = GameObjectExtensions.FindObjectsOfTypeAll<TerrainWrapper>().First();
-            }
             if (!Wrapper)
             {
                 return;

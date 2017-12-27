@@ -1,7 +1,7 @@
 using System;
 using Dingo.Common;
 using Dingo.Terrains;
-using Dingo.Common.GenericEdtitor;
+using Dingo.Common.GenericEditor;
 using UnityEngine;
 
 namespace Dingo.Roads.Connections

@@ -1,11 +1,13 @@
 ﻿using UnityEditor;
 
-[CustomEditor(typeof(ConnectionConfiguration))]
-public class ConnectionConfigurationGUI : Editor 
+namespace Dingo.Roads
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(ConnectionConfiguration))]
+    public class ConnectionConfigurationGUI : Editor
     {
-        AutoEditorWrapper.ShowAutoEditorGUI(target);
-        EditorUtility.SetDirty(target);
+        public override void OnInspectorGUI()
+        {
+            GenericEditor.DrawGUI(this);
+        }
     }
 }

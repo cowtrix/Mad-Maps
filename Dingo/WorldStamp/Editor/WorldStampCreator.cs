@@ -1,23 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using Dingo.Common;
-using EditorCellPainter;
-using ParadoxNotion.Serialization;
-using Steamworks;
 using UnityEditor;
 using UnityEngine;
 
 namespace Dingo.WorldStamp.Authoring
 {
-    public abstract class WorldStampCreatorLayer
-    {
-        public abstract void Capture(Bounds b);
-        public abstract void OnGUI();
-        public abstract void OnSceneGUI();
-    }
-
     public class WorldStampCreator : SceneViewEditorWindow
     {
         [MenuItem("Tools/Dingo/World Stamp Creator", false, 6)]
@@ -130,12 +117,12 @@ namespace Dingo.WorldStamp.Authoring
             var tb = Terrain.GetBounds();
 
             b.min = Handles.DoPositionHandle(b.min, Quaternion.identity).Flatten();
-            b.max = Handles.DoPositionHandle(b.max.x0z(b.min.y), Quaternion.identity).Flatten();
+            b.max = Handles.DoPositionHandle(b.max.xz().x0z(b.min.y), Quaternion.identity).Flatten();
             b.min = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Floor)).Flatten();
             b.max = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Floor)).Flatten();
 
-            b.Encapsulate(b.center.x0z(tb.max.y));
-            b.Encapsulate(b.center.x0z(tb.min.y));
+            b.Encapsulate(b.center.xz().x0z(tb.max.y));
+            b.Encapsulate(b.center.xz().x0z(tb.min.y));
             if (b != Bounds)
             {
                 Bounds = b;

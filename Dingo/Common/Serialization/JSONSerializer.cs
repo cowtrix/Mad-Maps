@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using FullSerializer;
 
-namespace Dingo.Common.Serialization{
-
-	
+namespace Dingo.Common.Serialization
+{	
 	public class fsUnityObjectConverter : fsConverter {
 
 		public override bool CanProcess(Type type){

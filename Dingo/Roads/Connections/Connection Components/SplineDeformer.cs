@@ -1,6 +1,6 @@
 using System;
 using Dingo.Common;
-using Dingo.Common.GenericEdtitor;
+using Dingo.Common.GenericEditor;
 using UnityEngine;
 using Random = System.Random;
 

@@ -51,37 +51,7 @@ namespace Dingo.Common
             }
             GUI.enabled = true;
         }
-
-        public static GUIContent[] GetAttachmentPointGUIContent()
-        {
-            var strings = AttachmentPointTypeManager.GetBase().FirstToList();
-            var ret = new GUIContent[strings.Count];
-            for (int i = 0; i < strings.Count; i++)
-            {
-                ret[i] = new GUIContent(strings[i]);
-            }
-            return ret;
-        }
-
-        public static ushort AttachmentPointBlockingGUI(string label, ushort currentlySelected)
-        {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(label, GUILayout.MaxWidth(64));
-            var result = (ushort)EditorGUILayout.Popup(currentlySelected, GetAttachmentPointGUIContent());
-            EditorGUILayout.EndHorizontal();
-            return result;
-        }
-
-        public static Vector3 DrawGUI(Vector3 obj)
-        {
-            return EditorGUILayout.Vector3Field(GUIContent.none, obj);
-        }
-
-        public static HurtBiome DrawGUI(HurtBiome biome)
-        {
-            return (HurtBiome)EditorGUILayout.ObjectField(biome, typeof(HurtBiome), false);
-        }
-
+        
         public static T Indent<T>(Func<T> function, int indent = 16)
         {
             EditorGUILayout.BeginHorizontal();

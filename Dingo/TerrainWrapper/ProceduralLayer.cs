@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Dingo.Common;
+using Dingo.Common.Serialization;
 using Dingo.Roads;
 using Dingo.Terrains.Lookups;
 using Dingo.WorldStamp;

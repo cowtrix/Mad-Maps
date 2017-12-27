@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
-using Dingo.Common.GenericEdtitor;
+using Dingo.Common.GenericEditor;
 using UnityEngine;
 using Random = System.Random;
 

@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using Dingo.Common;
 
 namespace Dingo.Roads
 {

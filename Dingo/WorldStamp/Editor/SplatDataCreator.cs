@@ -121,7 +121,7 @@ namespace Dingo.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
-            AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Splats ({0})", IgnoredSplats.Count), IgnoredSplats, IgnoredSplats.GetType(), this);
+            //AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Splats ({0})", IgnoredSplats.Count), IgnoredSplats, IgnoredSplats.GetType(), this);
         }
     }
 }

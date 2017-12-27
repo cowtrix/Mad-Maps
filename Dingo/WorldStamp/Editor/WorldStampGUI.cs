@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using EditorCellPainter;
+using Dingo.Common;
+using Dingo.Common.Painter;
+using Dingo.Terrains;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;

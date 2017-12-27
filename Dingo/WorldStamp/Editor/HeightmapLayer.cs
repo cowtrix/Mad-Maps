@@ -1,6 +1,6 @@
 using Dingo.Common;
+using Dingo.Common.GenericEditor;
 using Dingo.Common.Collections;
-using ParadoxNotion.Design;
 using UnityEditor;
 using UnityEngine;
 
@@ -113,7 +113,7 @@ namespace Dingo.WorldStamp.Authoring
             if (_dirty)
             {
                 _preview.Invalidate(
-                    Heights, () => bounds.size, () => bounds.center.x0z(bounds.min.y + 2), () => Vector3.one,
+                    Heights, () => bounds.size, () => bounds.center.xz().x0z(bounds.min.y + 2), () => Vector3.one,
                     () => Quaternion.identity, () => bounds.size, true, null, null,
                     () => parent.SceneGUIOwner == this, 64);
                 _dirty = false;

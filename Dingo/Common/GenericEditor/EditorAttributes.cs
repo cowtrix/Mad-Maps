@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dingo.Common.GenericEdtitor
+namespace Dingo.Common.GenericEditor
 {
 	public class NameAttribute : Attribute 
 	{

@@ -4,7 +4,7 @@ using System.Linq;
 using Dingo.Common;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Dingo.Common.GenericEdtitor;
+using Dingo.Common.GenericEditor;
 
 namespace Dingo.Roads.Connections
 {
@@ -259,7 +259,7 @@ namespace Dingo.Roads.Connections
                     }
                     if (config.Static)
                     {
-                        currentResult.Renderer.gameObject.SetStatic();
+                        //currentResult.Renderer.gameObject.SetStatic();
                     }
 
                     currentResult.Renderer.shadowCastingMode = config.ShadowCastingMode;

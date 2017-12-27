@@ -120,7 +120,7 @@ namespace Dingo.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
-            AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Details ({0})", IgnoredDetails.Count), IgnoredDetails, IgnoredDetails.GetType(), this);
+            //AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Details ({0})", IgnoredDetails.Count), IgnoredDetails, IgnoredDetails.GetType(), this);
         }
     }
 }

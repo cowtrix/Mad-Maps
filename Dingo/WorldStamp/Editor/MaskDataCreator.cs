@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
-using EditorCellPainter;
+using Dingo.Common.Painter;
 using UnityEditor;
 using UnityEngine;
 
