@@ -103,23 +103,6 @@ namespace Dingo.Common
             }
         }
         
-        {
-            foreach (Transform child in go.transform)
-            {
-                child.gameObject.DoSendMessageToAllChildrenRecursive(message, messageOptions);
-            }
-        }
-
-        private static void DoSendMessageToAllChildrenRecursive(this GameObject go, string message, SendMessageOptions messageOptions)
-        {
-            go.SendMessage(message, messageOptions);
-            foreach (Transform child in go.transform)
-            {
-                child.gameObject.DoSendMessageToAllChildrenRecursive(message, messageOptions);
-            }
-        }
-
-
         public static List<T> GetComponentsInChildrenNonAlloc<T>(this GameObject go, List<T> ret) where T : Component
         {
             var thisT = go.GetComponent<T>();
