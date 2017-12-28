@@ -45,7 +45,15 @@ namespace Dingo.Common.GenericEditor
             int bestScore = 0;
             foreach(var mapping in _activeDrawers)
             {
-                
+                var type = mapping.Key;
+                var interfaces = type.GetInterfaces();
+                foreach(var interfaceType in interfaces)
+                {
+                    if(interfaceType.IsAssignableFrom(typeof(ITypedGenericDrawer<>)))
+                    {
+
+                    }
+                }
             }
         }
 
