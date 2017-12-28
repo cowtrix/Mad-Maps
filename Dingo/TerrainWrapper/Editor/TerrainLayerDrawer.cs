@@ -1,4 +1,5 @@
 ﻿using Dingo.Common;
+using Dingo.Common.GenericEditor;
 using Dingo.Common.Collections;
 using System;
 using System.Collections.Generic;

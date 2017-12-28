@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using Dingo.Common.GenericEditor;
 
 namespace Dingo.Roads
 {
