@@ -1,5 +1,4 @@
-﻿using Dingo.Common;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Dingo.Common
 {

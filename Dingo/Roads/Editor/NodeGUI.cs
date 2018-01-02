@@ -61,7 +61,7 @@ namespace Dingo.Roads
             }
 
             var rot = node.transform.rotation;
-            Handles.CubeHandleCap(-1, pos, rot, RoadNetworkWindow.NodePreviewSize, EventType.repaint);
+            Handles.CubeHandleCap(-1, pos, rot, RoadNetworkWindow.NodePreviewSize, EventType.Repaint);
             
             if (RoadNetworkWindow.IsSelected(node))
             {

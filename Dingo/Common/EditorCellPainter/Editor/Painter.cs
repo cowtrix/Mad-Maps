@@ -91,7 +91,7 @@ namespace Dingo.Common.Painter
                 {
                     return;
                 }
-                if (Event.current.isMouse && Event.current.type == EventType.mouseDrag && Event.current.button == 1)
+                if (Event.current.isMouse && Event.current.type == EventType.MouseDrag && Event.current.button == 1)
                 {
                     return;
                 }
@@ -216,8 +216,8 @@ namespace Dingo.Common.Painter
 
                 var lastMouse = _currentInputState.MouseDown;
                 var mouseDown = myEvent.button == 0 && myEvent.isMouse &&
-                                (myEvent.type == EventType.mouseDown ||
-                                 myEvent.type == EventType.mouseDrag);
+                                (myEvent.type == EventType.MouseDown ||
+                                 myEvent.type == EventType.MouseDrag);
 
                 //planePos = TRS.MultiplyPoint(planePos);
                 //quantisedPlanePos = TRS.MultiplyPoint(quantisedPlanePos);

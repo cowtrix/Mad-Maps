@@ -4,7 +4,6 @@ using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
 using Dingo.Terrains.Lookups;
-using UnityEditor;
 using UnityEngine;
 
 namespace Dingo.WorldStamp.Authoring
