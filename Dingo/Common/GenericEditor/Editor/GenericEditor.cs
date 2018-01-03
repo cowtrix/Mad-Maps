@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
 using System.Reflection;
+using UnityEditor;
+using UnityEngine;
 
 namespace Dingo.Common.GenericEditor
 {
-    public class GenericEditorAttribute : Attribute
-    {
-        public Type TargetType;
-        public GenericEditorAttribute(Type targetType)
-        {
-            TargetType = targetType;
-        }
-    }
+    
 
     public static class GenericEditor
     {
+        public static Dictionary<FieldInfo, bool> ExpandedCache = new Dictionary<FieldInfo, bool>();
+
         private static Dictionary<Type, IGenericDrawer> _activeDrawers; // Mapping of IGeneriDrawer types to type
         private static Dictionary<Type, IGenericDrawer> _drawerTypeMapping = new Dictionary<Type, IGenericDrawer>();    // Mapping of all types to their drawer
+        private static Dictionary<Type, List<FieldInfo>> _typeFieldCache = new Dictionary<Type, List<FieldInfo>>();
         
         private static IGenericDrawer GetDrawer(Type type)
         {
@@ -29,9 +28,13 @@ namespace Dingo.Common.GenericEditor
             if(_activeDrawers == null)
             {
                 _activeDrawers = new Dictionary<Type, IGenericDrawer>();
-                var allTypes = TypeExtensions.GetAllTypesImplementingInterface(typeof(IGenericDrawer));
+                var allTypes = typeof(IGenericDrawer).GetAllTypesImplementingInterface();
                 foreach(var t in allTypes)
                 {
+                    if (t.IsAbstract)
+                    {
+                        continue;
+                    }
                     _activeDrawers.Add(t, null);
                 }
             }
@@ -40,43 +43,105 @@ namespace Dingo.Common.GenericEditor
             // Subclass = distance from actual class
             // Exact match - instant return
             Type bestDrawer = null;
-            int bestScore = 0;
+            int bestScore = int.MinValue;
             foreach(var mapping in _activeDrawers)
             {
                 var targetType = mapping.Key;
                 var interfaces = targetType.GetInterfaces();
                 foreach(var interfaceType in interfaces)
                 {
-                    if (!interfaceType.IsAssignableFrom(typeof(ITypedGenericDrawer<>)))
+                    var genArgs = interfaceType.GetGenericArguments();
+                    if (genArgs.Length != 1)
                     {
                         continue;
                     }
-                    var genericArg = interfaceType.GetGenericArguments()[0];
+
+                    var genericArg = genArgs[0];
                     if (genericArg == type)
                     {
-                        
+                        bestDrawer = targetType;
+                        break;
                     }
-                    if(bestScore == 0 && genericArg.IsAssignableFrom(type))
+                    if (!genericArg.IsAssignableFrom(type))
                     {
-                        bestDrawer = interfaceType;
+                        continue;
                     }
-                    
-                }
+                    var distance = type.GetInheritanceDistance(genericArg);
+                    if (distance > bestScore)
+                    {
+                        bestDrawer = targetType;
+                    }
+                } 
             }
-
             if (bestDrawer == null)
             {
-                throw new Exception("Failed to find drawer for type " + type);
+                return null;
             }
-            if (!_activeDrawers.TryGetValue(bestDrawer, out drawer))
-            {
-                drawer = Activator.CreateInstance(bestDrawer);
+            if (!_activeDrawers.TryGetValue(bestDrawer, out drawer) || drawer == null)
+            {  
+                drawer = (IGenericDrawer) Activator.CreateInstance(bestDrawer);
             }
             _drawerTypeMapping[type] = drawer;
+            return drawer;
         }
 
-        public static void DrawGUI(object target, string label = "", Type targetType = null, FieldInfo fieldInfo = null, object context = null)
+        private static List<FieldInfo> GetFields(Type type)
         {
+            List<FieldInfo> result;
+            if (!_typeFieldCache.TryGetValue(type, out result) || result == null)
+            {
+                var allFields = type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                result = new List<FieldInfo>();
+                foreach (var fieldInfo in allFields)
+                {
+                    var attributes = fieldInfo.GetCustomAttributes(true);
+                    if (attributes.Any(o => o is HideInInspector))
+                    {
+                        continue;
+                    }
+                    if (fieldInfo.IsPrivate && !attributes.Any(o => o is SerializeField))
+                    {
+                        continue;
+                    }
+                    result.Add(fieldInfo);
+                }
+                _typeFieldCache[type] = result;
+            }
+            return result;
+        }
+
+        public static object DrawGUI(object target, string label = "", Type targetType = null, FieldInfo fieldInfo = null, object context = null)
+        {
+            if (targetType == null && target == null && fieldInfo == null)
+            {
+                Debug.LogError("Insufficient information to determine type.");
+                return null;
+            }
+
+            if (targetType == null)
+            {
+                targetType = target != null ? target.GetType() : fieldInfo.FieldType;
+            }
+
+            var drawer = GetDrawer(targetType);
+            if (drawer != null)
+            {
+                target = drawer.DrawGUI(target, label, targetType, fieldInfo, context);
+            }
+            else
+            {
+                EditorGUI.indentLevel++;
+                var fields = GetFields(targetType);
+                foreach (var field in fields)
+                {
+                    var subObj = field.GetValue(target);
+                    subObj = DrawGUI(subObj, field.Name, subObj != null ? subObj.GetType() : field.FieldType, field, target);
+                    field.SetValue(target, subObj);
+                }
+                EditorGUI.indentLevel--;
+            }
+
+            return target;
         }
     }
 }

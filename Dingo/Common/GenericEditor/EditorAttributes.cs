@@ -25,5 +25,6 @@ namespace Dingo.Common.GenericEditor
 	public class ListGenericUIAttribute : Attribute 
 	{
 		public bool Reorderable;
+		public bool AllowDerived;
 	}
 }

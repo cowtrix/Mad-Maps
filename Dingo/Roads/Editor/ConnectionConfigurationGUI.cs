@@ -8,7 +8,7 @@ namespace Dingo.Roads
     {
         public override void OnInspectorGUI()
         {
-            GenericEditor.DrawGUI(this);
+            GenericEditor.DrawGUI(target);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -215,8 +216,7 @@ namespace Dingo.Common
                 var menu = GetTypeSelectionMenu(baseType, TaskTypeSelected);
                 return menu;
             };
-
-
+            
             GUILayout.BeginHorizontal();
             if (IndentedButton("Add " + baseType.Name.SplitCamelCase()))
             {
@@ -224,8 +224,7 @@ namespace Dingo.Common
                 Event.current.Use();
             }
             GUILayout.EndHorizontal();
-
-
+            
             GUI.backgroundColor = Color.white;
         }
 
@@ -253,6 +252,12 @@ namespace Dingo.Common
             {
                 callback((Type)selectedType);
             };
+
+            var types = baseType.GetAllChildTypes().Where(t => !t.IsAbstract);
+            foreach (var type in types)
+            {
+                menu.AddItem(new GUIContent(type.FullName), false, () => callback(type));
+            }
 
             /*var scriptInfos = EditorUtils.GetScriptInfosOfType(baseType);
 
