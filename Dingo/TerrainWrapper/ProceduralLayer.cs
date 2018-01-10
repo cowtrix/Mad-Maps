@@ -28,6 +28,7 @@ namespace Dingo.Terrains
         public abstract void Apply(ProceduralLayer layer, TerrainWrapper wrapper);
     }
 
+    [UserInstantiable(true)]
     public class ProceduralLayer : LayerBase, ISerializationCallbackReceiver
     {
         public List<ProceduralLayerComponent> Components = new List<ProceduralLayerComponent>();

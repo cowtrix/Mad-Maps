@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dingo.Common.Collections;
-using Dingo.Common;
-using Dingo.Common.Painter;
 using UnityEngine;
 
 namespace Dingo.WorldStamp

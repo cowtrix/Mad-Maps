@@ -15,30 +15,6 @@ namespace Dingo.WorldStamp
     [CanEditMultipleObjects]
     public class WorldStampGUI : Editor
     {
-        
-
-        /*[MenuItem("Tools/Compress All Worldstamps")]
-        public static void CompressAllInProject()
-        {
-            var allAssets = sFinder.FindComponentInPrefabs.FindComponentsInPrefab<WorldStamp>();
-            foreach (var worldStamp in allAssets)
-            {
-                worldStamp.Data.Migrate();
-                EditorUtility.SetDirty(worldStamp);
-            }
-        }
-
-        [MenuItem("Tools/Delete All Compound Layers")]
-        public static void DeleteCompoundLayers()
-        {
-            var all = FindObjectsOfType<BakedTerrainData>();
-            foreach (var compoundTerrainLayer in all)
-            {
-                Debug.Log("Destroyed " + compoundTerrainLayer);
-                DestroyImmediate(compoundTerrainLayer);
-            }
-        }*/
-
         BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle(-1);
         private SerializedProperty _size;
         private SerializedProperty _snapRotation;
@@ -99,9 +75,7 @@ namespace Dingo.WorldStamp
             _priority = serializedObject.FindProperty("Priority");
             _layerHeightBlendMode = serializedObject.FindProperty("LayerHeightBlendMode");
             _heightMin = serializedObject.FindProperty("MinHeight");
-            //_baseHeightBlendMode = serializedObject.FindProperty("BaseHeightBlendMode");
             _splatBlendMode = serializedObject.FindProperty("SplatBlendMode");
-            //_copyBaseSplats = serializedObject.FindProperty("CopyBaseSplats");
             _stencilSplats = serializedObject.FindProperty("StencilSplats");
             _removeBaseTrees = serializedObject.FindProperty("RemoveBaseTrees");
             _removeSameLayerTrees = serializedObject.FindProperty("RemoveSameLayerTrees");
@@ -180,6 +154,7 @@ namespace Dingo.WorldStamp
                 foreach (var worldStamp in all)
                 {
                     worldStamp.GizmosEnabled = false;
+                    EditorUtility.SetDirty(worldStamp);
                 }
                 SceneView.RepaintAll();
             }
@@ -224,6 +199,7 @@ namespace Dingo.WorldStamp
                 foreach (var worldStamp in all)
                 {
                     worldStamp.PreviewEnabled = false;
+                    EditorUtility.SetDirty(worldStamp);
                 }
                 SceneView.RepaintAll();
             }

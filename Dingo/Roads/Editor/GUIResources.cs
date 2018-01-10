@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Dingo.Roads
 {
-    internal static class GUIResources
+    public static partial class GUIResources
     {
         public static Texture2D RoadConfigurationIcon
         {

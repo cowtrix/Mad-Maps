@@ -24,6 +24,11 @@ namespace Dingo.Roads
 
         public void OnSceneGUI(SceneView sceneView)
         {
+            if (!FocusedRoadNetwork || !FocusedRoadNetwork.SceneViewEnabled)
+            {
+                return;
+            }
+
             if (Event.current.control)
             {
                 SceneView.RepaintAll();
@@ -38,11 +43,6 @@ namespace Dingo.Roads
             {
                 _nodeIndex++;
                 Event.current.Use();
-                return;
-            }
-
-            if (FocusedRoadNetwork == null)
-            {
                 return;
             }
 

@@ -25,6 +25,11 @@ namespace Dingo.Common
         public static void SetData(List<Serializable2DByteArray> datas, IEnumerable context)
         {
             _context.Clear();
+            if (datas.Count == 0)
+            {
+                return;
+            }
+
             var window = GetWindow<DataInspector>();
             window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
             window.minSize = new Vector2(Mathf.Min(datas[0].Width, 600), Mathf.Min(datas[0].Height, 600));

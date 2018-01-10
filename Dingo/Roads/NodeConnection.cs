@@ -126,6 +126,10 @@ namespace Dingo.Roads
         private void RecalculateSpline()
         {
             var instance = Network;
+            if (!instance)
+            {
+                return;
+            }
             _spline.Resolution = instance.SplineResolution;
 
             _spline.FirstControlPoint.Position = ThisNode.NodePosition;
@@ -172,14 +176,9 @@ namespace Dingo.Roads
                 if (!Components[i] || Components[i].Equals(null)) // Don't double destroy
                     continue;
                 Components[i].Destroy();
-
                 if (Components[i].gameObject != gameObject)
                 {
                     DestroyImmediate(Components[i].gameObject);
-                }
-                else
-                {
-                    DestroyImmediate(Components[i]);
                 }
             }
             Components.Clear();

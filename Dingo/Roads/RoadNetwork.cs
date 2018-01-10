@@ -10,24 +10,6 @@ using GameObjectExtensions = Dingo.Common.GameObjectExtensions;
 
 namespace Dingo.Roads
 {
-    public interface IOnPrebakeCallback
-    {
-        int GetPriority();
-        void OnPrebake();
-    }
-
-    public interface IOnBakeCallback
-    {
-        int GetPriority();
-        void OnBake();
-    }
-
-    public interface IOnPostBakeCallback
-    {
-        int GetPriority();
-        void OnPostBake();
-    }
-
 #if HURTWORLDSDK
     [StripComponentOnBuild]
 #endif
@@ -49,11 +31,10 @@ namespace Dingo.Roads
         public List<GameObject> IntersectionHistory = new List<GameObject>();
         public List<ConnectionConfiguration> RoadConfigHistory = new List<ConnectionConfiguration>();
         public NodeConfiguration CurrentNodeConfiguration = new NodeConfiguration();
-
+        public bool SceneViewEnabled = true;
         public RoadLayerMapping LayerMapping = new RoadLayerMapping();
-        
         private IEnumerator _slowThink;
-
+        
         public Node CreateNewNode(Vector3 position, Vector3 normal, Node previous, ConnectionConfiguration connectionConfig, NodeConfiguration nodeConfig)
         {
             var newNodeGo = new GameObject(string.Format("RoadNode_{0}", Nodes.Count));
@@ -145,8 +126,7 @@ namespace Dingo.Roads
         
         public void ForceThink()
         {
-            Nodes.Clear();
-            Nodes.AddRange(GetComponentsInChildren<Node>());
+            CollectAllNodes();
             foreach (var node in Nodes)
             {
                 node.OnPreForceThink();
@@ -216,6 +196,17 @@ namespace Dingo.Roads
             ConnectNodes(second, first, config);
         }
 
+        public List<T> Collect<T>() where T : class
+        {
+            var list = new List<T>(gameObject.GetComponentsByInterfaceInChildren<T>());
+            var allProxies = FindObjectsOfType<RoadNetworkProxy>().Where(proxy => proxy.Network == this);
+            foreach (var roadNetworkProxy in allProxies)
+            {
+                list.AddRange(roadNetworkProxy.gameObject.GetComponentsByInterfaceInChildren<T>());
+            }
+            return list;
+        } 
+
         public void RebakeAllNodes()
         {
             ForceThink();
@@ -243,7 +234,7 @@ namespace Dingo.Roads
             }
 
             {
-                var onPrebakeCallbacks = gameObject.GetComponentsByInterfaceInChildren<IOnPrebakeCallback>()
+                var onPrebakeCallbacks = Collect<IOnPrebakeCallback>()
                     .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
                     .OrderBy(callback => callback.GetPriority()).ToList();
                 for (int i = 0; i < onPrebakeCallbacks.Count; i++)
@@ -258,7 +249,7 @@ namespace Dingo.Roads
             }
 
             {
-                var onBakeCallbacks = gameObject.GetComponentsByInterfaceInChildren<IOnBakeCallback>()
+                var onBakeCallbacks = Collect<IOnBakeCallback>()
                     .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
                     .OrderBy(callback => callback.GetPriority()).ToList();
                 for (int i = 0; i < onBakeCallbacks.Count; i++)
@@ -273,7 +264,7 @@ namespace Dingo.Roads
             }
 
             {
-                var onPostBakeCallbacks = gameObject.GetComponentsByInterfaceInChildren<IOnPostBakeCallback>()
+                var onPostBakeCallbacks = Collect<IOnPostBakeCallback>()
                     .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
                     .OrderBy(callback => callback.GetPriority()).ToList();
                 for (int i = 0; i < onPostBakeCallbacks.Count; i++)
@@ -323,20 +314,12 @@ namespace Dingo.Roads
         {
             Nodes.Clear();
             Nodes.AddRange(GetComponentsInChildren<Node>());
-        }
-
-        /*public void InitializeConnection(NodeConnection newComponent, RoadConfiguration configuration)
-        {
-            configuration.Initialise(newComponent);
-            /*for (int i = 0; i < DefaultObjects.Count; i++)
+            var allProxies = FindObjectsOfType<RoadNetworkProxy>().Where(proxy => proxy.Network == this);
+            foreach (var roadNetworkProxy in allProxies)
             {
-                if (DefaultObjects[i] == null)
-                {
-                    continue;
-                }
-                newComponent.AddComponent(DefaultObjects[i]);
+                Nodes.AddRange(roadNetworkProxy.GetComponentsInChildren<Node>());
             }
-        }*/
+        }
 
         public void MergeNodes(Node baseNode, Node nodeToMerge)
         {

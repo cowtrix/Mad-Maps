@@ -146,6 +146,7 @@ namespace Dingo.Roads.Connections
 
         private BakeResult CreateNewBakeResult(Config.LodLevel config, GameObject rootTarget, int lodLevelIndex, int chunkCount)
         {
+            rootTarget.GetOrAddComponent<ProceduralMeshContainer>().Collider = config.CopyToCollider;
             return new BakeResult()
             {
                 Mesh = new Mesh(),

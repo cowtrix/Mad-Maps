@@ -2,14 +2,23 @@ using System;
 using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
-using EditorCellPainter;
-using UnityEditor;
+
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using EditorCellPainter;
+#endif
 
 namespace Dingo.WorldStamp.Authoring
 {
+    [Serializable]
     public class MaskDataCreator : WorldStampCreatorLayer
     {
+        public float GridSize = 5;
+        public WorldStampMask Mask = new WorldStampMask();
+        public Bounds LastBounds;
+
         private static float MinMaskRes = 4;
         private static float MaskResolution = 128;
 
@@ -26,10 +35,10 @@ namespace Dingo.WorldStamp.Authoring
         }
         private GridManagerInt __gridManager;
 
+#if UNITY_EDITOR
         private Painter _maskPainter;
-        public float GridSize = 5;
-        public WorldStampMask Mask = new WorldStampMask();
-
+#endif
+        
         private void ResetMask(Bounds bounds)
         {
             GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
@@ -48,6 +57,7 @@ namespace Dingo.WorldStamp.Authoring
                     Mask.SetValue(cell, 1);
                 }
             }
+            LastBounds = bounds;
         }
 
         private void FillMaskFromMinY(Bounds bounds, Serializable2DFloatArray heights)
@@ -71,7 +81,7 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
-        protected override GUIContent Label
+        public override GUIContent Label
         {
             get { return new GUIContent("Mask"); }
         }
@@ -88,12 +98,16 @@ namespace Dingo.WorldStamp.Authoring
 
         protected override void CaptureInternal(Terrain terrain, Bounds bounds)
         {
-            ResetMask(bounds);
+            if (LastBounds != bounds)
+            {
+                ResetMask(bounds);
+            }
         }
 
+#if UNITY_EDITOR
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
-            var bounds = parent.Bounds;
+            var bounds = parent.Template.Bounds;
             if (_maskPainter == null)
             {
                 _maskPainter = new Painter(Mask, GridManager);
@@ -119,30 +133,45 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
-        public override void PreviewInDataInspector()
+        override public void DrawGUI(WorldStampCreator parent)
         {
-            throw new NotImplementedException();
-        }
+            EditorExtensions.Seperator();
+            EditorGUILayout.BeginHorizontal();
 
-        public override void Clear()
-        {
-            Mask.Clear();
-        }
+            GUIExpanded = EditorGUILayout.Foldout(GUIExpanded, Label);
+            var previewContent = new GUIContent("Edit");
+            previewContent.tooltip = "Edit the mask for this stamp.";
+            GUI.color = parent.SceneGUIOwner == this ? Color.green : Color.white;
+            if (GUILayout.Button(previewContent, EditorStyles.miniButton, GUILayout.Width(60), GUILayout.Height(16)))
+            {
+                parent.SceneGUIOwner = parent.SceneGUIOwner == this ? null : this;
+                if (parent.Template.Bounds != LastBounds)
+                {
+                    ResetMask(parent.Template.Bounds);
+                }
+            }
+            GUI.color = Color.white;
+            EditorGUILayout.EndHorizontal();
 
-        protected override void CommitInternal(WorldStampData data)
-        {
-            data.Mask = Mask.JSONClone();
+            if (GUIExpanded)
+            {
+                GUI.enabled = Enabled;
+                EditorGUI.indentLevel++;
+                OnExpandedGUI(parent);
+                EditorGUI.indentLevel--;
+                GUI.enabled = true;
+            }
         }
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
             if (EditorGUILayoutX.IndentedButton("Reset"))
             {
-                ResetMask(parent.Bounds);
+                ResetMask(parent.Template.Bounds);
             }
             if (EditorGUILayoutX.IndentedButton("Fill From Min Y"))
             {
-                FillMaskFromMinY(parent.Bounds, parent.GetCreator<HeightmapLayer>().Heights);
+                FillMaskFromMinY(parent.Template.Bounds, parent.GetCreator<HeightmapDataCreator>().Heights);
             }
             if (EditorGUILayoutX.IndentedButton("Load From Texture"))
             {
@@ -157,25 +186,48 @@ namespace Dingo.WorldStamp.Authoring
             {
                 var tex = new Texture2D(0, 0);
                 tex.LoadImage(File.ReadAllBytes(path));
-                GridSize = Math.Max(MinMaskRes, Math.Max(parent.Bounds.size.x, parent.Bounds.size.z) / MaskResolution);
+                GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
                 Mask.Clear();
-                for (var u = 0f; u < parent.Bounds.size.x; u += GridSize)
+                for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
                 {
-                    for (var v = 0f; v < parent.Bounds.size.z; v += GridSize)
+                    for (var v = 0f; v < parent.Template.Bounds.size.z; v += GridSize)
                     {
                         var cell = GridManager.GetCell(new Vector3(u, 0, v));
-                        var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Bounds.min;
-                        var cellMin = GridManager.GetCellCenter(cell).x0z() + parent.Bounds.min;
-                        if (!parent.Bounds.Contains(cellMax) || !parent.Bounds.Contains(cellMin))
+                        var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Template.Bounds.min;
+                        var cellMin = GridManager.GetCellCenter(cell).x0z() + parent.Template.Bounds.min;
+                        if (!parent.Template.Bounds.Contains(cellMax) || !parent.Template.Bounds.Contains(cellMin))
                         {
                             continue;
                         }
-                        var val = tex.GetPixelBilinear(u / parent.Bounds.size.x, v / parent.Bounds.size.z).grayscale;
+                        var val = tex.GetPixelBilinear(u / parent.Template.Bounds.size.x, v / parent.Template.Bounds.size.z).grayscale;
                         Mask.SetValue(cell, val);
                     }
                 }
                 UnityEngine.Object.DestroyImmediate(tex);
             }
+        }
+#endif
+
+        public override void PreviewInDataInspector()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Clear()
+        {
+            Mask.Clear();
+        }
+
+        protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
+        {
+            Mask.OnBeforeSerialize();
+            data.Mask = Mask.JSONClone();
+            data.GridSize = GridSize;
+        }
+
+        public override bool CanDisable
+        {
+            get { return false; }
         }
     }
 }

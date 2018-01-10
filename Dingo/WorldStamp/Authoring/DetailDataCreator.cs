@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
@@ -6,18 +7,29 @@ using Dingo.Terrains;
 using Dingo.Terrains.Lookups;
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 namespace Dingo.WorldStamp.Authoring
 {
+    [Serializable]
     public class DetailDataCreator : WorldStampCreatorLayer
     {
-        [HideInInspector]
+        [NonSerialized]
         public List<CompressedDetailData> DetailData = new List<CompressedDetailData>();
 
         public List<DetailPrototypeWrapper> IgnoredDetails = new List<DetailPrototypeWrapper>();
 
-        protected override GUIContent Label
+        public override GUIContent Label
         {
-            get { return new GUIContent("Details"); }
+            get
+            {
+                var nullCount = DetailData.Count(data => data.Wrapper == null);
+                if(nullCount > 0)
+                    return new GUIContent(string.Format("Details ({0}) ({1} need resolving)", DetailData.Count, nullCount));
+                return new GUIContent(string.Format("Details ({0})", DetailData.Count));
+            }
         }
 
         protected override bool HasDataPreview
@@ -37,21 +49,15 @@ namespace Dingo.WorldStamp.Authoring
 
             var prototypes = terrain.terrainData.detailPrototypes;
             var wrappers = TerrainLayerUtilities.ResolvePrototypes(prototypes);
-
-            if (prototypes.Length != wrappers.Count)
-            {
-                Debug.LogError("Failed to collect details - possibly you have detail configs that aren't wrapper assets?");
-                return;
-            }
-
+            
             for (var i = 0; i < prototypes.Length; ++i)
             {
-                var wrapper = wrappers[prototypes[i]];
-                if (IgnoredDetails.Contains(wrapper))
+                DetailPrototypeWrapper wrapper;
+                wrappers.TryGetValue(prototypes[i], out wrapper);
+                if (wrapper != null && IgnoredDetails.Contains(wrapper))
                 {
                     continue;
                 }
-
                 var sample = terrain.terrainData.GetDetailLayer(min.x, min.z, width, height, i);
                 var data = new byte[width, height];
                 int sum = 0;
@@ -70,14 +76,15 @@ namespace Dingo.WorldStamp.Authoring
                 }
                 else
                 {
-                    Debug.Log(string.Format("Ignored detail {0} as it appeared to be empty.", wrapper.name));
+                    Debug.Log(string.Format("WorldStamp Detail Capture: Ignored detail layer {0} as it appeared to be empty.", wrapper.name));
                 }
             }
         }
 
+#if UNITY_EDITOR
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
-            var bounds = parent.Bounds;
+            var bounds = parent.Template.Bounds;
             int counter = 0;
             int res = 32;
             foreach (var kvp in DetailData)
@@ -103,6 +110,38 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
+        protected override void OnExpandedGUI(WorldStampCreator parent)
+        {
+            if (NeedsRecapture)
+            {
+                EditorGUILayout.HelpBox("You need to Capture this layer to edit it.", MessageType.Info);
+                return;
+            }
+            foreach (var compressedDetailData in DetailData)
+            {
+                EditorGUILayout.BeginHorizontal();
+                compressedDetailData.Wrapper = (DetailPrototypeWrapper) EditorGUILayout.ObjectField(compressedDetailData.Wrapper,
+                    typeof (DetailPrototypeWrapper), false);
+                GUI.color = compressedDetailData.Wrapper != null && IgnoredDetails.Contains(compressedDetailData.Wrapper) ? Color.red : Color.white;
+                GUI.enabled = compressedDetailData.Wrapper != null;
+                if (GUILayout.Button("Ignore", EditorStyles.miniButton, GUILayout.Width(60)))
+                {
+                    if (IgnoredDetails.Contains(compressedDetailData.Wrapper))
+                    {
+                        IgnoredDetails.Remove(compressedDetailData.Wrapper);
+                    }
+                    else
+                    {
+                        IgnoredDetails.Add(compressedDetailData.Wrapper);
+                    }
+                }
+                GUI.enabled = true;
+                GUI.color = Color.white;
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+#endif
+
         public override void PreviewInDataInspector()
         {
             DataInspector.SetData(DetailData.Select(x => x.Data).ToList(), DetailData.Select(x => x.Wrapper).ToList());
@@ -113,14 +152,14 @@ namespace Dingo.WorldStamp.Authoring
             DetailData.Clear();
         }
 
-        protected override void CommitInternal(WorldStampData data)
+        protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
-            data.DetailData = DetailData.JSONClone();
-        }
-
-        protected override void OnExpandedGUI(WorldStampCreator parent)
-        {
-            AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Details ({0})", IgnoredDetails.Count), IgnoredDetails, IgnoredDetails.GetType(), this);
+            data.DetailData.Clear();
+            for (int i = 0; i < DetailData.Count; i++)
+            {
+                var compressedDetailData = DetailData[i];
+                data.DetailData.Add(compressedDetailData.JSONClone());
+            }
         }
     }
 }

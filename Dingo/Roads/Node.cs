@@ -30,7 +30,7 @@ namespace Dingo.Roads
         public float SnapOffset = 0;
 
         public bool IsExplicitControl = false;
-        public Vector3 ExplicitControl = new Vector3();
+        public Vector3 ExplicitControl = new Vector3(1, 0, 0);
 
         public bool OverrideCurviness = false;
         public float Curviness = 30;
@@ -56,7 +56,7 @@ namespace Dingo.Roads
             {
                 if (!__network)
                 {
-                    __network = transform.GetComponentInAncestors<RoadNetwork>();
+                    __network = transform.GetComponentInAncestors<RoadNetwork>() ?? transform.GetComponentInAncestors<RoadNetworkProxy>().Network;
                 }
                 return __network;
             }
@@ -185,7 +185,7 @@ namespace Dingo.Roads
 
         public Vector3 CalculateTangent(Node nextNode)
         {
-            var breakAngle = Network.BreakAngle;
+            var breakAngle = Network != null ? Network.BreakAngle : 90;
             Vector3 normal = Vector3.zero;
             var connectionCount = InConnections.Count + OutConnections.Count;
             if (connectionCount == 0)
@@ -321,7 +321,7 @@ namespace Dingo.Roads
 
         private void Snap()
         {
-            if (Locked || Configuration.SnappingMode == NodeConfiguration.ESnappingMode.None || Vector3.Distance(_lastSnapPosition, transform.position) < .01f)
+            if (!Network || Locked || Configuration.SnappingMode == NodeConfiguration.ESnappingMode.None || Vector3.Distance(_lastSnapPosition, transform.position) < .01f)
             {
                 return; // Do nothing in this case
             }
@@ -380,7 +380,7 @@ namespace Dingo.Roads
             {
                 return Configuration.Curviness;
             }
-            return Network.Curviness;
+            return Network != null ? Network.Curviness : 30;
         }
 
         public IEnumerable<NodeConnection> AllConnections()
@@ -438,7 +438,7 @@ namespace Dingo.Roads
                 return tangent;
             if(relativeNode != null)
                 return (relativeNode.NodePosition - NodePosition).normalized * GetCurviness();
-            Debug.LogError("We shouldn't really be able to get to this point");
+            Debug.LogError("We shouldn't really be able to get to this point", this);
             return Vector3.forward;
         }
 

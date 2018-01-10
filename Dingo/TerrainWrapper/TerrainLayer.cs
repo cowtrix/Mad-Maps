@@ -12,7 +12,7 @@ using UnityEditor;
 
 namespace Dingo.Terrains
 {
-    [CreateAssetMenu(menuName = "sMap/Terrain Snapshot")]
+    [UserInstantiable(true)]
     public class TerrainLayer : LayerBase
     {
         public enum ETerrainLayerBlendMode

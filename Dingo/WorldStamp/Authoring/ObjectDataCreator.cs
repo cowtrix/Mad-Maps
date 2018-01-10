@@ -1,21 +1,28 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
-using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Dingo.WorldStamp.Authoring
 {
+    [Serializable]
     public class ObjectDataCreator : WorldStampCreatorLayer
     {
-        public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
         public LayerMask Mask = ~0;
 
-        [HideInInspector]
+        [NonSerialized]
         public Dictionary<PrefabObjectData, Bounds> BoundsMapping = new Dictionary<PrefabObjectData, Bounds>();
+        [NonSerialized]
+        public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
 
         protected override void CaptureInternal(Terrain terrain, Bounds bounds)
         {
+#if UNITY_EDITOR
             BoundsMapping.Clear();
             Objects.Clear();
 
@@ -45,7 +52,7 @@ namespace Dingo.WorldStamp.Authoring
                 }
                 if (transform.GetComponentInChildren<WorldStamp>())
                 {
-                    Debug.Log(string.Format("Ignored {0} as it had a stamp component on it.", transform), transform);
+                    Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);
                     ignores.Add(transform);
                     var children = transform.GetComponentsInChildren<Transform>(true);
                     foreach (var ignore in children)
@@ -107,6 +114,13 @@ namespace Dingo.WorldStamp.Authoring
                 }
                 Objects.Add(newData);
             }
+#endif
+        }
+
+#if UNITY_EDITOR
+        protected override void OnExpandedGUI(WorldStampCreator parent)
+        {
+            Mask = LayerMaskFieldUtility.LayerMaskField("Layer Mask", Mask, false);
         }
 
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
@@ -122,6 +136,7 @@ namespace Dingo.WorldStamp.Authoring
                 }
             }
         }
+#endif
 
         public override void PreviewInDataInspector()
         {
@@ -133,19 +148,18 @@ namespace Dingo.WorldStamp.Authoring
             Objects.Clear();
         }
 
-        protected override void CommitInternal(WorldStampData data)
+        protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
-            data.Objects = Objects.JSONClone();
+            data.Objects.Clear();
+            foreach (var prefabObjectData in Objects)
+            {
+                data.Objects.Add(prefabObjectData.JSONClone());
+            }
         }
 
-        protected override void OnExpandedGUI(WorldStampCreator parent)
+        public override GUIContent Label
         {
-            Mask = LayerMaskFieldUtility.LayerMaskField("Mask", Mask, false);
-        }
-
-        protected override GUIContent Label
-        {
-            get { return new GUIContent("Objects");}
+            get { return new GUIContent(string.Format("Objects ({0})", Objects.Count));}
         }
 
         protected override bool HasDataPreview

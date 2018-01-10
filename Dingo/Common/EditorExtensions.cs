@@ -31,6 +31,24 @@ namespace Dingo.Common
             }
         }
 
+        public static void DrawArrow(Vector3 start, Vector3 end, Color color, float size)
+        {
+            Gizmos.color = color;
+
+            var delta = end - start;
+            var up = Vector3.up * size;
+            var p1 = start + delta * .75f;
+            
+            Gizmos.DrawLine(start + up * .5f, start - up * .5f);
+            Gizmos.DrawLine(start + up * .5f, p1 + up * .5f);
+            Gizmos.DrawLine(start - up * .5f, p1 - up * .5f);
+            Gizmos.DrawLine(p1 + up * .5f, p1 + up);
+            Gizmos.DrawLine(p1 - up * .5f, p1 - up);
+
+            Gizmos.DrawLine(p1 + up, end);
+            Gizmos.DrawLine(p1 - up, end);
+        }
+
         private static GUIStyle _seperator = new GUIStyle("box")
         {
             border = new RectOffset(0, 0, 1, 0),
@@ -40,7 +58,7 @@ namespace Dingo.Common
 
         public static string OpenFilePanel(string title, string extension, string directory = null, bool assetPath = true)
         {
-            bool persistantString = string.IsNullOrEmpty(directory);
+            bool persistantString = String.IsNullOrEmpty(directory);
             if (persistantString)
             {
                 directory = EditorPrefs.GetString("sMap_EditorExtensions_OpenFilePanel");
@@ -51,7 +69,7 @@ namespace Dingo.Common
             }
             Debug.Log("Directory was " + directory);
             var path = EditorUtility.OpenFilePanel(title, directory, extension);
-            if (string.IsNullOrEmpty(path))
+            if (String.IsNullOrEmpty(path))
             {
                 return path;
             }
@@ -66,7 +84,7 @@ namespace Dingo.Common
             directory = path.Substring(0, path.LastIndexOf("/", StringComparison.Ordinal));
             if (assetPath)
             {
-                directory = directory.Replace(Application.dataPath, string.Empty);
+                directory = directory.Replace(Application.dataPath, String.Empty);
             }
             EditorPrefs.SetString("sMap_EditorExtensions_OpenFilePanel", directory);
             Debug.Log("Set persistent OpenFilePanel to " + directory);
@@ -75,7 +93,7 @@ namespace Dingo.Common
 
         public static string SaveFilePanel(string title, string defaultName, string extension, string directory = null, bool assetPath = true)
         {
-            bool persistantString = string.IsNullOrEmpty(directory);
+            bool persistantString = String.IsNullOrEmpty(directory);
             if (persistantString)
             {
                 directory = EditorPrefs.GetString("sMap_EditorExtensions_OpenFilePanel");
@@ -86,7 +104,7 @@ namespace Dingo.Common
             }
             Debug.Log("Directory was " + directory);
             var path = EditorUtility.SaveFilePanel(title, directory, defaultName, extension);
-            if (string.IsNullOrEmpty(path))
+            if (String.IsNullOrEmpty(path))
             {
                 return path;
             }
@@ -101,7 +119,7 @@ namespace Dingo.Common
             directory = path.Substring(0, path.LastIndexOf("/", StringComparison.Ordinal));
             if (assetPath)
             {
-                directory = directory.Replace(Application.dataPath, string.Empty);
+                directory = directory.Replace(Application.dataPath, String.Empty);
             }
             EditorPrefs.SetString("sMap_EditorExtensions_OpenFilePanel", directory);
             Debug.Log("Set persistent OpenFilePanel to " + directory);

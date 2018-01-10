@@ -1,18 +1,26 @@
+using System;
 using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Dingo.WorldStamp.Authoring
 {
+    [Serializable]
     public class TreeDataCreator : WorldStampCreatorLayer
     {
+        [NonSerialized]
         public List<DingoTreeInstance> Trees = new List<DingoTreeInstance>();
 
-        protected override GUIContent Label
+        public List<GameObject> IgnoredTrees = new List<GameObject>();
+
+        public override GUIContent Label
         {
-            get { return new GUIContent("Trees");}
+            get { return new GUIContent(string.Format("Trees ({0})", Trees.Count));}
         }
 
         protected override bool HasDataPreview
@@ -30,6 +38,10 @@ namespace Dingo.WorldStamp.Authoring
             foreach (var tree in trees)
             {
                 var worldPos = terrain.TreeToWorldPos(tree.position);
+                if (IgnoredTrees.Contains(prototypes[tree.prototypeIndex].prefab))
+                {
+                    continue;
+                }
                 if (!expandedBounds.Contains(worldPos))
                 {
                     continue;
@@ -38,20 +50,6 @@ namespace Dingo.WorldStamp.Authoring
                 var yDelta = worldPos.y - terrain.SampleHeight(worldPos);
                 hurtTree.Position = new Vector3((worldPos.x - bounds.min.x) / bounds.size.x, yDelta, (worldPos.z - bounds.min.z) / bounds.size.z);
                 Trees.Add(hurtTree);
-            }
-        }
-
-        protected override void PreviewInSceneInternal(WorldStampCreator parent)
-        {
-            var bounds = parent.Bounds;
-            var terrain = parent.Terrain;
-            Handles.color = Color.green;
-            foreach (var hurtTreeInstance in Trees)
-            {
-                var pos = new Vector3(hurtTreeInstance.Position.x * bounds.size.x, 0,
-                    hurtTreeInstance.Position.z * bounds.size.z) + bounds.min;
-                pos.y += terrain.SampleHeight(pos);
-                Handles.DrawDottedLine(pos, pos + Vector3.up * 10 * hurtTreeInstance.Scale.x, 1);
             }
         }
 
@@ -65,13 +63,30 @@ namespace Dingo.WorldStamp.Authoring
             Trees.Clear();
         }
 
-        protected override void CommitInternal(WorldStampData data)
+        protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
-            data.Trees = Trees.JSONClone();
+            data.Trees.Clear();
+            for (int i = 0; i < Trees.Count; i++)
+            {
+                var dingoTreeInstance = Trees[i];
+                data.Trees.Add(dingoTreeInstance.Clone());
+            }
         }
 
-        protected override void OnExpandedGUI(WorldStampCreator parent)
+#if UNITY_EDITOR
+        protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
+            var bounds = parent.Template.Bounds;
+            var terrain = parent.Template.Terrain;
+            Handles.color = Color.green;
+            foreach (var hurtTreeInstance in Trees)
+            {
+                var pos = new Vector3(hurtTreeInstance.Position.x * bounds.size.x, 0,
+                    hurtTreeInstance.Position.z * bounds.size.z) + bounds.min;
+                pos.y += terrain.SampleHeight(pos);
+                Handles.DrawDottedLine(pos, pos + Vector3.up * 10 * hurtTreeInstance.Scale.x, 1);
+            }
         }
+#endif
     }
 }

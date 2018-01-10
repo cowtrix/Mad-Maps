@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
@@ -9,17 +10,23 @@ using UnityEngine;
 
 namespace Dingo.WorldStamp.Authoring
 {
+    [Serializable]
     public class SplatDataCreator : WorldStampCreatorLayer
     {
-        [HideInInspector]
+        [NonSerialized]
         public List<CompressedSplatData> SplatData = new List<CompressedSplatData>();
 
         public List<SplatPrototypeWrapper> IgnoredSplats = new List<SplatPrototypeWrapper>();
-        public bool _ignoredSplatsExpanded;
 
-        protected override GUIContent Label
+        public override GUIContent Label
         {
-            get { return new GUIContent("Splats"); }
+            get
+            {
+                var nullCount = SplatData.Count(data => data.Wrapper == null);
+                if (nullCount > 0)
+                    return new GUIContent(string.Format("Splats ({0}) ({1} need resolving)", SplatData.Count, nullCount));
+                return new GUIContent(string.Format("Splats ({0})", SplatData.Count));
+            }
         }
 
         protected override bool HasDataPreview
@@ -35,7 +42,7 @@ namespace Dingo.WorldStamp.Authoring
 
             int width = max.x - min.x;
             int height = max.z - min.z;
-            
+
             var prototypes = terrain.terrainData.splatPrototypes;
             var wrappers = TerrainLayerUtilities.ResolvePrototypes(prototypes);
 
@@ -68,7 +75,7 @@ namespace Dingo.WorldStamp.Authoring
                 }
                 if (sum < 0.01f)
                 {
-                    Debug.Log(string.Format("Ignored splat {0} as it appeared to be empty.", wrapper.name));
+                    Debug.Log(string.Format("WorldStamp Splat Capture: Ignored splat layer {0} as it appeared to be empty.", wrapper.name));
                     continue;
                 }
 
@@ -76,9 +83,10 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
+#if UNITY_EDITOR
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
-            var bounds = parent.Bounds;
+            var bounds = parent.Template.Bounds;
             int counter = 0;
             int res = 32;
             foreach (var kvp in SplatData)
@@ -104,6 +112,38 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
+        protected override void OnExpandedGUI(WorldStampCreator parent)
+        {
+            if (NeedsRecapture)
+            {
+                EditorGUILayout.HelpBox("You need to Capture this layer to edit it.", MessageType.Info);
+                return;
+            }
+            foreach (var compressedDetailData in SplatData)
+            {
+                EditorGUILayout.BeginHorizontal();
+                compressedDetailData.Wrapper = (SplatPrototypeWrapper)EditorGUILayout.ObjectField(compressedDetailData.Wrapper,
+                    typeof(SplatPrototypeWrapper), false);
+                GUI.color = compressedDetailData.Wrapper != null && IgnoredSplats.Contains(compressedDetailData.Wrapper) ? Color.red : Color.white;
+                GUI.enabled = compressedDetailData.Wrapper != null;
+                if (GUILayout.Button("Ignore", EditorStyles.miniButton, GUILayout.Width(60)))
+                {
+                    if (IgnoredSplats.Contains(compressedDetailData.Wrapper))
+                    {
+                        IgnoredSplats.Remove(compressedDetailData.Wrapper);
+                    }
+                    else
+                    {
+                        IgnoredSplats.Add(compressedDetailData.Wrapper);
+                    }
+                }
+                GUI.enabled = true;
+                GUI.color = Color.white;
+                EditorGUILayout.EndHorizontal();
+            }
+        }
+#endif
+
         public override void PreviewInDataInspector()
         {
             DataInspector.SetData(SplatData.Select(x => x.Data).ToList(), SplatData.Select(x => x.Wrapper).ToList());
@@ -114,14 +154,14 @@ namespace Dingo.WorldStamp.Authoring
             SplatData.Clear();
         }
 
-        protected override void CommitInternal(WorldStampData data)
+        protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
-            data.SplatData = SplatData.JSONClone();
-        }
-
-        protected override void OnExpandedGUI(WorldStampCreator parent)
-        {
-            AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Splats ({0})", IgnoredSplats.Count), IgnoredSplats, IgnoredSplats.GetType(), this);
+            data.SplatData.Clear();
+            for (int i = 0; i < SplatData.Count; i++)
+            {
+                var compressedSplatData = SplatData[i];
+                data.SplatData.Add(compressedSplatData.JSONClone());
+            }
         }
     }
 }

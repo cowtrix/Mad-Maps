@@ -8,10 +8,10 @@ using UnityEngine;
 
 namespace Dingo.Terrains.Lookups
 {
-    [Serializable]
+    /*[Serializable]
     public class SplatDataLookup : CompositionDictionary<SplatPrototypeWrapper, Serializable2DFloatArray>
     {
-    }
+    }*/
 
     [Serializable]
     public class CompressedSplatData
@@ -41,10 +41,10 @@ namespace Dingo.Terrains.Lookups
         }
     }
 
-    [Serializable]
+    /*[Serializable]
     public class DetailDataLookup : CompositionDictionary<DetailPrototypeWrapper, Serializable2DIntArray>
     {
-    }
+    }*/
 
     [Serializable]
     public class CompressedDetailDataLookup : CompositionDictionary<DetailPrototypeWrapper, Serializable2DByteArray>

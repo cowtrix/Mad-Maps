@@ -116,11 +116,35 @@ namespace Dingo.Roads
             w.titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
         }
 
+        [MenuItem("GameObject/3D Object/Dingo/Road Network")]
+        public static void CreateNetwork()
+        {
+            var newNetworkGO = new GameObject("Road Network");
+            newNetworkGO.AddComponent<RoadNetwork>();
+            Selection.activeGameObject = newNetworkGO;
+        }
+
         public void OnGUI()
         {
+            EditorGUILayout.BeginHorizontal();
+            FocusedRoadNetwork = (RoadNetwork) EditorGUILayout.ObjectField(FocusedRoadNetwork, typeof (RoadNetwork), false);
+            GUI.color = FocusedRoadNetwork != null && FocusedRoadNetwork.SceneViewEnabled ? Color.black : Color.grey;
+            if (FocusedRoadNetwork != null && GUILayout.Button(new GUIContent(GUIResources.EyeOpenIcon, FocusedRoadNetwork.SceneViewEnabled ? "Disable Gizmos" : "Enable Gizmos"), 
+                EditorStyles.label, GUILayout.Width(18), GUILayout.Height(18)))
+            {
+                FocusedRoadNetwork.SceneViewEnabled = !FocusedRoadNetwork.SceneViewEnabled;
+            }
+            GUI.color = Color.white;
+            EditorGUILayout.EndHorizontal();
             if (FocusedRoadNetwork == null)
             {
+                EditorGUILayout.HelpBox("Select a Road Network object.", MessageType.Info);
                 return;
+            }
+
+            if (!FocusedRoadNetwork.SceneViewEnabled)
+            {
+                EditorGUILayout.HelpBox("Gizmos are Disabled", MessageType.Info);
             }
 
             NodePreviewSize = FocusedRoadNetwork.NodePreviewSize;
@@ -206,6 +230,7 @@ namespace Dingo.Roads
             _currentConfiguration = (ConnectionConfiguration) EditorGUILayout.ObjectField("Configuration", _currentConfiguration,
                 typeof (ConnectionConfiguration), false);
 
+            GUI.enabled = _currentConfiguration != null;
             if (GUILayout.Button("Apply Configuration to Selected"))
             {
                 var selected = GetCurrentlySelectedNodes();
@@ -218,6 +243,7 @@ namespace Dingo.Roads
                     }
                 }
             }
+            GUI.enabled = true;
 
             EditorExtensions.Seperator();
 
@@ -300,7 +326,7 @@ namespace Dingo.Roads
             FocusedRoadNetwork.SplineResolution = EditorGUILayout.FloatField("Spline Resolution", FocusedRoadNetwork.SplineResolution);
             FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
-            FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.Slider("Node Preview Size", FocusedRoadNetwork.NodePreviewSize, 1, 10);
+            FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
             FocusedRoadNetwork.RecalculateTerrain = EditorGUILayout.Toggle("Recalculate Terrain", FocusedRoadNetwork.RecalculateTerrain);
             DrawConnections.Value = EditorGUILayout.Toggle("Draw Connections", DrawConnections);
 
@@ -336,6 +362,7 @@ namespace Dingo.Roads
                 EditorGUI.indentLevel--;
             }
 
+           
             EditorExtensions.Seperator();
             EditorGUILayout.LabelField("Tools", EditorStyles.boldLabel);
             if (GUILayout.Button("Snap To Surface"))
@@ -365,6 +392,11 @@ namespace Dingo.Roads
                 var rn = newObj.GetComponent<RoadNetwork>();
                 rn.Strip();
             }
+        }
+
+        private void MoveProcMeshesToMesh()
+        {
+            
         }
 
         private void DoCommands()
