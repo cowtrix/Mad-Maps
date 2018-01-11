@@ -354,6 +354,52 @@ namespace Dingo.Terrains
             return h;
         }
 
+        public void SetHeights(int x, int z, float[,] heights, int heightRes, Serializable2DFloatArray stencil = null)
+        {
+            if (heights == null)
+            {
+                return;
+            }
+            if (Heights == null || Heights.Width != heightRes || Heights.Height != heightRes)
+            {
+                Heights = new Serializable2DFloatArray(heightRes, heightRes);
+            }
+            var width = heights.GetLength(0);
+            var height = heights.GetLength(1);
+            for (var u = x; u < x + width; ++u)
+            {
+                for (var v = z; v < z + height; ++v)
+                {
+                    var hx = u - x;
+                    var hz = v - z;
+                    try
+                    {
+                        var heightsSample = heights[hx, hz];
+                        if (stencil == null)
+                        {
+                            Heights[u, v] = heightsSample;
+                        }
+                        else
+                        {
+                            float val;
+                            int key;
+                            MiscUtilities.DecompressStencil(stencil[u, v], out key, out val);
+                            Heights[u, v] = Mathf.Lerp(Heights[u, v], heightsSample, val);
+                        }
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Debug.LogError(string.Format("x {0} y {1}", hx, hz));
+                        throw e;
+                    }
+                }
+            }
+
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
         public void SetHeights(int x, int z, Serializable2DFloatArray heights, int heightRes, Serializable2DFloatArray stencil = null)
         {
             if (heights == null)
@@ -452,7 +498,7 @@ namespace Dingo.Terrains
         public void SetSplatmap(SplatPrototypeWrapper prototype, int x, int z, 
             Serializable2DByteArray splats, int splatRes, Serializable2DFloatArray stencil = null)
         {
-            if (splats == null)
+            if (splats == null || prototype == null)
             {
                 return;
             }
@@ -512,6 +558,70 @@ namespace Dingo.Terrains
 #endif
         }
 
+        public void SetSplatmap(SplatPrototypeWrapper prototype, int x, int z,
+            float[,] splats, int splatRes, Serializable2DFloatArray stencil = null)
+        {
+            if (splats == null || prototype == null)
+            {
+                return;
+            }
+            if (SplatData == null)
+            {
+                SplatData = new CompressedSplatDataLookup();
+            }
+
+            Serializable2DByteArray existingSplats;
+            if (!SplatData.TryGetValue(prototype, out existingSplats) || existingSplats.Width != splatRes ||
+                existingSplats.Height != splatRes)
+            {
+                existingSplats = new Serializable2DByteArray(splatRes, splatRes);
+                SplatData[prototype] = existingSplats;
+            }
+
+            var width = splats.GetLength(0);
+            var height = splats.GetLength(1);
+            for (var u = x; u < x + width; ++u)
+            {
+                if (u < 0 || u >= splatRes)
+                {
+                    continue;
+                }
+                for (var v = z; v < z + height; ++v)
+                {
+                    if (v < 0 || v >= splatRes)
+                    {
+                        continue;
+                    }
+
+                    var hx = u - x;
+                    var hz = v - z;
+
+                    try
+                    {
+                        var splatSample = splats[hx, hz] * 255f;
+
+                        if (stencil != null)
+                        {
+                            var stencilVal = stencil[hx, hz];
+                            splatSample = (byte)Mathf.Clamp(Mathf.Lerp(existingSplats[u, v], splatSample, stencilVal), 0, 255);
+                        }
+
+                        existingSplats[u, v] = (byte)Mathf.Clamp(splatSample, 0, 255);
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            }
+
+
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        }
+
+
         public override Serializable2DByteArray GetSplatmap(SplatPrototypeWrapper prototype, int x, int z, int width, int height, int splatResolution)
         {
             if (SplatData == null)
@@ -550,6 +660,55 @@ namespace Dingo.Terrains
                 }
             }
             return splats;
+        }
+
+        public void SetDetailMap(DetailPrototypeWrapper prototype, int x, int z, int[,] details, int dRes, Serializable2DFloatArray stencil = null)
+        {
+            if (DetailData == null)
+            {
+                DetailData = new CompressedDetailDataLookup();
+            }
+
+            Serializable2DByteArray existingDetails;
+            if (!DetailData.TryGetValue(prototype, out existingDetails) || existingDetails.Width != dRes ||
+                existingDetails.Height != dRes)
+            {
+                existingDetails = new Serializable2DByteArray(dRes, dRes);
+                DetailData[prototype] = existingDetails;
+            }
+
+            var width = details.GetLength(0);
+            var height = details.GetLength(1);
+            for (var u = x; u < x + width; ++u)
+            {
+                for (var v = z; v < z + height; ++v)
+                {
+                    var hx = u - x;
+                    var hz = v - z;
+
+                    try
+                    {
+                        var splatSample = details[hx, hz];
+                        if (stencil != null)
+                        {
+                            existingDetails[u, v] = (byte)Mathf.Clamp(Mathf.Lerp(existingDetails[u, v], splatSample, stencil[hx, hz]), 0, 255);
+                        }
+                        else
+                        {
+                            existingDetails[u, v] = (byte)splatSample;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+                }
+            }
+
+
+#if UNITY_EDITOR
+            UnityEditor.EditorUtility.SetDirty(this);
+#endif
         }
         
         public void SetDetailMap(DetailPrototypeWrapper prototype, int x, int z, Serializable2DByteArray details, int dRes, Serializable2DFloatArray stencil = null)
