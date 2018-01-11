@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using Dingo.Common;
 using UnityEngine;
-using UnityEngineInternal;
 
 namespace Dingo.Common
 {

@@ -51,7 +51,7 @@ namespace Dingo.Common.Painter
         private static void OnSceneGUIDelegate(SceneView sceneview)
         {
             var t = EditorApplication.timeSinceStartup;
-
+            
             if (_dirty)
             {
                 Invalidate();
@@ -107,13 +107,13 @@ namespace Dingo.Common.Painter
                     Debug.LogError("Failed to find shader " + ShaderName);
                     return;
                 }
-                _material = new Material(shader) {hideFlags = HideFlags.DontSave};
+                _material = new Material(shader) { hideFlags = HideFlags.DontSave };
             }
             _material.SetFloat("_Size", CellSize);
 
             //_rendererList.Clear();
             //_rendererList.AddRange(Object.FindObjectsOfType<EditorCellRenderer>());
-            int requiredRendererCount = Mathf.CeilToInt(_cells.Count/(float) MAX_VERTS);
+            int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)MAX_VERTS);
             for (int i = 0; i < requiredRendererCount; i++)
             {
                 if (_rendererList.Count <= i)
@@ -177,6 +177,7 @@ namespace Dingo.Common.Painter
             if (invalidate)
             {
                 Invalidate();
+            }
             }
         }
     }

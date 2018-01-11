@@ -1,4 +1,3 @@
-using UnityEngine.Serialization;
 using System;
 using System.Collections.Generic;
 using Dingo.Common;
@@ -7,7 +6,6 @@ using Dingo.Terrains.Lookups;
 using Dingo.WorldStamp;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace Dingo.Terrains

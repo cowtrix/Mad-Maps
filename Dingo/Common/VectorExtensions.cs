@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using Random = System.Random;
 
@@ -134,11 +133,6 @@ namespace Dingo.Common
         public static Vector3 x0z(this Vector2 w, float y = 0)
         {
             return new Vector3(w.x, y, w.y);
-        }
-
-        public static Vector3 x0z(this Vector3 w, float y = 0)
-        {
-            return new Vector3(w.x, y, w.z);
         }
 
         public static Vector3 xy0(this Vector2 w, float z = 0)

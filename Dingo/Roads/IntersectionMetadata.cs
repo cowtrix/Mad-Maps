@@ -1,9 +1,7 @@
-using System.Linq;
 using UnityEngine;
 
 namespace Dingo.Roads
 {
-    [StripComponentOnBuild]
     public class IntersectionMetadata : NodeComponent
     {
         [Header("> Two Node Case")]

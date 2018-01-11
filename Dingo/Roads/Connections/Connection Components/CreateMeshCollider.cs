@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Dingo.Common;
-using UnityEngine;
-
-namespace Dingo.Roads.Connections
+﻿namespace Dingo.Roads.Connections
 {
     /*[Serializable]
     public class CreateMeshCollider : ConnectionComponent, IOnBakeCallback

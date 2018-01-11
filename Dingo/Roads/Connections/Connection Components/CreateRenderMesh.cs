@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dingo.Common;
-using ParadoxNotion.Design;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Dingo.Common.GenericEditor;
 
 namespace Dingo.Roads.Connections
 {
@@ -25,7 +25,7 @@ namespace Dingo.Roads.Connections
                 public bool CopyToCollider;
                 public float BreakDistance = 50;
 
-                [TOD_Range(0, 1)]
+                [Range(0, 1)]
                 public float SnapStrength = 0.05f;
                 public MeshTools.Axis Axis;
                 public Vector3 Scale = new Vector3(1, 1, 1);
@@ -47,9 +47,7 @@ namespace Dingo.Roads.Connections
                     return SourceMesh != null ? SourceMesh.name.Truncate(32, "...") : "null";
                 }
             }
-
-            [AllowDerived]
-            [ReorderableList]
+            
             public List<LodLevel> LodLevels = new List<LodLevel>(); 
 
             public override Type GetMonoType()
@@ -262,7 +260,7 @@ namespace Dingo.Roads.Connections
                     }
                     if (config.Static)
                     {
-                        currentResult.Renderer.gameObject.SetStatic();
+                        //currentResult.Renderer.gameObject.SetStatic();
                     }
 
                     currentResult.Renderer.shadowCastingMode = config.ShadowCastingMode;

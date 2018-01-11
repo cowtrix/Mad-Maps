@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Dingo.Common;
+using Dingo.Common.GenericEditor;
+using Dingo.Common.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using Dingo.Common;
-using Dingo.Common.Collections;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditorInternal;
@@ -175,8 +175,9 @@ namespace Dingo.Terrains
                 EditorGUILayout.BeginVertical("Box");
                 EditorGUI.indentLevel++;
 
-                AutoEditorWrapper.ListEditorNicer("Components", procLayer.Components,
-                    typeof (List<ProceduralLayerComponent>), procLayer.Components, true);
+                /*AutoEditorWrapper.ListEditorNicer("Components", procLayer.Components,
+                    , procLayer.Components, true);*/
+                GenericEditor.DrawGUI(procLayer.Components, "Components", typeof(List<ProceduralLayerComponent>), null, procLayer);
 
                 EditorGUI.indentLevel--;
                 EditorGUILayout.EndVertical();

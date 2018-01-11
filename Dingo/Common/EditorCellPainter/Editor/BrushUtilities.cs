@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Dingo.Common.Painter
 {
-    [SDKScript(Full = true)]
     public static class BrushUtilities
     {
         public static float BlendValues(float val, float existingVal, EBrushBlendMode brushBlendMode, float dt, float flow)

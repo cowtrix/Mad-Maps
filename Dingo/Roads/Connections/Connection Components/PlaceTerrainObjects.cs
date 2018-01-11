@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Dingo.Common;
 using Dingo.Terrains;
 using Dingo.WorldStamp;
-using ParadoxNotion.Design;
+using Dingo.Common.GenericEditor;
 using UnityEngine;
 using Random = System.Random;
 
