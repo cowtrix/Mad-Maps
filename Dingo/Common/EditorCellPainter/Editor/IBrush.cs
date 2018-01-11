@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 
-namespace EditorCellPainter
+namespace Dingo.Common.Painter
 {
     [SDKScript(Full = true)]
     public interface IBrush

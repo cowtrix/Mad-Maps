@@ -375,7 +375,7 @@ namespace Dingo.WorldStamp
             }
             foreach (var terrainWrapper in wrappers)
             {
-                WorldStamp.ApplyAllStamps(terrainWrapper, layerFilter);
+                WorldStampApplyManager.ApplyAllStamps(terrainWrapper, layerFilter);
                 terrainWrapper.ApplyAllLayers();
             }
         }

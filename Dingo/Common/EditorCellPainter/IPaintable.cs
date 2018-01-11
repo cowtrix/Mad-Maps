@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 
-#if !HURTWORLDSDK
 namespace Dingo.Common.Painter
 {
     public interface IPaintable
@@ -9,6 +8,6 @@ namespace Dingo.Common.Painter
         float GetValue(int cell);
         IEnumerator<KeyValuePair<int, float>> AllValues();
         void RemoveCell(int cell);
+        bool Dirty { get; set; }
     }
 }
-#endif

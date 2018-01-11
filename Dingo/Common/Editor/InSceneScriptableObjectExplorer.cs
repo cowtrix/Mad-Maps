@@ -13,7 +13,7 @@ namespace Dingo.Common
             typeof(Editor),
         }; 
         
-        [MenuItem("Tools/Level/In-Scene Scriptable Objects")]
+        [MenuItem("Tools/Dingo/Utilities/In-Scene Scriptable Objects")]
         public static void OpenWindow()
         {
             GetWindow<InSceneScriptableObjectExplorer>();
@@ -23,7 +23,8 @@ namespace Dingo.Common
 
         void OnGUI()
         {
-            if (GUILayout.Button("Collect"))
+            EditorGUILayout.HelpBox("This tool finds and shows ScriptableObjects that are embedded in the scene. These objects can leak and end up greatly increasing your level size and load times.", MessageType.Info);
+            if (GUILayout.Button("Refresh"))
             {
                 _objects.Clear();
                 _objects.AddRange(Resources.FindObjectsOfTypeAll<ScriptableObject>());
@@ -51,9 +52,22 @@ namespace Dingo.Common
                 }
             }
 
-            foreach (var scriptableObject in _objects)
+            for (int i = _objects.Count - 1; i >= 0; i--)
             {
+                var scriptableObject = _objects[i];
+                if (!scriptableObject)
+                {
+                    _objects.RemoveAt(i);
+                    continue;
+                }
+                EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.ObjectField(scriptableObject, typeof (ScriptableObject), true);
+                if (GUILayout.Button("Destroy", EditorStyles.miniButton, GUILayout.Width(60)) &&
+                    EditorUtility.DisplayDialog(string.Format("Destroy {0} [{1}]?", scriptableObject, scriptableObject.GetType()), "This will permanently destroy this object.", "Yes", "No"))
+                {
+                    Undo.DestroyObjectImmediate(scriptableObject);
+                }
+                EditorGUILayout.EndHorizontal();
             }
         }
     }

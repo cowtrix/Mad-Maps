@@ -275,7 +275,7 @@ namespace Dingo.Terrains.MapMagic
             terrainLayer.Objects.Clear();
             
             float pixelSize = 1f * global::MapMagic.MapMagic.instance.terrainSize / global::MapMagic.MapMagic.instance.resolution;
-            Rect terrainRect = new Rect(rect.offset.x * pixelSize, rect.offset.z * pixelSize, rect.size.x * pixelSize, rect.size.z * pixelSize);
+            //Rect terrainRect = new Rect(rect.offset.x * pixelSize, rect.offset.z * pixelSize, rect.size.x * pixelSize, rect.size.z * pixelSize);
             var terrainSize = terrain.terrainData.size;
 
             //adding

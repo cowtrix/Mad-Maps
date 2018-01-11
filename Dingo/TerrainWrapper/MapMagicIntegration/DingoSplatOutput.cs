@@ -243,6 +243,7 @@ namespace Dingo.Terrains.MapMagic
 
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
+            terrainLayer.SplatData.Clear();
 
             var splatWidth = splats3D.GetLength(0);
             var splatHeight = splats3D.GetLength(1);

@@ -1,8 +1,9 @@
+using Dingo.WorldStamp;
 using System;
 using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
-
+using Dingo.Common.Painter;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -110,7 +111,7 @@ namespace Dingo.WorldStamp.Authoring
             var bounds = parent.Template.Bounds;
             if (_maskPainter == null)
             {
-                _maskPainter = new Painter(Mask, GridManager);
+                _maskPainter = new Common.Painter.Painter(Mask, GridManager);
                 _maskPainter.Ramp = new Gradient()
                 {
                     colorKeys = new[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.black, 0.001f), new GradientColorKey(Color.black, 1), },

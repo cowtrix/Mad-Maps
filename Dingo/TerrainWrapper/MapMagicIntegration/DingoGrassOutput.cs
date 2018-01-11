@@ -275,17 +275,18 @@ namespace Dingo.Terrains.MapMagic
         {
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
+            terrainLayer.DetailData.Clear();
 
             var grassTuple = (TupleSet<int[][,], DetailPrototypeWrapper[]>)dataBox;
             int[][,] details = grassTuple.item1;
             DetailPrototypeWrapper[] prototypes = grassTuple.item2;
 
             //resolution
-            /*if (details.Length != 0)
+            if (details.Length != 0)
             {
                 int resolution = details[0].GetLength(1);
                 terrain.terrainData.SetDetailResolution(resolution, patchResolution);
-            }*/
+            }
 
             //prototypes
             //terrain.terrainData.detailPrototypes = prototypes;

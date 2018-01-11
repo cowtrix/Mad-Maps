@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace EditorCellPainter
+namespace Dingo.Common.Painter
 {
     [SDKScript(Full = true)]
     public static class BrushUtilities

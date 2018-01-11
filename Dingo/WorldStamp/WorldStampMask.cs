@@ -5,11 +5,18 @@ using UnityEngine;
 namespace Dingo.WorldStamp
 {
     [Serializable]
-    public class WorldStampMask : CompositionDictionary<int, float>, IPaintable
+    public class WorldStampMask : CompositionDictionary<int, float>, Common.Painter.IPaintable
     {
+        public bool Dirty { get; set; }
+
         public void SetValue(int cell, float val)
         {
+            if (ContainsKey(cell) && Math.Abs(this[cell] - val) < .0001f)
+            {
+                return;
+            }
             this[cell] = val;
+            Dirty = true;
         }
 
         public float GetValue(int cell)
@@ -29,7 +36,10 @@ namespace Dingo.WorldStamp
 
         public void RemoveCell(int cell)
         {
-            Remove(cell);
+            if (Remove(cell))
+            {
+                Dirty = true;
+            }
         }
 
         public float GetBilinear(GridManagerInt gridManager, Vector3 position)

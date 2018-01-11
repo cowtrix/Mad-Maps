@@ -49,6 +49,7 @@ namespace Dingo.WorldStamp.Authoring
                 EditorGUILayout.HelpBox("Please Select a Target Terrain", MessageType.Info);
                 return;
             }
+            EditorGUILayout.LabelField("Size:", Template.Bounds.size.xz().ToString());
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
@@ -84,7 +85,9 @@ namespace Dingo.WorldStamp.Authoring
 
                 var newTemplate = new GameObject("Stamp Template");
                 var temp = newTemplate.AddComponent<WorldStampCaptureTemplateContainer>();
+                temp.transform.position = Template.Bounds.center.x0z(Template.Bounds.min.y);
                 temp.Template = Template.Clone();
+                temp.Template.Dirty = true;
             }
             if (GUILayout.Button("Create New Stamp"))
             {

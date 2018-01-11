@@ -1,6 +1,5 @@
 using UnityEngine;
 
-#if !HURTWORLDSDK
 namespace Dingo.Common.Painter
 {
     public class GridManagerInt : IGridManager
@@ -76,11 +75,10 @@ namespace Dingo.Common.Painter
             return new Vector2(Random.Range(cellMin.x, cellMin.x + GRID_SIZE),
                 Random.Range(cellMin.y, cellMin.y + GRID_SIZE));
         }
-
+        
         public float GetGridSize()
         {
             return GRID_SIZE;
         }
     }
 }
-#endif

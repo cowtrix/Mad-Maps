@@ -1,6 +1,5 @@
 using UnityEngine;
 
-#if !HURTWORLDSDK
 namespace Dingo.Common.Painter
 {
     public interface IGridManager
@@ -17,4 +16,3 @@ namespace Dingo.Common.Painter
         float GetGridSize();
     }
 }
-#endif

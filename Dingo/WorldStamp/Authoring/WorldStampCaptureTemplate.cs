@@ -10,6 +10,8 @@ namespace Dingo.WorldStamp.Authoring
     [Serializable]
     public class WorldStampCaptureTemplate : ISerializationCallbackReceiver
     {
+        public bool Dirty = true;
+
         public Bounds Bounds;
         public Terrain Terrain;
         public List<WorldStampCreatorLayer> Creators = new List<WorldStampCreatorLayer>()
@@ -27,6 +29,11 @@ namespace Dingo.WorldStamp.Authoring
 
         public void OnBeforeSerialize()
         {
+            if (!Dirty)
+            {
+                return;
+            }
+            Dirty = false;
             _creatorJSON = new List<Common.Serialization.DerivedComponentJsonDataRow>();
             for (int i = 0; i < Creators.Count; i++)
             {
@@ -66,6 +73,7 @@ namespace Dingo.WorldStamp.Authoring
             var mask = Creators.First(layer => layer is MaskDataCreator) as MaskDataCreator;
             mask.Mask.OnAfterDeserialize();
 
+            Dirty = true;
             OnBeforeSerialize();
             var newTemplate = new WorldStampCaptureTemplate();
             newTemplate._creatorJSON = new List<Common.Serialization.DerivedComponentJsonDataRow>();
@@ -79,7 +87,8 @@ namespace Dingo.WorldStamp.Authoring
 
             mask = newTemplate.Creators.First(layer => layer is MaskDataCreator) as MaskDataCreator;
             mask.Mask.OnAfterDeserialize();
-            
+
+            newTemplate.Dirty = true;
             return newTemplate;
         }
     }

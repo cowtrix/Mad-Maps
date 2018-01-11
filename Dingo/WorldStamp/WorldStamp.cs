@@ -4,6 +4,7 @@ using System.Linq;
 using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Terrains;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
 
@@ -36,12 +37,7 @@ namespace Dingo.WorldStamp
             RelativeToStamp,
         }
 
-        private class LayerStampMapping
-        {
-            public string LayerName;
-            public int LayerIndex = -1;
-            public List<WorldStamp> Stamps = new List<WorldStamp>();
-        }
+        
 
         public WorldStampData Data
         {
@@ -160,12 +156,6 @@ namespace Dingo.WorldStamp
                 _dataContainer.LinkToPrefab();
             }
 
-            /*if (!HaveHeightsBeenFlipped)
-            {
-                HaveHeightsBeenFlipped = true;
-                Data.Heights = Data.Heights.Flip();
-            }*/
-
             transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
             if (SnapPosition)
             {
@@ -212,143 +202,6 @@ namespace Dingo.WorldStamp
             Size = Data.Size;
         }
         
-        public static void ApplyAllStamps(TerrainWrapper wrapper, string layerFilter = null)
-        {
-            Profiler.BeginSample("ApplyAllStamps");
-            Profiler.BeginSample("CollectAndOrganise");
-            // Collect stamps
-            var allStamps = new List<WorldStamp>(FindObjectsOfType<WorldStamp>());
-            var tBounds = new Bounds(wrapper.Terrain.GetPosition() + wrapper.Terrain.terrainData.size/2,
-                wrapper.Terrain.terrainData.size);
-            for (var i = allStamps.Count - 1; i >= 0; i--)
-            {
-                var worldStamp = allStamps[i];
-
-                if (!string.IsNullOrEmpty(layerFilter) && worldStamp.LayerName != layerFilter)
-                {
-                    allStamps.RemoveAt(i);
-                    continue;
-                }
-
-                var stampBounds = new ObjectBounds(worldStamp.transform.position, worldStamp.Size/2,
-                    worldStamp.transform.rotation);
-                var axisStampBounds = stampBounds.ToAxisBounds();
-                if (!tBounds.Intersects(axisStampBounds))
-                {
-                    allStamps.RemoveAt(i);
-                }
-            }
-
-            List<LayerStampMapping> mappings = new List<LayerStampMapping>();
-
-            // Setup layers
-            foreach (var stamp in allStamps)
-            {
-                LayerStampMapping mapping = null;
-                foreach (var layerStampMapping in mappings)
-                {
-                    if (layerStampMapping.LayerName == stamp.LayerName)
-                    {
-                        mapping = layerStampMapping;
-                        break;
-                    }
-                }
-                if (mapping == null)
-                {
-                    mapping = new LayerStampMapping()
-                    {
-                        LayerIndex = wrapper.GetLayerIndex(stamp.LayerName),
-                        LayerName = stamp.LayerName
-                    };
-                    mappings.Add(mapping);
-                }
-                mapping.Stamps.Add(stamp);
-            }
-
-            mappings = mappings.OrderByDescending(mapping => mapping.LayerIndex).ToList();
-            for (int i = 0; i < mappings.Count; i++)
-            {
-                mappings[i].Stamps = mappings[i].Stamps.OrderBy(stamp => stamp.Priority)
-                    .ThenBy(stamp => stamp.transform.GetSiblingIndex())
-                    .ToList();
-            }
-
-            for (int i =  mappings.Count - 1; i >= 0; i--)
-            {
-                var layerStampMapping = mappings[i];
-                var layer = wrapper.GetLayer<TerrainLayer>(layerStampMapping.LayerName, false, true);
-                if (!layer.UserOwned)
-                {
-                    mappings.RemoveAt(i);
-                    continue;
-                }
-                if (wrapper.GetLayerIndex(layer) == wrapper.Layers.Count-1)
-                {
-                    layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Set;
-                }
-                else
-                {
-                    layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                }
-                layer.Clear(wrapper);
-            }
-            Profiler.EndSample();
-
-            for (int i = 0; i < mappings.Count; i++)
-            {
-                var layerStampMapping = mappings[i];
-                var layer = wrapper.GetLayer<TerrainLayer>(layerStampMapping.LayerName, false, true);
-                wrapper.CopyCompoundToLayer(layer);
-                for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
-                {
-                    MiscUtilities.ProgressBar(string.Format("Applying Heights for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    layerStampMapping.Stamps[j].StampHeights(wrapper, layer);
-                }
-                //layer.Stencil.Clear();  // To clear out prepass
-                for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
-                {
-                    MiscUtilities.ProgressBar(string.Format("Applying Stencil for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    layerStampMapping.Stamps[j].StampStencil(wrapper, layer, j+1);
-                }
-
-                MiscUtilities.ClampStencil(layer.Stencil);
-
-                for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
-                {
-                    var worldStamp = layerStampMapping.Stamps[j];
-                    var stencilKey = j + 1;
-
-                    MiscUtilities.ProgressBar(string.Format("Applying Splats for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    worldStamp.StampSplats(wrapper, layer, stencilKey);
-
-                    MiscUtilities.ProgressBar(string.Format("Applying Objects for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    worldStamp.StampObjects(wrapper, layer, stencilKey);
-
-                    MiscUtilities.ProgressBar(string.Format("Applying Trees for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    worldStamp.StampTrees(wrapper, layer, stencilKey);
-                    
-                    MiscUtilities.ProgressBar(string.Format("Applying Details for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), string.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    worldStamp.StampDetails(wrapper, layer, stencilKey);
-                }
-
-                //MiscUtilities.AbsStencil(layer.Stencil);
-                MiscUtilities.ColoriseStencil(layer.Stencil);
-                wrapper.ClearCompoundCache(layer);
-#if UNITY_EDITOR
-                UnityEditor.EditorUtility.SetDirty(layer);
-#endif
-            }
-
-            MiscUtilities.ClearProgressBar();
-
-#if UNITY_EDITOR
-            if (!UnityEditor.EditorPrefs.GetBool("worldStamp_DirtyOnStamp"))
-            {
-                return;
-            }
-#endif
-            Profiler.EndSample();
-        }
         
         private bool ShouldWriteHeights()
         {
@@ -426,7 +279,7 @@ namespace Dingo.WorldStamp
             return Mathf.Lerp(existingHeight, newHeight, maskValue);
         }
 
-        private void StampHeights(TerrainWrapper terrainWrapper, TerrainLayer layer)
+        public void StampHeights(TerrainWrapper terrainWrapper, TerrainLayer layer)
         {
             if (!ShouldWriteHeights())
             {
@@ -498,7 +351,7 @@ namespace Dingo.WorldStamp
             Profiler.EndSample();
         }
 
-        private void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
             if (!WriteStencil)
             {
@@ -617,7 +470,7 @@ namespace Dingo.WorldStamp
             }
         }
 
-        private void StampSplats(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public void StampSplats(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
             if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplats.Count == Data.SplatData.Count)
             {
@@ -751,7 +604,7 @@ namespace Dingo.WorldStamp
             Profiler.EndSample();
         }
 
-        private void StampDetails(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public void StampDetails(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
             if (!WriteDetails)
             {
@@ -861,7 +714,7 @@ namespace Dingo.WorldStamp
             Profiler.EndSample();
         }
 
-        private void StampTrees(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public void StampTrees(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
             Profiler.BeginSample("StampTrees");
             // Stamp trees
@@ -945,7 +798,7 @@ namespace Dingo.WorldStamp
             Profiler.EndSample();
         }
 
-        private void StampObjects(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public void StampObjects(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
             Profiler.BeginSample("StampObjects");
             // Stamp objects

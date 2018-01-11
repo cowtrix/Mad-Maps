@@ -4,7 +4,7 @@ using ParadoxNotion.Serialization;
 using UnityEditor;
 using UnityEngine;
 
-namespace EditorCellPainter
+namespace Dingo.Common.Painter
 {
     public delegate Color CellColorDelegate(int cell, Color color);
     public delegate void CellDelegate(int cell);
@@ -267,6 +267,8 @@ namespace EditorCellPainter
             Handles.color = Color.magenta.WithAlpha(.2f);
             Handles.DrawDottedLine(_currentInputState.PlanePosition, _currentInputState.GridPosition, 1);
 
+            _repaint |= Canvas.Dirty;
+
             EditorCellHelper.SetAlive(); // Tell the cell renderer that it should keep rendering
             EditorCellHelper.CellSize = GridManager.GetGridSize();
             EditorCellHelper.TRS = TRS;
@@ -275,6 +277,7 @@ namespace EditorCellPainter
                 EditorCellHelper.Clear(false);
                 lock (Canvas)
                 {
+                    Canvas.Dirty = false;
                     var enumerator = Canvas.AllValues();
                     while (enumerator.MoveNext())
                     {

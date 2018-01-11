@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace EditorCellPainter
+namespace Dingo.Common.Painter
 {
     public class BlurBrush : BaseBrush, IBrush
     {

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace EditorCellPainter
+namespace Dingo.Common.Painter
 {
     [SDKScript(Full = true)]
     public abstract class BaseBrush : IBrush
