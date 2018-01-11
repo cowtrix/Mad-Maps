@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ParadoxNotion.Design;
+using System;
 using Dingo.Common;
 using UnityEngine;
 
@@ -104,7 +105,7 @@ namespace Dingo.WorldStamp.Authoring
 
         protected virtual void OnExpandedGUI(WorldStampCreator parent)
         {
-            AutoEditorWrapper.ShowAutoEditorGUI(this);
+            EditorUtils.ShowAutoEditorGUI(this);
         }
 #endif
 
@@ -136,5 +137,8 @@ namespace Dingo.WorldStamp.Authoring
         public abstract void Clear();
         protected abstract void CommitInternal(WorldStampData data, WorldStamp stamp);
         protected abstract void CaptureInternal(Terrain terrain, Bounds bounds);
+        public virtual void Dispose()
+        {
+        }
     }
 }

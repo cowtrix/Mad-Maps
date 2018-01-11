@@ -91,5 +91,13 @@ namespace Dingo.WorldStamp.Authoring
             newTemplate.Dirty = true;
             return newTemplate;
         }
+
+        public void Dispose()
+        {
+            for (int i = 0; i < Creators.Count; i++)
+            {
+                Creators[i].Dispose();
+            }
+        }
     }
 }

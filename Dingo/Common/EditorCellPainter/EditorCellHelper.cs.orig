@@ -10,7 +10,10 @@ namespace Dingo.Common.Painter
         private const string ShaderName = "Hidden/EditorCellShader";
 
         private const int MAX_VERTS = 65534;
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
         public static float CellSize
         {
             get { return __cellSize; }
@@ -30,6 +33,7 @@ namespace Dingo.Common.Painter
         private static List<EditorCellRenderer> _rendererList = new List<EditorCellRenderer>();
 
         public struct Cell
+<<<<<<< HEAD
         {
             public Vector3 Center;
             public Color Color;
@@ -37,6 +41,39 @@ namespace Dingo.Common.Painter
 
         private static List<Cell> _cells = new List<Cell>();
 
+        private static double _lastAliveTime;
+        private const double AutoClearTime = .1;
+        private static bool _dirty;
+        public static Matrix4x4 TRS = Matrix4x4.identity;
+
+        static EditorCellHelper()
+        {
+            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
+        }
+
+        private static void OnSceneGUIDelegate(SceneView sceneview)
+        {
+            var t = EditorApplication.timeSinceStartup;
+
+            if (_dirty)
+            {
+                Invalidate();
+            }
+            else if (_lastAliveTime + AutoClearTime < t)
+            {
+                //Debug.Log("Auto cleared");
+                Clear(true);
+            }
+        }
+
+=======
+        {
+            public Vector3 Center;
+            public Color Color;
+        }
+        private static List<Cell> _cells = new List<Cell>();
+    
         private static double _lastAliveTime;
         private const double AutoClearTime = .1;
         private static bool _dirty;
@@ -63,6 +100,7 @@ namespace Dingo.Common.Painter
             }
         }
 
+>>>>>>> origin/master
         public static void SetAlive()
         {
             _lastAliveTime = EditorApplication.timeSinceStartup;
@@ -107,13 +145,21 @@ namespace Dingo.Common.Painter
                     Debug.LogError("Failed to find shader " + ShaderName);
                     return;
                 }
+<<<<<<< HEAD
+                _material = new Material(shader) {hideFlags = HideFlags.DontSave};
+=======
                 _material = new Material(shader) { hideFlags = HideFlags.DontSave };
+>>>>>>> origin/master
             }
             _material.SetFloat("_Size", CellSize);
 
             //_rendererList.Clear();
             //_rendererList.AddRange(Object.FindObjectsOfType<EditorCellRenderer>());
+<<<<<<< HEAD
+            int requiredRendererCount = Mathf.CeilToInt(_cells.Count/(float) MAX_VERTS);
+=======
             int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)MAX_VERTS);
+>>>>>>> origin/master
             for (int i = 0; i < requiredRendererCount; i++)
             {
                 if (_rendererList.Count <= i)
@@ -138,6 +184,7 @@ namespace Dingo.Common.Painter
             var activeRenderer = _rendererList[0];
             int index = 0;
             for (int i = 0; i < _cells.Count; i++)
+<<<<<<< HEAD
             {
                 var cell = _cells[i];
                 activeRenderer.QueueCell(cell);
@@ -160,7 +207,41 @@ namespace Dingo.Common.Painter
         }
 
 
+=======
+            {
+                var cell = _cells[i];
+                activeRenderer.QueueCell(cell);
+                if (activeRenderer.VertCount > MAX_VERTS)
+                {
+                    index++;
+                    activeRenderer = _rendererList[index];
+                }
+            }
 
+            for (int i = 0; i < _rendererList.Count; i++)
+            {
+                _rendererList[i].Finalise();
+            }
+
+            _lastAliveTime = EditorApplication.timeSinceStartup;
+            _dirty = false;
+
+            SceneView.RepaintAll();
+        }
+>>>>>>> origin/master
+
+        private static EditorCellRenderer GetNewRenderer()
+        {
+            var newGo = new GameObject("grid_temp_6217354124");
+            var r = newGo.AddComponent<EditorCellRenderer>();
+            newGo.hideFlags = HideFlags.DontSave;
+            newGo.transform.ApplyTRSMatrix(TRS);
+
+<<<<<<< HEAD
+            return r;
+        }
+
+=======
         private static EditorCellRenderer GetNewRenderer()
         {
             var newGo = new GameObject("grid_temp_6217354124");
@@ -170,7 +251,8 @@ namespace Dingo.Common.Painter
 
             return r;
         }
-
+    
+>>>>>>> origin/master
         public static void Clear(bool invalidate)
         {
             _cells.Clear();

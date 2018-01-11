@@ -1,14 +1,18 @@
-
+using Dingo.WorldStamp;
 using System;
 using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
+using Dingo.Common.Painter;
+<<<<<<< HEAD:Dingo/WorldStamp/Authoring/MaskDataCreator.cs
+=======
+using UnityEditor;
+>>>>>>> origin/master:Dingo/WorldStamp/Editor/MaskDataCreator.cs
 using UnityEngine;
-using GridManagerInt = Dingo.Common.Painter.GridManagerInt;
-using Painter = Dingo.Common.Painter.Painter;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using EditorCellPainter;
 #endif
 
 namespace Dingo.WorldStamp.Authoring
@@ -23,18 +27,18 @@ namespace Dingo.WorldStamp.Authoring
         private static float MinMaskRes = 4;
         private static float MaskResolution = 128;
 
-        private Common.Painter.GridManagerInt GridManager
+        private GridManagerInt GridManager
         {
             get
             {
                 if (__gridManager == null || __gridManager.GRID_SIZE != GridSize)
                 {
-                    __gridManager = new Common.Painter.GridManagerInt(GridSize);
+                    __gridManager = new GridManagerInt(GridSize);
                 }
                 return __gridManager;
             }
         }
-        private Common.Painter.GridManagerInt __gridManager;
+        private GridManagerInt __gridManager;
 
 #if UNITY_EDITOR
         private Painter _maskPainter;
@@ -105,22 +109,13 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
-        public override void Dispose()
-        {
-            if (_maskPainter != null)
-            {
-                _maskPainter.Destroy();
-                _maskPainter = null;
-            }
-        }
-
 #if UNITY_EDITOR
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
             var bounds = parent.Template.Bounds;
             if (_maskPainter == null)
             {
-                _maskPainter = new Painter(Mask, GridManager);
+                _maskPainter = new Common.Painter.Painter(Mask, GridManager);
                 _maskPainter.Ramp = new Gradient()
                 {
                     colorKeys = new[] { new GradientColorKey(Color.red, 0), new GradientColorKey(Color.black, 0.001f), new GradientColorKey(Color.black, 1), },
@@ -137,7 +132,7 @@ namespace Dingo.WorldStamp.Authoring
                 _maskPainter.MinValue = 0;
                 _maskPainter.Rect = new Rect(Vector2.zero, bounds.size.xz());
                 _maskPainter.TRS = Matrix4x4.TRS(bounds.min, Quaternion.identity, Vector3.one);
-                //_maskPainter.Repaint();
+                _maskPainter.Repaint();
                 _maskPainter.PaintingEnabled = true;
                 _maskPainter.OnSceneGUI();
             }
@@ -145,20 +140,6 @@ namespace Dingo.WorldStamp.Authoring
 
         override public void DrawGUI(WorldStampCreator parent)
         {
-            if (parent.SceneGUIOwner != this && _maskPainter != null)
-            {
-                _maskPainter.Canvas = null;
-            }
-            if (_maskPainter != null && _maskPainter.Canvas != Mask)
-            {
-                _maskPainter.Canvas = null;
-                parent.SceneGUIOwner = null;
-            }
-            if (Mask.Count == 0)
-            {
-                ResetMask(parent.Template.Bounds);
-            }
-
             EditorExtensions.Seperator();
             EditorGUILayout.BeginHorizontal();
 
@@ -169,7 +150,7 @@ namespace Dingo.WorldStamp.Authoring
             if (GUILayout.Button(previewContent, EditorStyles.miniButton, GUILayout.Width(60), GUILayout.Height(16)))
             {
                 parent.SceneGUIOwner = parent.SceneGUIOwner == this ? null : this;
-                if ((parent.Template.Bounds.size - LastBounds.size).magnitude > 1)
+                if (parent.Template.Bounds != LastBounds)
                 {
                     ResetMask(parent.Template.Bounds);
                 }

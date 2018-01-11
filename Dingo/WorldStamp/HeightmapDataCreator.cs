@@ -114,13 +114,13 @@ namespace Dingo.WorldStamp.Authoring
             if (_dirty)
             {
                 _preview.Invalidate(
-                    Heights, () => bounds.size, () => bounds.center.x0z(bounds.min.y + 2 + ZeroLevel * bounds.size.y), () => Vector3.one,
+                    Heights, () => bounds.size, () => bounds.center.xz().x0z(bounds.min.y + 2 + ZeroLevel * bounds.size.y), () => Vector3.one,
                     () => Quaternion.identity, () => bounds.size, true, null, null,
                     () => parent.SceneGUIOwner == this, 128);
                 _dirty = false;
             }
 
-            HandleExtensions.DrawWireCube(bounds.center.x0z(bounds.min.y + ZeroLevel * bounds.size.y), bounds.size.x0z()/2, Quaternion.identity, Color.cyan);
+            HandleExtensions.DrawWireCube(bounds.center.xz().x0z(bounds.min.y + ZeroLevel * bounds.size.y), bounds.size.xz().x0z() / 2, Quaternion.identity, Color.cyan);
         }
 
 #endif

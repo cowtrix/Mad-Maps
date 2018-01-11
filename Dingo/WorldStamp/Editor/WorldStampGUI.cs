@@ -564,7 +564,7 @@ namespace Dingo.WorldStamp
 
             if (_painter == null)
             {
-                _painter = new Painter(worldStamp.Mask, worldStamp.Data.GridManager);
+                _painter = new Common.Painter.Painter(worldStamp.Mask, worldStamp.Data.GridManager);
                 _painter.Ramp = new Gradient()
                 {
                     colorKeys = new[] { new GradientColorKey(Color.red, 0),new GradientColorKey(Color.black, 0.001f), new GradientColorKey(Color.black, 1), },

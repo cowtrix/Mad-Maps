@@ -83,11 +83,18 @@ namespace Dingo.WorldStamp.Authoring
                 mask.Mask.OnBeforeSerialize();
                 mask.Mask.OnAfterDeserialize();
 
+                Template.Dirty = true;
+                Template.OnBeforeSerialize();
+
                 var newTemplate = new GameObject("Stamp Template");
                 var temp = newTemplate.AddComponent<WorldStampCaptureTemplateContainer>();
-                temp.transform.position = Template.Bounds.center.x0z(Template.Bounds.min.y);
+                temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
                 temp.Template = Template.Clone();
                 temp.Template.Dirty = true;
+
+                /*var templateMask = temp.Template.Creators.First(layer => layer is MaskDataCreator) as MaskDataCreator;
+                Debug.Log("Window avg: " + mask.Mask.AvgValue());
+                Debug.Log("Template avg: " + templateMask.Mask.AvgValue());*/
             }
             if (GUILayout.Button("Create New Stamp"))
             {
@@ -102,7 +109,7 @@ namespace Dingo.WorldStamp.Authoring
                 }
 
                 GameObject go = new GameObject("New WorldStamp");
-                go.transform.position = Template.Bounds.center.x0z(Template.Bounds.min.y) + Vector3.up * GetCreator<HeightmapDataCreator>().ZeroLevel * Template.Terrain.terrainData.size.y;
+                go.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y) + Vector3.up * GetCreator<HeightmapDataCreator>().ZeroLevel * Template.Terrain.terrainData.size.y;
                 var stamp = go.AddComponent<WorldStamp>();
                 var data = new WorldStampData();
                 foreach (var worldStampCreatorLayer in Template.Creators)
@@ -155,12 +162,12 @@ namespace Dingo.WorldStamp.Authoring
             var tb = Template.Terrain.GetBounds();
 
             b.min = Handles.DoPositionHandle(b.min, Quaternion.identity).Flatten();
-            b.max = Handles.DoPositionHandle(b.max.x0z(b.min.y), Quaternion.identity).Flatten();
+            b.max = Handles.DoPositionHandle(b.max.xz().x0z(b.min.y), Quaternion.identity).Flatten();
             b.min = Template.Terrain.HeightmapCoordToWorldPos(Template.Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).Flatten();
             b.max = Template.Terrain.HeightmapCoordToWorldPos(Template.Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).Flatten();
 
-            b.Encapsulate(b.center.x0z(tb.max.y));
-            b.Encapsulate(b.center.x0z(tb.min.y));
+            b.Encapsulate(b.center.xz().x0z(tb.max.y));
+            b.Encapsulate(b.center.xz().x0z(tb.min.y));
             if (b != Template.Bounds)
             {
                 Template.Bounds = b;

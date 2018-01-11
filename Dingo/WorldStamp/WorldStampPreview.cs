@@ -26,7 +26,7 @@ namespace Dingo.WorldStamp
             Func<Vector3> scaleGetter,
             Func<Quaternion> rotationGetter, 
             Func<Vector3> dataSizeGetter, bool flipHeights,
-            WorldStampMask mask, GridManagerInt gridManager, 
+            WorldStampMask mask, Common.Painter.GridManagerInt gridManager, 
             Func<bool> existenceHook, int res)
         {
             _dataSize = dataSizeGetter;

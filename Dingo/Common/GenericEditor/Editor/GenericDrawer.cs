@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Reflection;
 using UnityEditor;
-using UnityEditor.Experimental.Build.AssetBundle;
 using UnityEngine;
 
 namespace Dingo.Common.GenericEditor

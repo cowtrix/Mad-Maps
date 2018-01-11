@@ -19,6 +19,19 @@ namespace Dingo.WorldStamp
             Dirty = true;
         }
 
+        public float AvgValue()
+        {
+            float avg = 0;
+            int count = 0;
+            var enumerator = AllValues();
+            while (enumerator.MoveNext())
+            {
+                avg += enumerator.Current.Value;
+                count++;
+            }
+            return avg/count;
+        }
+
         public float GetValue(int cell)
         {
             float val;
@@ -42,7 +55,7 @@ namespace Dingo.WorldStamp
             }
         }
 
-        public float GetBilinear(GridManagerInt gridManager, Vector3 position)
+        public float GetBilinear(Common.Painter.GridManagerInt gridManager, Vector3 position)
         {
             var gridSize = gridManager.GetGridSize();
             var xDiff = Mathf.Abs(position.x) % gridSize;

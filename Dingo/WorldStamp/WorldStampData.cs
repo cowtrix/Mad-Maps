@@ -12,18 +12,18 @@ namespace Dingo.WorldStamp
     public class WorldStampData
     {
         public float GridSize = 1;
-        public GridManagerInt GridManager
+        public Common.Painter.GridManagerInt GridManager
         {
             get
             {
                 if (__gridManager == null || __gridManager.GRID_SIZE != GridSize)
                 {
-                    __gridManager = new GridManagerInt(GridSize);
+                    __gridManager = new Common.Painter.GridManagerInt(GridSize);
                 }
                 return __gridManager;
             }
         }
-        private GridManagerInt __gridManager;
+        private Common.Painter.GridManagerInt __gridManager;
 
         public WorldStampMask Mask = new WorldStampMask();
         // The physical size this snapshot was when baked

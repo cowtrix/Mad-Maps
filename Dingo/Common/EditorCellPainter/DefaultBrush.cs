@@ -1,5 +1,8 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Dingo.Common.Painter
 {
@@ -97,6 +100,7 @@ namespace Dingo.Common.Painter
 
         public override void DrawSpecificGUI()
         {
+#if UNITY_EDITOR
             Strength = Mathf.Max(0, EditorGUILayout.FloatField("Strength", Strength));
             Radius = Mathf.Clamp(EditorGUILayout.IntField("Radius", Radius), 0, 32);
             Falloff = EditorGUILayout.CurveField("Falloff", Falloff, Color.white, new Rect(0, 0, 1, 1));
@@ -106,10 +110,12 @@ namespace Dingo.Common.Painter
             {
                 Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
             }
+#endif
         }
 
         protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
+#if UNITY_EDITOR
             Radius = Mathf.Clamp(Radius, 0, 32);
             //var scaledRad = gridManager.GetGridSize()*Radius;
 
@@ -130,29 +136,6 @@ namespace Dingo.Common.Painter
                 Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
                     gridManager.GetGridSize()*Radius, EventType.Repaint);
             }
-            
-            /*for (var i = -scaledRad; i <= scaledRad; i += gridManager.GetGridSize())
-            {
-                for (var j = -scaledRad; j <= scaledRad; j += gridManager.GetGridSize())
-                {
-                    var pos = inputState.GridPosition + new Vector3(i, 0, j);
-                    if (BrushShape == EBrushShape.Circle)
-                    {
-                        var circleDist = Vector2.Distance(inputState.GridPosition.xz(), pos.xz());
-                        if (circleDist > scaledRad)
-                        {
-                            continue;
-                        }
-                    }
-                    if(rect.size.sqrMagnitude > 0 && !rect.Contains(pos.xz()))
-                    {
-                        continue;
-                    }
-                    Handles.RectangleHandleCap(-1, TRS.MultiplyPoint(pos), planeRot, gridManager.GetGridSize() / 2,
-                        EventType.Repaint);
-                }
-            }*/
-
             Handles.color = Color.white;
             if (BrushShape == EBrushShape.Circle)
             {
@@ -164,6 +147,7 @@ namespace Dingo.Common.Painter
                 Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
                     gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
             }
+#endif
         }
     }
 }

@@ -37,13 +37,6 @@ namespace Dingo.Terrains
             {
                 return;
             }
-            _tabs = new[]
-            {
-                new GUIContent("Layers") {image = EditorGUIUtility.FindTexture("Terrain Icon")}, 
-                new GUIContent("Splats") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolSplat")},
-                new GUIContent("Details") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolPlants")},
-                new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
-            };
             _layerDrawer = new TerrainLayerDrawer(Wrapper);
             _splatsDrawer = new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = new TerrainDetailsDrawer(Wrapper);
@@ -76,6 +69,17 @@ namespace Dingo.Terrains
                 {
                     Wrapper.Layers.RemoveAt(i);
                 }
+            }
+
+            if (_tabs == null)
+            {
+                _tabs = new[]
+                {
+                    new GUIContent("Layers") {image = EditorGUIUtility.FindTexture("Terrain Icon")}, 
+                    new GUIContent("Splats") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolSplat")},
+                    new GUIContent("Details") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolPlants")},
+                    new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
+                };
             }
 
             CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20));

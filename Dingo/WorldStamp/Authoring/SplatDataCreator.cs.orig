@@ -7,10 +7,6 @@ using Dingo.Terrains;
 using Dingo.Terrains.Lookups;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 namespace Dingo.WorldStamp.Authoring
 {
     [Serializable]
@@ -159,12 +155,21 @@ namespace Dingo.WorldStamp.Authoring
 
         protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
+<<<<<<< HEAD:Dingo/WorldStamp/Authoring/SplatDataCreator.cs
             data.SplatData.Clear();
             for (int i = 0; i < SplatData.Count; i++)
             {
                 var compressedSplatData = SplatData[i];
                 data.SplatData.Add(compressedSplatData.JSONClone());
             }
+=======
+            data.SplatData = SplatData.JSONClone();
+        }
+
+        protected override void OnExpandedGUI(WorldStampCreator parent)
+        {
+            //AutoEditorWrapper.ListEditorNicer(string.Format("Ignored Splats ({0})", IgnoredSplats.Count), IgnoredSplats, IgnoredSplats.GetType(), this);
+>>>>>>> origin/master:Dingo/WorldStamp/Editor/SplatDataCreator.cs
         }
     }
 }
