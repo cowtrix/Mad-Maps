@@ -262,13 +262,14 @@ namespace Dingo.Terrains.MapMagic
                 {
                     for (var v = 0; v < splatHeight; ++v)
                     {
-                        data[u, v] = splats3D[u, v, i];
+                        data[v, u] = splats3D[u, v, i];
                     }
                 }
                 terrainLayer.SetSplatmap(splatPrototypeWrapper, 0, 0, data, splatWidth);
             }
 
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += terrain1 => terrain1.GetComponent<TerrainWrapper>().Update();
             yield break;
         }
 

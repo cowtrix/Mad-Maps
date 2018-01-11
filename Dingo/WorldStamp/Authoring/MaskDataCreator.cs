@@ -1,10 +1,8 @@
-
 using System;
 using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
 using UnityEngine;
-using GridManagerInt = Dingo.Common.Painter.GridManagerInt;
 using Painter = Dingo.Common.Painter.Painter;
 
 #if UNITY_EDITOR
@@ -149,12 +147,12 @@ namespace Dingo.WorldStamp.Authoring
             {
                 _maskPainter.Canvas = null;
             }
-            if (_maskPainter != null && _maskPainter.Canvas != Mask)
+            if (_maskPainter != null && _maskPainter.Canvas != null &&_maskPainter.Canvas != Mask)
             {
                 _maskPainter.Canvas = null;
                 parent.SceneGUIOwner = null;
             }
-            if (Mask.Count == 0)
+            if (Mask.Count == 0 || LastBounds != parent.Template.Bounds)
             {
                 ResetMask(parent.Template.Bounds);
             }
@@ -203,6 +201,103 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
+        public Texture2D GetTextureFromMask(WorldStampCreator parent)
+        {
+            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            var bounds = parent.Template.Bounds;
+            var width = Mathf.CeilToInt(bounds.size.x/GridSize);
+            var height = Mathf.CeilToInt(bounds.size.z/GridSize);
+            var tex = new Texture2D(width, height);
+            for (var u = 0; u < width; u++)
+            {
+                for (var v = 0; v < height; v++)
+                {
+                    var pos = new Vector3((u / (float)width) * bounds.size.x, bounds.size.y/2, (v / (float)height) * bounds.size.z);
+                    var cell = GridManager.GetCell(pos);
+                    var cellMax = GridManager.GetCellMax(cell).x0z() + bounds.min;
+                    var cellMin = GridManager.GetCellCenter(cell).x0z() + bounds.min;
+                    if (!bounds.Contains(cellMax) || !bounds.Contains(cellMin))
+                    {
+                        continue;
+                    }
+
+                    var val = Mask.GetValue(cell);
+                    tex.SetPixel(u, v, Color.Lerp(Color.black, Color.white, val));
+                }
+            }
+            tex.Apply();
+            return tex;
+        }
+
+        public Serializable2DFloatArray GetArrayFromMask(WorldStampCreator parent)
+        {
+            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            var bounds = parent.Template.Bounds;
+            var width = Mathf.CeilToInt(bounds.size.x / GridSize);
+            var height = Mathf.CeilToInt(bounds.size.z / GridSize);
+            var array = new Serializable2DFloatArray(width, height);
+            for (var u = 0; u < width; u++)
+            {
+                for (var v = 0; v < height; v++)
+                {
+                    var pos = new Vector3((u / (float)width) * bounds.size.x, bounds.size.y / 2, (v / (float)height) * bounds.size.z);
+                    var cell = GridManager.GetCell(pos);
+                    var cellMax = GridManager.GetCellMax(cell).x0z() + bounds.min;
+                    var cellMin = GridManager.GetCellCenter(cell).x0z() + bounds.min;
+                    if (!bounds.Contains(cellMax) || !bounds.Contains(cellMin))
+                    {
+                        continue;
+                    }
+
+                    var val = Mask.GetValue(cell);
+                    array[u, v] = val;
+                }
+            }
+            return array;
+        }
+
+        public void SetMaskFromArray(WorldStampCreator parent, Serializable2DFloatArray mask)
+        {
+            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            Mask.Clear();
+            for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
+            {
+                for (var v = 0f; v < parent.Template.Bounds.size.z; v += GridSize)
+                {
+                    var cell = GridManager.GetCell(new Vector3(u, 0, v));
+                    var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Template.Bounds.min;
+                    var cellMin = GridManager.GetCellCenter(cell).x0z() + parent.Template.Bounds.min;
+                    if (!parent.Template.Bounds.Contains(cellMax) || !parent.Template.Bounds.Contains(cellMin))
+                    {
+                        continue;
+                    }
+                    var val = mask.BilinearSample(new Vector2(u / parent.Template.Bounds.size.x, v / parent.Template.Bounds.size.z));
+                    Mask.SetValue(cell, val);
+                }
+            }
+        }
+
+        public void SetMaskFromTexture(WorldStampCreator parent, Texture2D tex)
+        {
+            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            Mask.Clear();
+            for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
+            {
+                for (var v = 0f; v < parent.Template.Bounds.size.z; v += GridSize)
+                {
+                    var cell = GridManager.GetCell(new Vector3(u, 0, v));
+                    var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Template.Bounds.min;
+                    var cellMin = GridManager.GetCellCenter(cell).x0z() + parent.Template.Bounds.min;
+                    if (!parent.Template.Bounds.Contains(cellMax) || !parent.Template.Bounds.Contains(cellMin))
+                    {
+                        continue;
+                    }
+                    var val = tex.GetPixelBilinear(u / parent.Template.Bounds.size.x, v / parent.Template.Bounds.size.z).grayscale;
+                    Mask.SetValue(cell, val);
+                }
+            }
+        }
+
         private void LoadFromTexture(WorldStampCreator parent)
         {
             var path = EditorUtility.OpenFilePanel("Load Texture Into Mask", "Assets", "png");
@@ -210,23 +305,7 @@ namespace Dingo.WorldStamp.Authoring
             {
                 var tex = new Texture2D(0, 0);
                 tex.LoadImage(File.ReadAllBytes(path));
-                GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
-                Mask.Clear();
-                for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
-                {
-                    for (var v = 0f; v < parent.Template.Bounds.size.z; v += GridSize)
-                    {
-                        var cell = GridManager.GetCell(new Vector3(u, 0, v));
-                        var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Template.Bounds.min;
-                        var cellMin = GridManager.GetCellCenter(cell).x0z() + parent.Template.Bounds.min;
-                        if (!parent.Template.Bounds.Contains(cellMax) || !parent.Template.Bounds.Contains(cellMin))
-                        {
-                            continue;
-                        }
-                        var val = tex.GetPixelBilinear(u / parent.Template.Bounds.size.x, v / parent.Template.Bounds.size.z).grayscale;
-                        Mask.SetValue(cell, val);
-                    }
-                }
+                SetMaskFromTexture(parent, tex);
                 UnityEngine.Object.DestroyImmediate(tex);
             }
         }

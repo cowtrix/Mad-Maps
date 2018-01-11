@@ -74,9 +74,13 @@ namespace Dingo.WorldStamp.Authoring
                 {
                     DetailData.Add(new CompressedDetailData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
                 }
-                else
+                else if (wrapper != null)
                 {
                     Debug.Log(string.Format("WorldStamp Detail Capture: Ignored detail layer {0} as it appeared to be empty.", wrapper.name));
+                }
+                else
+                {
+                    Debug.Log(string.Format("WorldStamp Detail Capture: Unable to resolve prototype at index {0}.", i));
                 }
             }
         }

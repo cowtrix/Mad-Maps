@@ -66,13 +66,17 @@ namespace Dingo.Common.GenericEditor
             FieldInfo fieldInfo = null,
             object context = null)
         {
-            if (!GenericEditor.ExpandedCache.ContainsKey(fieldInfo))
+            if (fieldInfo != null)
             {
-                GenericEditor.ExpandedCache[fieldInfo] = false;
+                if (!GenericEditor.ExpandedCache.ContainsKey(fieldInfo))
+                {
+                    GenericEditor.ExpandedCache[fieldInfo] = false;
+                }
+                GenericEditor.ExpandedCache[fieldInfo] =
+                    EditorGUILayout.Foldout(GenericEditor.ExpandedCache[fieldInfo], fieldInfo.Name);
             }
-            GenericEditor.ExpandedCache[fieldInfo] =
-                EditorGUILayout.Foldout(GenericEditor.ExpandedCache[fieldInfo], fieldInfo.Name);
-            if (GenericEditor.ExpandedCache[fieldInfo])
+            
+            if (fieldInfo != null && GenericEditor.ExpandedCache[fieldInfo])
             {
                 for (var i = 0; i < target.Count; i++)
                 {

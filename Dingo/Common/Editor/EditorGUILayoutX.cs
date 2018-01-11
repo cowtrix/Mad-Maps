@@ -20,12 +20,6 @@ namespace Dingo.Common
             return value;
         }
 
-        [MenuItem("CONTEXT/EntityStatsBuilderObject/Destroy")]
-        public static void DestrotStatsBuilder(MenuCommand command)
-        {
-            UnityEngine.Object.DestroyImmediate(command.context, true);
-        }
-
         public static void DrawTODStackReflective<T>(T obj, float time)
         {
             if (obj == null)

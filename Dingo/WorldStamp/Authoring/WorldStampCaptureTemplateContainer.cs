@@ -1,14 +1,17 @@
+using Dingo.Common.Collections;
 using UnityEngine;
 
 namespace Dingo.WorldStamp.Authoring
 {
     public class WorldStampCaptureTemplateContainer : MonoBehaviour
     {
-        public WorldStampCaptureTemplate Template;
+        [HideInInspector]
+        public Serializable2DFloatArray Mask;
+        public Vector3 Size;
 
-        public void OnDrawGizmosSelected()
+        public void OnDrawGizmos()
         {
-            GizmoExtensions.DrawWireCube(Template.Bounds.center, Template.Bounds.size/2, Quaternion.identity, Color.white);
+            GizmoExtensions.DrawWireCube(transform.position + Vector3.up * (Size.y/2), Size / 2, Quaternion.identity, Color.white);
         }
     }
 }

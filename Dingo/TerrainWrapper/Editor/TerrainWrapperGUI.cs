@@ -81,6 +81,9 @@ namespace Dingo.Terrains
                     new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
                 };
             }
+            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
+            _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
             CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20));
             var currentTabTitle = _tabs[CurrentTab].text;

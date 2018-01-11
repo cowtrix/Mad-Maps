@@ -21,6 +21,20 @@ namespace Dingo.WorldStamp.Authoring
 
         private GUIContent _createStampTemplateContent = new GUIContent("Create Stamp Template", "Create an in-scene object to preserve stamp capture settings.");
 
+        void OnSelectionChange()
+        {
+            if (!Selection.activeGameObject)
+            {
+                return;
+            }
+            var t = Selection.activeGameObject.GetComponent<Terrain>();
+            if (!t)
+            {
+                return;
+            }
+            Template.Terrain = t;
+        }
+
         void OnEnable()
         {
             if (Template.Terrain != null)
@@ -78,23 +92,12 @@ namespace Dingo.WorldStamp.Authoring
 
             if (GUILayout.Button("Create Stamp Template"))
             {
-                var mask = Template.Creators.First(layer => layer is MaskDataCreator) as MaskDataCreator;
-                
-                mask.Mask.OnBeforeSerialize();
-                mask.Mask.OnAfterDeserialize();
-
-                Template.Dirty = true;
-                Template.OnBeforeSerialize();
-
+                var mask = GetCreator<MaskDataCreator>();
                 var newTemplate = new GameObject("Stamp Template");
                 var temp = newTemplate.AddComponent<WorldStampCaptureTemplateContainer>();
                 temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
-                temp.Template = Template.Clone();
-                temp.Template.Dirty = true;
-
-                /*var templateMask = temp.Template.Creators.First(layer => layer is MaskDataCreator) as MaskDataCreator;
-                Debug.Log("Window avg: " + mask.Mask.AvgValue());
-                Debug.Log("Template avg: " + templateMask.Mask.AvgValue());*/
+                temp.Mask = mask.GetArrayFromMask(this);
+                temp.Size = Template.Bounds.size;
             }
             if (GUILayout.Button("Create New Stamp"))
             {
@@ -155,19 +158,25 @@ namespace Dingo.WorldStamp.Authoring
             Handles.color = Color.white.WithAlpha(.5f);
             Handles.DrawWireCube(Template.Terrain.GetPosition() + Template.Terrain.terrainData.size / 2, Template.Terrain.terrainData.size);
         }
+
+        public static Bounds ClampBounds(Terrain Terrain, Bounds b)
+        {
+            var tb = Terrain.GetBounds();
+            
+            b.min = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).Flatten();
+            b.max = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).Flatten();
+
+            b.Encapsulate(b.center.xz().x0z(tb.max.y));
+            b.Encapsulate(b.center.xz().x0z(tb.min.y));
+            return b;
+        }
         
         private bool DoSetArea()
         {
             var b = Template.Bounds;
-            var tb = Template.Terrain.GetBounds();
-
             b.min = Handles.DoPositionHandle(b.min, Quaternion.identity).Flatten();
             b.max = Handles.DoPositionHandle(b.max.xz().x0z(b.min.y), Quaternion.identity).Flatten();
-            b.min = Template.Terrain.HeightmapCoordToWorldPos(Template.Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).Flatten();
-            b.max = Template.Terrain.HeightmapCoordToWorldPos(Template.Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).Flatten();
-
-            b.Encapsulate(b.center.xz().x0z(tb.max.y));
-            b.Encapsulate(b.center.xz().x0z(tb.min.y));
+            b = ClampBounds(Template.Terrain, b);
             if (b != Template.Bounds)
             {
                 Template.Bounds = b;
