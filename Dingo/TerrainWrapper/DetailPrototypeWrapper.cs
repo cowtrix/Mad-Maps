@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Dingo.Terrains
 {
-    [CreateAssetMenu(menuName = "MapMagic/Detail Prototype")]
+    [CreateAssetMenu(menuName = "Dingo/Terrain/Detail Prototype")]
     public class DetailPrototypeWrapper : ScriptableObject
     {
         public float BendFactor;

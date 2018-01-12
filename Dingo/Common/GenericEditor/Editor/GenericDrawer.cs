@@ -75,13 +75,16 @@ namespace Dingo.Common.GenericEditor
                 GenericEditor.ExpandedCache[fieldInfo] =
                     EditorGUILayout.Foldout(GenericEditor.ExpandedCache[fieldInfo], fieldInfo.Name);
             }
-            
-            if (fieldInfo != null && GenericEditor.ExpandedCache[fieldInfo])
+
+            if (fieldInfo == null || GenericEditor.ExpandedCache[fieldInfo])
             {
                 for (var i = 0; i < target.Count; i++)
                 {
                     var o = target[i];
-                    GenericEditor.DrawGUI(o);
+                    if (o != null)
+                    {
+                        GenericEditor.DrawGUI(o, o.ToString(), o.GetType(), null, target);
+                    }
                     target[i] = o;
                     EditorExtensions.Seperator();
                 }
@@ -90,7 +93,7 @@ namespace Dingo.Common.GenericEditor
                 {
                     EditorGUILayoutX.DerivedTypeSelectButton(listType, (o) => target.Add(o));
                 }
-                else
+                else if(GUILayout.Button("Add " + listType.Name))
                 {
                     target.Add(Activator.CreateInstance(listType));
                 }

@@ -11,6 +11,8 @@ namespace Dingo.WorldStamp
         private Mesh _mesh;
         private Material _material;
         private int _lastFrame;
+        private Vector3 _lastPosition;
+        private Quaternion _lastRotation;
         private bool _isDisposed;
 
         private Func<bool> _existenceHook;
@@ -134,7 +136,10 @@ namespace Dingo.WorldStamp
                 return;
             }
 
-            if (_lastFrame >= Time.renderedFrameCount)
+            var position = _position();
+            var rotation = _rotation();
+
+            if (_lastFrame >= Time.renderedFrameCount && !(_lastPosition == position && _lastRotation == rotation))
             {
                 return;
             }
@@ -148,10 +153,7 @@ namespace Dingo.WorldStamp
             var displaySizeScale = new Vector3(displaySize.x/dSize.x, displaySize.y/dSize.y,displaySize.z/dSize.z);
             var scale = _scale();
             scale = new Vector3(scale.x * displaySizeScale.x, scale.y * displaySizeScale.y, scale.z * displaySizeScale.z);
-
-            var position = _position();
-            var rotation = _rotation();
-
+            
             var mat = Matrix4x4.TRS(position, rotation, scale);
             Graphics.DrawMesh(_mesh, mat, _material, 0);
         }

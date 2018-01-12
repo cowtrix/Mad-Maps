@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Dingo.Roads
+namespace Dingo.Common
 {
     public static partial class GUIResources
     {

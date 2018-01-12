@@ -15,7 +15,8 @@ namespace Dingo.WorldStamp.Authoring
             var w = GetWindow<WorldStampCreator>();
             w.titleContent = new GUIContent("World Stamp Creator");
         }
-        
+
+        public bool BoundsLocked;
         public WorldStampCaptureTemplate Template = new WorldStampCaptureTemplate();
         public WorldStampCreatorLayer SceneGUIOwner;
 
@@ -50,6 +51,15 @@ namespace Dingo.WorldStamp.Authoring
             Template.Bounds = Template.Terrain.GetBounds();
         }
 
+
+        void OnDisable()
+        {
+            for (int i = 0; i < Template.Creators.Count; i++)
+            {
+                Template.Creators[i].Dispose();
+            }
+        }
+
         public T GetCreator<T>() where T: WorldStampCreatorLayer
         {
             return Template.Creators.First(layer => layer is T) as T;
@@ -63,7 +73,15 @@ namespace Dingo.WorldStamp.Authoring
                 EditorGUILayout.HelpBox("Please Select a Target Terrain", MessageType.Info);
                 return;
             }
+
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Size:", Template.Bounds.size.xz().ToString());
+            if (GUILayout.Button(new GUIContent(BoundsLocked ? GUIResources.LockedIcon : GUIResources.UnlockedIcon, "Lock Bounds"), EditorStyles.label,
+                GUILayout.Width(18), GUILayout.Height(18)))
+            {
+                BoundsLocked = !BoundsLocked;
+            }
+            EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
 
             EditorGUILayout.BeginHorizontal();
@@ -135,7 +153,7 @@ namespace Dingo.WorldStamp.Authoring
                 return;
             }
 
-            if (DoSetArea())
+            if (!BoundsLocked && DoSetArea())
             {
                 foreach (var worldStampCreatorLayer in Template.Creators)
                 {

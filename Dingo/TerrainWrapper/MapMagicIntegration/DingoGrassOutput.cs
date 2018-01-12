@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Dingo.Common;
 using MapMagic;
 using UnityEngine;
 
@@ -293,7 +294,7 @@ namespace Dingo.Terrains.MapMagic
             for (int i = 0; i < details.Length; i++)
             {
                 //terrain.terrainData.SetDetailLayer(0, 0, i, details[i]);
-                terrainLayer.SetDetailMap(prototypes[i], 0, 0, details[i], global::MapMagic.MapMagic.instance.resolution);
+                terrainLayer.SetDetailMap(prototypes[i], 0, 0, details[i].Flip(), global::MapMagic.MapMagic.instance.resolution);
             }
             
             yield return null;

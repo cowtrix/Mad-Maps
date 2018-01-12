@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Dingo.Terrains
 {
-    [CreateAssetMenu(menuName = "Dingo/Splat Prototype")]
+    [CreateAssetMenu(menuName = "Dingo/Terrain/Splat Prototype")]
     public partial class SplatPrototypeWrapper : ScriptableObject
     {
         public Texture2D Texture;

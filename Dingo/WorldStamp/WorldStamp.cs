@@ -283,6 +283,13 @@ namespace Dingo.WorldStamp
         {
             if (!ShouldWriteHeights())
             {
+                if (WriteHeights)
+                {
+                    Debug.LogWarning(
+                        string.Format(
+                            "Stamp {0} is set to write Heights, but is not currently configured correctly to do so. This may be unintended.",
+                            name), this);
+                }
                 return;
             }
 

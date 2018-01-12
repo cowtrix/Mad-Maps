@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Dingo.Roads
 {
-    [CreateAssetMenu(menuName = "sRoads/Connection Configuration")]
+    [CreateAssetMenu(menuName = "Dingo/Roads/Connection Configuration")]
     public class ConnectionConfiguration : ScriptableObject, ISerializationCallbackReceiver
     {
         public Color Color = UnityEngine.Color.white;

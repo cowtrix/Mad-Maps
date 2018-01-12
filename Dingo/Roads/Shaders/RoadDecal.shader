@@ -11,17 +11,14 @@
 	}
 	SubShader 
 	{
-		Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True"}
-		LOD 300
-		Offset -1, -1
-		//ZWrite Off
-		Cull Back
-
-		Blend SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
+		Tags { "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True" }
+		Blend Off
+		Cull Front
+		ZWrite On
 
 		CGPROGRAM
 
-		#pragma surface surf StandardSpecular finalgbuffer:DecalFinalGBuffer exclude_path:forward exclude_path:prepass noshadow noforwardadd keepalpha
+		#pragma surface surf StandardSpecular
 		#pragma target 3.0
 
 		sampler2D _MainTex;
@@ -34,10 +31,59 @@
 			float4 color : COLOR;
 		};
 
+		float4 _Color1;
+		float4 _Color2;
+
+		inline half GetColorLerp(float4 color)
+		{
+			return color.r;
+		}
+
+		void surf (Input IN, inout SurfaceOutputStandardSpecular o) 
+		{
+			fixed4 main = tex2D(_MainTex, IN.uv_MainTex);
+			fixed3 normal = UnpackNormal(tex2D(_BumpMap, IN.uv_MainTex));
+			fixed4 specSmooth = tex2D(_Spec, IN.uv_MainTex);
+			float4 color = lerp(_Color1, _Color2, GetColorLerp(IN.color));
+
+			o.Alpha = 1;
+			o.Albedo = main.rgb * color.rgb;
+		}
+
+		ENDCG
+
+		Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True"}
+		LOD 300
+		Offset -1, -1
+		//ZWrite Off
+		Cull Back
+
+		Blend SrcAlpha OneMinusSrcAlpha, Zero OneMinusSrcAlpha
+
+		CGPROGRAM
+
+		#pragma surface surf StandardSpecular finalgbuffer:DecalFinalGBuffer vertex:vert exclude_path:forward exclude_path:prepass noshadow noforwardadd keepalpha
+		#pragma target 3.0
+
+		sampler2D _MainTex;
+		sampler2D _Spec;
+		sampler2D _BumpMap;
+
+		struct Input 
+		{
+			float2 uv_MainTex;
+			float4 color : COLOR;
+			float4 screenPos;
+            float eyeDepth;
+		};
+
 		fixed3 _ColorMain;
 		half _Smoothness;
 		float4 _Color1;
 		float4 _Color2;
+
+		//sampler2D_float _CameraDepthTexture;
+        //float4 _CameraDepthTexture_TexelSize;
 
 		inline half ConvertToGrayscale (half3 c)
 		{
@@ -48,6 +94,12 @@
 		{
 			return color.r;
 		}
+
+		void vert (inout appdata_full v, out Input o)
+        {
+            UNITY_INITIALIZE_OUTPUT(Input, o);
+            //COMPUTE_EYEDEPTH(o.eyeDepth);
+        }
 
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) 
 		{
@@ -62,6 +114,17 @@
 			o.Normal = normal;
 			o.Specular = max(0.01, specSmooth.rgb);
 			o.Smoothness = _Smoothness;
+			/*
+			float rawZ = SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(IN.screenPos));
+            float sceneZ = LinearEyeDepth(rawZ);
+            float partZ = IN.eyeDepth;
+
+			float fade = 1.0;
+            if ( rawZ > 0.0 ) // Make sure the depth texture exists
+                fade = saturate(sceneZ - partZ);
+
+			//if(sceneZ == 0)
+				o.Alpha = fade > 0;*/
 		}
 
 		void DecalFinalGBuffer (Input IN, SurfaceOutputStandardSpecular o, inout half4 diffuse, inout half4 specSmoothness, inout half4 normal, inout half4 emission)
@@ -97,14 +160,7 @@
 			float4 color : COLOR;
 		};
 
-		half _SmoothnessLow;
-		half _SmoothnessHigh;
 		half _ContributionDiffuseSpecular;
-		half _ContributionOcclusion;
-
-		half _MaskAlphaUsingAO;
-		half _MaskAlphaPower;
-		half _MaskAlphaShift;
 
 		float4 _Color1;
 		float4 _Color2;
@@ -136,6 +192,8 @@
 		}
 
 		ENDCG
+
+		
 	} 
 	FallBack "sRoads/RoadDecalForward"
 }

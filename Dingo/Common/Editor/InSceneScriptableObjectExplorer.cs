@@ -23,6 +23,7 @@ namespace Dingo.Common
 
         void OnGUI()
         {
+            titleContent = new GUIContent("In-Scene ScriptableObjects");
             EditorGUILayout.HelpBox("This tool finds and shows ScriptableObjects that are embedded in the scene. These objects can leak and end up greatly increasing your level size and load times.", MessageType.Info);
             if (GUILayout.Button("Refresh"))
             {

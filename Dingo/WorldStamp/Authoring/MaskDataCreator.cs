@@ -42,9 +42,9 @@ namespace Dingo.WorldStamp.Authoring
         {
             GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
             Mask.Clear();
-            for (var u = 0f; u < bounds.size.x; u += GridSize)
+            for (var u = GridSize / 2f; u < bounds.size.x; u += GridSize)
             {
-                for (var v = 0f; v < bounds.size.z; v += GridSize)
+                for (var v = GridSize / 2f; v < bounds.size.z; v += GridSize)
                 {
                     var cell = GridManager.GetCell(new Vector3(u, 0, v));
                     var cellMax = GridManager.GetCellMax(cell).x0z() + bounds.min;
@@ -260,9 +260,9 @@ namespace Dingo.WorldStamp.Authoring
         {
             GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
             Mask.Clear();
-            for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
+            for (var u = GridSize/2f; u < parent.Template.Bounds.size.x; u += GridSize)
             {
-                for (var v = 0f; v < parent.Template.Bounds.size.z; v += GridSize)
+                for (var v = GridSize / 2f; v < parent.Template.Bounds.size.z; v += GridSize)
                 {
                     var cell = GridManager.GetCell(new Vector3(u, 0, v));
                     var cellMax = GridManager.GetCellMax(cell).x0z() + parent.Template.Bounds.min;
