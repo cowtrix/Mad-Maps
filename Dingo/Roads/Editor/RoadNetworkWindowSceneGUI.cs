@@ -52,13 +52,17 @@ namespace Dingo.Roads
             SceneGUICast(out hit);
             DoNodeSelection(ref hit);
 
-            if (_currentTab == 0)
+            if (_currentTab == 0)   // Connections
             {
                 var myEvent = Event.current;
                 var hitPoint = hit.point;
                 var hitNormal = hit.normal;
                 DoAddNodePreview(myEvent, ref hitPoint);
                 DoConnectOrCreateNodes(myEvent, hitPoint, hitNormal);
+            }
+            else if (_currentTab == 1)  // Intersections
+            {
+                DoIntersectionSceneGUI();
             }
 
             // Draw nodes and connections
@@ -69,6 +73,36 @@ namespace Dingo.Roads
             for (var i = 0; i < n.Count && i < budget; i++)
             {
                 DrawRoadNodeSceneGUI(sceneView.camera, n[i]);
+            }
+        }
+
+        private void DoIntersectionSceneGUI()
+        {
+            if (_currentIntersection == null)
+            {
+                return;
+            }
+            var currentlySelectedNodes = GetCurrentlySelectedNodes();
+            if (currentlySelectedNodes == null || currentlySelectedNodes.Count != 1)
+            {
+                return;
+            }
+            var insertionNode = currentlySelectedNodes[0];
+            var nodePos = insertionNode.transform.position;
+            var nodeRot = insertionNode.transform.rotation;
+
+            var intersectionNodes = _currentIntersection.GetComponents<Node>();
+
+            var extraRot = Quaternion.LookRotation(insertionNode.CalculateTangent(null).Flatten()) * Quaternion.Euler(_extraRotation);
+            IntersectionMetadata metaData = _currentIntersection.GetComponent<IntersectionMetadata>();
+            if (metaData && insertionNode.AllConnections().Count() > 1)
+            {
+                extraRot *= Quaternion.Euler(metaData.TwoNodeRotation);
+            }
+            
+            for (int i = 0; i < intersectionNodes.Length; i++)
+            {
+                Handles.DrawWireCube(nodePos + nodeRot * extraRot* intersectionNodes[i].Offset, NodePreviewSize * Vector3.one);
             }
         }
 

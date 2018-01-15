@@ -20,6 +20,9 @@ namespace Dingo.WorldStamp.Authoring
         public WorldStampCaptureTemplate Template = new WorldStampCaptureTemplate();
         public WorldStampCreatorLayer SceneGUIOwner;
 
+        public WorldStamp TargetInjectionStamp;
+        public WorldStampCaptureTemplateContainer TargetInjectionTemplate;
+
         private GUIContent _createStampTemplateContent = new GUIContent("Create Stamp Template", "Create an in-scene object to preserve stamp capture settings.");
 
         void OnSelectionChange()
@@ -117,6 +120,22 @@ namespace Dingo.WorldStamp.Authoring
                 temp.Mask = mask.GetArrayFromMask(this);
                 temp.Size = Template.Bounds.size;
             }
+
+            GUILayout.BeginHorizontal();
+            TargetInjectionTemplate = (WorldStampCaptureTemplateContainer) EditorGUILayout.ObjectField(TargetInjectionTemplate,
+                typeof (WorldStampCaptureTemplateContainer), true);
+            GUI.enabled = TargetInjectionTemplate;
+            if (GUILayout.Button("Replace Existing Stamp Template", GUILayout.Width(220)))
+            {
+                var mask = GetCreator<MaskDataCreator>();
+                var temp = TargetInjectionTemplate;
+                temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
+                temp.Mask = mask.GetArrayFromMask(this);
+                temp.Size = Template.Bounds.size;
+            }
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+
             if (GUILayout.Button("Create New Stamp"))
             {
                 for (int i = 0; i < Template.Creators.Count; i++)
@@ -143,7 +162,24 @@ namespace Dingo.WorldStamp.Authoring
                 
                 EditorGUIUtility.PingObject(stamp);
             }
-            
+            EditorGUILayout.BeginHorizontal();
+            TargetInjectionStamp = (WorldStamp) EditorGUILayout.ObjectField(TargetInjectionStamp, typeof (WorldStamp), true);
+            GUI.enabled = TargetInjectionStamp;
+            if (GUILayout.Button("Replace Existing Stamp", GUILayout.Width(220)))
+            {
+                var data = new WorldStampData();
+                foreach (var worldStampCreatorLayer in Template.Creators)
+                {
+                    worldStampCreatorLayer.Commit(data, TargetInjectionStamp);
+                }
+                data.Size = Template.Bounds.size;
+                TargetInjectionStamp.SetData(data);
+                TargetInjectionStamp.HaveHeightsBeenFlipped = true;
+                EditorGUIUtility.PingObject(TargetInjectionStamp);
+                EditorUtility.SetDirty(TargetInjectionStamp);
+            }
+            GUI.enabled = true;
+            EditorGUILayout.EndHorizontal();
         }
 
         protected override void OnSceneGUI(SceneView sceneView)

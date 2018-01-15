@@ -308,7 +308,7 @@ namespace Dingo.Roads
             _extraRotation = EditorGUILayout.Vector3Field("Rotation", _extraRotation);
 
             var currentSelectedNodes = GetCurrentlySelectedNodes();
-            GUI.enabled = currentSelectedNodes.IsNullOrEmpty();
+            GUI.enabled = !currentSelectedNodes.IsNullOrEmpty();
             if (GUILayout.Button("Insert Intersection Into Node"))
             {
                 for (int i = 0; i < currentSelectedNodes.Count; i++)

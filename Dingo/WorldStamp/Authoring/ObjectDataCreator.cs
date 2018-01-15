@@ -1,3 +1,4 @@
+using Dingo.Roads;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,6 +56,17 @@ namespace Dingo.WorldStamp.Authoring
                     Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);
                     ignores.Add(transform);
                     var children = transform.GetComponentsInChildren<Transform>(true);
+                    foreach (var ignore in children)
+                    {
+                        ignores.Add(ignore);
+                    }
+                    continue;
+                }
+                var rn = transform.GetComponentInAncestors<RoadNetwork>();
+                if (rn)
+                {
+                    ignores.Add(rn.transform);
+                    var children = rn.transform.GetComponentsInChildren<Transform>(true);
                     foreach (var ignore in children)
                     {
                         ignores.Add(ignore);

@@ -66,6 +66,10 @@ namespace Dingo.Common.Painter
         public static void SetAlive()
         {
             _lastAliveTime = EditorApplication.timeSinceStartup;
+            if (_material)
+            {
+                _material.SetFloat("_Size", CellSize);
+            }
         }
 
         public static void AddCell(Vector3 center, Color color)

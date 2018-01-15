@@ -494,6 +494,7 @@ namespace Dingo.WorldStamp
                 }
                 else if (stamp.Mask == null || stamp.Mask.Count == 0)
                 {
+                    stamp.Data.Mask.OnBeforeSerialize();
                     stamp.Mask = JsonUtility.FromJson<WorldStampMask>(JsonUtility.ToJson(stamp.Data.Mask));
                 }
                 _editingMask = !_editingMask;
