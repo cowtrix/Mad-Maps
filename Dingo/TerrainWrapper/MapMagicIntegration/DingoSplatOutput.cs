@@ -1,3 +1,4 @@
+#if MAPMAGIC
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using UnityEngine;
 
 namespace Dingo.Terrains.MapMagic
 {
-#if MAPMAGIC
+
     [System.Serializable]
     [GeneratorMenu(menu = "Dingo", name = "Dingo Textures", disengageable = true)]
     public class DingoSplatOutput : OutputGenerator, Layout.ILayered
@@ -305,5 +306,5 @@ namespace Dingo.Terrains.MapMagic
             layout.DrawLayered(this, "Layers:");
         }
     }
-#endif
 }
+#endif

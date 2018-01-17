@@ -18,7 +18,7 @@
 
 		CGPROGRAM
 
-		#pragma surface surf StandardSpecular
+		#pragma surface surf StandardSpecular vertex:vert
 		#pragma target 3.0
 
 		sampler2D _MainTex;
@@ -37,6 +37,12 @@
 		inline half GetColorLerp(float4 color)
 		{
 			return color.r;
+		}
+
+		void vert (inout appdata_full v, out Input o) 
+		{
+		  v.normal = -v.normal;
+          UNITY_INITIALIZE_OUTPUT(Input,o);          
 		}
 
 		void surf (Input IN, inout SurfaceOutputStandardSpecular o) 

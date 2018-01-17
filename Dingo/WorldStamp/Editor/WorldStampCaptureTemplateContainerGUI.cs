@@ -1,7 +1,6 @@
 using System.Linq;
 using Dingo.Common;
 using Dingo.Common.Painter;
-using MapMagic;
 using UnityEditor;
 using UnityEngine;
 using EditorCellHelper = Dingo.Common.Painter.EditorCellHelper;
@@ -21,6 +20,7 @@ namespace Dingo.WorldStamp.Authoring
             {
                 var w = EditorWindow.GetWindow<WorldStampCreator>();
 
+                w.Template = wsct.Template.JSONClone();
                 if (w.Template.Terrain == null)
                 {
                     w.Template.Terrain = Terrain.activeTerrain;
@@ -72,7 +72,7 @@ namespace Dingo.WorldStamp.Authoring
                     Common.Painter.EditorCellHelper.AddCell(pos, Color.Lerp(Color.black, Color.clear, val));
                 }
             }
-            Common.Painter.EditorCellHelper.Invalidate();
+            Common.Painter.EditorCellHelper.Invalidate(); 
         }
     }
 }

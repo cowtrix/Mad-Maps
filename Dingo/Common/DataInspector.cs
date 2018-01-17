@@ -159,6 +159,11 @@ namespace Dingo.Common
                 float frac;
                 MiscUtilities.DecompressStencil(val, out stencilKey, out frac);
 
+                if (stencilKey > 0)
+                {
+                    var t = 0;
+                }
+
                 var color = stencilKey > 0 ? ColorUtils.GetIndexColor(stencilKey) : Color.black;
                 colors[counter] = Color.Lerp(Color.black, color, frac);
                 gcolors[counter] = stencilKey > 0 ? Color.Lerp(Color.black, Color.white, frac) : Color.black;

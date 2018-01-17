@@ -5,19 +5,39 @@ using UnityEngine;
 namespace Dingo.WorldStamp.Authoring
 {
     [Serializable]
-    public class WorldStampCaptureTemplate //: ISerializationCallbackReceiver
+    public class WorldStampCaptureTemplate
     {
         public Bounds Bounds;
         public Terrain Terrain;
-        public List<WorldStampCreatorLayer> Creators = new List<WorldStampCreatorLayer>()
+
+        public DetailDataCreator DetailDataCreator = new DetailDataCreator();
+        public HeightmapDataCreator HeightmapDataCreator = new HeightmapDataCreator();
+        public MaskDataCreator MaskDataCreator = new MaskDataCreator();
+        public ObjectDataCreator ObjectDataCreator = new ObjectDataCreator();
+        public RoadDataCreator RoadDataCreator = new RoadDataCreator();
+        public SplatDataCreator SplatDataCreator = new SplatDataCreator();
+        public TreeDataCreator TreeDataCreator = new TreeDataCreator();
+
+        public List<WorldStampCreatorLayer> Creators
         {
-            new HeightmapDataCreator(), 
-            new SplatDataCreator(), 
-            new DetailDataCreator(), 
-            new TreeDataCreator(), 
-            new ObjectDataCreator(),
-            new RoadDataCreator(), 
-            new MaskDataCreator(),
-        };
+            get
+            {
+                if (__creators == null)
+                {
+                    __creators = new List<WorldStampCreatorLayer>
+                    {
+                        HeightmapDataCreator,
+                        SplatDataCreator,
+                        DetailDataCreator,
+                        TreeDataCreator,
+                        ObjectDataCreator,
+                        RoadDataCreator,
+                        MaskDataCreator
+                    };
+                }
+                return __creators;
+            }
+        }
+        private List<WorldStampCreatorLayer> __creators;
     }
 }

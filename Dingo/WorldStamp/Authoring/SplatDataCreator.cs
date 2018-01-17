@@ -49,22 +49,16 @@ namespace Dingo.WorldStamp.Authoring
             var prototypes = terrain.terrainData.splatPrototypes;
             var wrappers = TerrainLayerUtilities.ResolvePrototypes(prototypes);
 
-            if (prototypes.Length != wrappers.Count)
-            {
-                Debug.LogError("Failed to collect splats - possibly you have splat configs that aren't wrapper assets?");
-                return;
-            }
-
             var sampleSplats = terrain.terrainData.GetAlphamaps(min.x, min.z, width, height);
 
             for (var i = 0; i < prototypes.Length; ++i)
             {
-                var wrapper = wrappers[prototypes[i]];
-                if (wrapper == null || IgnoredSplats.Contains(wrapper))
+                SplatPrototypeWrapper wrapper;
+                wrappers.TryGetValue(prototypes[i], out wrapper);
+                if (IgnoredSplats.Contains(wrapper))
                 {
                     continue;
                 }
-
                 var data = new byte[width, height];
                 float sum = 0;
                 for (var dx = 0; dx < width; ++dx)

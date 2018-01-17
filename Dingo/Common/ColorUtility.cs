@@ -6,7 +6,7 @@ namespace Dingo.Common
     {
         public static Color GetIndexColor(int index)
         {
-            //Random.InitState(index);
+            Random.InitState(index);
             return Random.ColorHSV(0f, 1f, 1f, 1f, 1f, 1f);
         }
     }

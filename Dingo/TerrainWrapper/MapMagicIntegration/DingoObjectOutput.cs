@@ -2,12 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Dingo.WorldStamp;
+#if MAPMAGIC
 using MapMagic;
 using UnityEngine;
 
 namespace Dingo.Terrains.MapMagic
 {
-#if MAPMAGIC
+
     [System.Serializable]
     [GeneratorMenu(menu = "Dingo", name = "Dingo Objects", disengageable = true)]
     public class DingoObjectOutput : OutputGenerator, Layout.ILayered
@@ -274,7 +275,7 @@ namespace Dingo.Terrains.MapMagic
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
             terrainLayer.Objects.Clear();
             
-            float pixelSize = 1f * global::MapMagic.MapMagic.instance.terrainSize / global::MapMagic.MapMagic.instance.resolution;
+            //float pixelSize = 1f * global::MapMagic.MapMagic.instance.terrainSize / global::MapMagic.MapMagic.instance.resolution;
             //Rect terrainRect = new Rect(rect.offset.x * pixelSize, rect.offset.z * pixelSize, rect.size.x * pixelSize, rect.size.z * pixelSize);
             var terrainSize = terrain.terrainData.size;
 
@@ -348,5 +349,5 @@ namespace Dingo.Terrains.MapMagic
         }
 
     }
-#endif
 }
+#endif

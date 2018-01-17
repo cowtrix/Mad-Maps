@@ -84,7 +84,7 @@ namespace Dingo.Roads.Connections
         public void OnBake()
         {
             // Setup
-            if (Configuration == null)
+            if (Configuration == null || !NodeConnection)
             {
                 return;
             }

@@ -15,8 +15,11 @@ namespace Dingo.WorldStamp.Authoring
     public class MaskDataCreator : WorldStampCreatorLayer
     {
         public float GridSize = 5;
-        public WorldStampMask Mask = new WorldStampMask();
+
+        [NonSerialized]
         public Bounds LastBounds;
+        [NonSerialized]
+        public WorldStampMask Mask = new WorldStampMask();
 
         private static float MinMaskRes = 4;
         private static float MaskResolution = 128;
@@ -62,9 +65,9 @@ namespace Dingo.WorldStamp.Authoring
         private void FillMaskFromMinY(Bounds bounds, Serializable2DFloatArray heights)
         {
             Mask.Clear();
-            for (var u = 0f; u < bounds.size.x; u += GridSize)
+            for (var u = GridSize / 2f; u < bounds.size.x; u += GridSize)
             {
-                for (var v = 0f; v < bounds.size.z; v += GridSize)
+                for (var v = GridSize / 2f; v < bounds.size.z; v += GridSize)
                 {
                     var cell = GridManager.GetCell(new Vector3(u, 0, v));
                     var cellMax = GridManager.GetCellMax(cell).x0z() + bounds.min;
@@ -74,7 +77,7 @@ namespace Dingo.WorldStamp.Authoring
                         continue;
                     }
 
-                    var h = heights.BilinearSample(new Vector2(v / bounds.size.z, u / bounds.size.x));
+                    var h = heights.BilinearSample(new Vector2(u / bounds.size.z, v / bounds.size.x));
                     Mask.SetValue(cell, h > 0 ? 1 : 0);
                 }
             }
@@ -179,7 +182,12 @@ namespace Dingo.WorldStamp.Authoring
             {
                 GUI.enabled = Enabled;
                 EditorGUI.indentLevel++;
+                EditorGUI.BeginChangeCheck();
                 OnExpandedGUI(parent);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    NeedsRecapture = true;
+                }
                 EditorGUI.indentLevel--;
                 GUI.enabled = true;
             }

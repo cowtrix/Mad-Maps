@@ -19,7 +19,7 @@ namespace Dingo.Roads
 
         public static void DrawConnectionSceneGUI(Camera sceneviewCamera, NodeConnection connection)
         {
-            if (!connection || !RoadNetworkWindow.DrawConnections)
+            if (!connection)
             {
                 return;
             }

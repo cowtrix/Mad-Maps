@@ -118,6 +118,7 @@ namespace Dingo.WorldStamp.Authoring
                 var temp = newTemplate.AddComponent<WorldStampCaptureTemplateContainer>();
                 temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
                 temp.Mask = mask.GetArrayFromMask(this);
+                temp.Template = Template.JSONClone();
                 temp.Size = Template.Bounds.size;
             }
 

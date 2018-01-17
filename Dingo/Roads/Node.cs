@@ -54,7 +54,15 @@ namespace Dingo.Roads
             {
                 if (!__network)
                 {
-                    __network = transform.GetComponentInAncestors<RoadNetwork>() ?? transform.GetComponentInAncestors<RoadNetworkProxy>().Network;
+                    __network = transform.GetComponentInAncestors<RoadNetwork>();
+                    if (!__network)
+                    {
+                        var proxy = transform.GetComponentInAncestors<RoadNetworkProxy>();
+                        if (proxy)
+                        {
+                            __network = proxy.Network;
+                        }
+                    }
                 }
                 return __network;
             }

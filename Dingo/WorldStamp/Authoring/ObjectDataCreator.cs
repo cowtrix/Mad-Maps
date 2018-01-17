@@ -15,6 +15,7 @@ namespace Dingo.WorldStamp.Authoring
     public class ObjectDataCreator : WorldStampCreatorLayer
     {
         public LayerMask Mask = ~0;
+        public WorldStamp.EObjectRelativeMode RelativeMode = WorldStamp.EObjectRelativeMode.RelativeToTerrain;
 
         [NonSerialized]
         public Dictionary<PrefabObjectData, Bounds> BoundsMapping = new Dictionary<PrefabObjectData, Bounds>();
@@ -73,6 +74,17 @@ namespace Dingo.WorldStamp.Authoring
                     }
                     continue;
                 }
+                var template = transform.GetComponentInAncestors<WorldStampCaptureTemplateContainer>();
+                if (template)
+                {
+                    ignores.Add(template.transform);
+                    var children = template.transform.GetComponentsInChildren<Transform>(true);
+                    foreach (var ignore in children)
+                    {
+                        ignores.Add(ignore);
+                    }
+                    continue;
+                }
 
                 var go = transform.gameObject;
                 if (Mask != (Mask | (1 << go.layer)))
@@ -99,11 +111,21 @@ namespace Dingo.WorldStamp.Authoring
 
                 var relativePos = root.transform.position - bounds.min;
                 relativePos = new Vector3(relativePos.x / bounds.size.x, 0, relativePos.z / bounds.size.z);
-                var terrainHeightAtPoint = (terrain.SampleHeight(root.transform.position) + terrainPos.y);
-                relativePos.y = (root.transform.position.y - terrainHeightAtPoint);
-
+                
+                if (RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToTerrain)
+                {
+                    var terrainHeightAtPoint = terrain.SampleHeight(root.transform.position);
+                    relativePos.y = (root.transform.position.y - terrainHeightAtPoint);
+                }
+                else
+                {
+                    relativePos.y = root.transform.position.y;
+                }
+                relativePos.y -= terrainPos.y;
+                
                 var newData = new PrefabObjectData()
                 {
+                    AbsoluteHeight = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
                     Prefab = prefabAsset,
                     Position = relativePos,
                     Rotation = root.transform.rotation.eulerAngles,
@@ -133,6 +155,7 @@ namespace Dingo.WorldStamp.Authoring
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
             Mask = LayerMaskFieldUtility.LayerMaskField("Layer Mask", Mask, false);
+            RelativeMode = (WorldStamp.EObjectRelativeMode) EditorGUILayout.EnumPopup("Relative Mode", RelativeMode);
         }
 
         protected override void PreviewInSceneInternal(WorldStampCreator parent)

@@ -6,6 +6,7 @@ using Dingo.Common.Collections;
 using Dingo.Terrains;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 namespace Dingo.WorldStamp
 {
@@ -37,8 +38,6 @@ namespace Dingo.WorldStamp
             RelativeToTerrain,
             RelativeToStamp,
         }
-
-        
 
         public WorldStampData Data
         {
@@ -101,12 +100,10 @@ namespace Dingo.WorldStamp
 
         public bool WriteObjects = true;
         public bool RemoveBaseObjects = true;
-        public bool StencilObjects = true; 
-        public bool SnapObjectToGround = true;    // TODO
-        public bool ScaleObjects = false;
-        public bool RelativeToStamp = false;
-        public EObjectRelativeMode ObjectRelativeMode = EObjectRelativeMode.RelativeToTerrain;
-
+        public bool StencilObjects = true;
+        public bool OverrideObjectRelativeMode = false;
+        public EObjectRelativeMode RelativeMode = EObjectRelativeMode.RelativeToTerrain;
+        
         // Splats
         public bool WriteSplats = true;
         public bool StencilSplats = false;
@@ -187,7 +184,7 @@ namespace Dingo.WorldStamp
                 _preview.Dispose();
                 _preview = null;
             }
-            if (PreviewEnabled && (_preview == null || _preview.IsDisposed()))
+            if (PreviewEnabled && (_preview == null || _preview.IsDisposed()) && Data != null)
             {
                 _preview = new WorldStampPreview();
                 _preview.Invalidate(
@@ -904,19 +901,24 @@ namespace Dingo.WorldStamp
 
                 prefabObjectData.Rotation = (transform.rotation * Quaternion.Euler(prefabObjectData.Rotation)).eulerAngles;
 
-                if (ObjectRelativeMode == EObjectRelativeMode.RelativeToStamp)
+                if (OverrideObjectRelativeMode)
                 {
-                    prefabObjectData.AbsoluteHeight = true;
+                    prefabObjectData.AbsoluteHeight = RelativeMode == EObjectRelativeMode.RelativeToStamp;
                     if (HaveHeightsBeenFlipped)
                     {
-                        prefabObjectData.Position.y += transform.position.y - tPos.y
-                        + Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
+                        prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
                     }
                     else
                     {
-                        prefabObjectData.Position.y += transform.position.y - tPos.y
-                        + Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
+                        prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
                     }
+                }
+
+                if (prefabObjectData.AbsoluteHeight)
+                {
+                    prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
+                    prefabObjectData.Position.y += transform.position.y;
+                    prefabObjectData.Position.y += tPos.y;
                 }
 
                 if (prefabObjectData.Scale.x < 0 || prefabObjectData.Scale.y < 0 || prefabObjectData.Scale.z < 0)

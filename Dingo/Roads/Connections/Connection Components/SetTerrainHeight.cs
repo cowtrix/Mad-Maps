@@ -104,7 +104,7 @@ namespace Dingo.Roads.Connections
                 Mathf.Min(xDelta, terrain.terrainData.heightmapResolution - matrixMin.x),
                 Mathf.Min(zDelta, terrain.terrainData.heightmapResolution - matrixMin.z));
 
-            float planeGive = -(wrapper.Terrain.terrainData.size.x / wrapper.Terrain.terrainData.heightmapResolution);
+            float planeGive = -(wrapper.Terrain.terrainData.size.x / wrapper.Terrain.terrainData.heightmapResolution) * 2;
             Plane startPlane, endPlane;
             GenerateSplinePlanes(planeGive, mainSpline, out startPlane, out endPlane);
 
@@ -114,7 +114,7 @@ namespace Dingo.Roads.Connections
                                new Serializable2DFloatArray(floatArraySize.x, floatArraySize.z);
 
             var stencilKey = GetStencilKey();
-            if (layer.Stencil == null)
+            if (layer.Stencil == null || layer.Stencil.Width != heightRes || layer.Stencil.Height != heightRes)
             {
                 layer.Stencil = new Serializable2DFloatArray(heightRes, heightRes);
             }
@@ -191,9 +191,8 @@ namespace Dingo.Roads.Connections
                     {
                         DebugHelper.DrawPoint(worldPos, 1, Color.yellow, 30);
                     }*/
-
-                    var newRawStencilValue = MiscUtilities.CompressStencil(maskValue > existingStencilStrength ? stencilKey : existingStencilKey,
-                        maskValue + existingStencilStrength);
+                    var key = maskValue > existingStencilStrength ? stencilKey : existingStencilKey;
+                    var newRawStencilValue = MiscUtilities.CompressStencil(key, /*stencilKey == existingStencilKey ?*/ Mathf.Max(maskValue, existingStencilStrength)/* : maskValue + existingStencilStrength*/);
                     layer.Stencil[coordX, coordZ] = newRawStencilValue;
 
                     /* MiscUtilities.DecompressStencil(layer.Stencil[coordX, coordZ], out existingStencilKey,

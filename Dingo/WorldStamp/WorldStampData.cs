@@ -31,6 +31,7 @@ namespace Dingo.WorldStamp
 
         // HEIGHTS
         public Serializable2DFloatArray Heights;
+        public float ZeroLevel;
         
         // TREES
         public List<DingoTreeInstance> Trees = new List<DingoTreeInstance>();
@@ -43,6 +44,6 @@ namespace Dingo.WorldStamp
 
         // GRASS
         public List<CompressedDetailData> DetailData = new List<CompressedDetailData>();
-
+        
     }
 }

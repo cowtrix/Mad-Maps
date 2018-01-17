@@ -1,8 +1,11 @@
-﻿using Dingo.Common;
+﻿using System;
+using System.Security.AccessControl;
+using Dingo.Common;
 using Dingo.Common.Collections;
 using Dingo.Roads;
 using Dingo.Terrains;
 using UnityEngine;
+using Coord = Dingo.Common.Coord;
 
 namespace Dingo.WorldStamp
 {
@@ -47,18 +50,26 @@ namespace Dingo.WorldStamp
 
             foreach (var terrainWrapper in terrainWrappers)
             {
-                ProcessHeight(objectBounds, stencilKey, terrainWrapper);
-                if (RemoveTrees)
+                try
                 {
-                    ProcessTrees(objectBounds, terrainWrapper);
+                    ProcessHeight(objectBounds, stencilKey, terrainWrapper);
+                    if (RemoveTrees)
+                    {
+                        ProcessTrees(objectBounds, terrainWrapper);
+                    }
+                    if (RemoveObjects)
+                    {
+                        ProcessObjects(objectBounds, terrainWrapper);
+                    }
+                    if (RemoveGrass)
+                    {
+                        ProcessGrass(objectBounds, terrainWrapper);
+                    }
                 }
-                if (RemoveObjects)
+                catch (Exception)
                 {
-                    ProcessObjects(objectBounds, terrainWrapper);
-                }
-                if (RemoveGrass)
-                {
-                    ProcessGrass(objectBounds, terrainWrapper);
+                    Debug.LogError("SimpleTerrainPlane thew exception! " + name, this);
+                    throw;
                 }
             }
         }
@@ -179,15 +190,24 @@ namespace Dingo.WorldStamp
         {
             var flatObjBounds = objectBounds.Flatten();
             var flatBounds = flatObjBounds.ToAxisBounds();
+            var terrainSize = terrainWrapper.Terrain.terrainData.size;
+            var hRes = terrainWrapper.Terrain.terrainData.heightmapResolution;
+
             var matrixMin = terrainWrapper.Terrain.WorldToHeightmapCoord(flatBounds.min,
                 TerrainX.RoundType.Floor);
             var matrixMax = terrainWrapper.Terrain.WorldToHeightmapCoord(flatBounds.max,
                 TerrainX.RoundType.Ceil);
-            var floatArraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
-            var terrainSize = terrainWrapper.Terrain.terrainData.size;
-            var hRes = terrainWrapper.Terrain.terrainData.heightmapResolution;
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            matrixMin = new Common.Coord(Mathf.Clamp(matrixMin.x, 0, hRes), Mathf.Clamp(matrixMin.z, 0, hRes));
+            matrixMax = new Common.Coord(Mathf.Clamp(matrixMax.x, 0, hRes), Mathf.Clamp(matrixMax.z, 0, hRes));
 
+            var floatArraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
+
+            
+            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            if (layer.Stencil == null || layer.Stencil.Width != hRes || layer.Stencil.Height != hRes)
+            {
+                layer.Stencil = new Serializable2DFloatArray(hRes, hRes);
+            }
             var layerHeights = layer.GetHeights(matrixMin.x, matrixMin.z, floatArraySize.x, floatArraySize.z, hRes) ??
                                new Serializable2DFloatArray(floatArraySize.x, floatArraySize.z);
 

@@ -111,14 +111,16 @@ namespace Dingo.Roads
                 return;
             }
 
+            var allComponents = GetComponentsInChildren<ConnectionComponent>();
+
             // Recollect
             Components.Clear();
-            Components.AddRange(GetComponentsInChildren<ConnectionComponent>()
-                .Where(component => component.NodeConnection == this));
+            Components.AddRange(allComponents.Where(component => component.NodeConnection == this || component.NodeConnection == null || component.NodeConnection.Equals(null)));
 
             RecalculateSpline();
-            foreach (var connectionComponent in Components)
+            for (int i = 0; i < Components.Count; i++)
             {
+                var connectionComponent = Components[i];
                 connectionComponent.Think();
             }
         }

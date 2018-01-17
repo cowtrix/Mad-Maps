@@ -63,5 +63,53 @@ namespace Dingo.Common
                 array[i] = UnityEngine.Random.value;
             }
         }
+
+        public static T[] Add<T>(this T[] array, T value)
+        {
+            var newArray = new T[array.Length + 1];
+            for (int i = 0; i < array.Length; i++)
+            {
+                newArray[i] = array[i];
+            }
+            newArray[newArray.Length - 1] = value;
+            return newArray;
+        }
+
+        public static Array Add(this Array array, object value)
+        {
+            var newArray = Array.CreateInstance(array.GetType().GetElementType(), array.Length + 1);
+            for (int i = 0; i < array.Length; i++)
+            {
+                newArray.SetValue(array.GetValue(i), i);
+            }
+            newArray.SetValue(value, newArray.Length - 1);
+            return newArray;
+        }
+
+        public static Array Remove(this Array array, int index)
+        {
+            var newArray = Array.CreateInstance(array.GetType().GetElementType(), array.Length - 1);
+            int copyCounter = 0;
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == index)
+                {
+                    continue;
+                }
+                newArray.SetValue(array.GetValue(i), copyCounter);
+                copyCounter++;
+            }
+            return newArray;
+        }
+
+        public static Array Resize(this Array array, int newCount)
+        {
+            var newArray = new Array[newCount];
+            for (int i = 0; i < newCount && i < array.Length; i++)
+            {
+                newArray.SetValue(array.GetValue(i), i);
+            }
+            return newArray;
+        }
     }
 }

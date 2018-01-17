@@ -9,7 +9,7 @@ namespace Dingo.Roads
 {
     public partial class RoadNetworkWindow : EditorWindow
     {
-        public static EditorPersistantVal<bool> DrawConnections = new EditorPersistantVal<bool>("NodeNetworkGUI_DrawConnections", true);
+        //public static EditorPersistantVal<bool> DrawConnections = new EditorPersistantVal<bool>("NodeNetworkGUI_DrawConnections", true);
         private static EditorPersistantVal<int> _currentTab = new EditorPersistantVal<int>("NodeNetworkGUI_CurrentTab", 0);
         private static EditorPersistantVal<bool> _configurationIgnoredTypesExpanded = new EditorPersistantVal<bool>("NodeNetworkGUI_IgnoredTypesExpanded", false);
 
@@ -213,6 +213,12 @@ namespace Dingo.Roads
                     GUI.Label(buttonRect, configName, textStyle);
                     configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), config.Color.ToHexString());
                     buttonRect.y += 2;
+                    var deleteRect = new Rect(buttonRect.max.x - 16, buttonRect.y, 16, 16);
+                    if (GUI.Button(deleteRect, "x", EditorStyles.miniButton))
+                    {
+                        FocusedRoadNetwork.RoadConfigHistory.RemoveAt(i);
+                        _currentConfiguration = null;
+                    }
                     if (GUI.Button(buttonRect, configName, textStyle))
                     {
                         _currentConfiguration = config;
@@ -249,8 +255,11 @@ namespace Dingo.Roads
             // Config
             FocusedRoadNetwork.CurrentNodeConfiguration.SnappingMode = (NodeConfiguration.ESnappingMode) EditorGUILayout.EnumPopup("Snapping Mode",
                 FocusedRoadNetwork.CurrentNodeConfiguration.SnappingMode);
-            FocusedRoadNetwork.CurrentNodeConfiguration.SnapMask = LayerMaskFieldUtility.LayerMaskField("Snapping Mask",
+            if (FocusedRoadNetwork.CurrentNodeConfiguration.SnappingMode == NodeConfiguration.ESnappingMode.Raycast)
+            {
+                FocusedRoadNetwork.CurrentNodeConfiguration.SnapMask = LayerMaskFieldUtility.LayerMaskField("Snapping Mask",
                 FocusedRoadNetwork.CurrentNodeConfiguration.SnapMask, false);
+            }
             FocusedRoadNetwork.CurrentNodeConfiguration.SnapOffset = EditorGUILayout.FloatField("Snapping Offset",
                 FocusedRoadNetwork.CurrentNodeConfiguration.SnapOffset);
         }
@@ -327,7 +336,7 @@ namespace Dingo.Roads
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
             FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
             FocusedRoadNetwork.RecalculateTerrain = EditorGUILayout.Toggle("Recalculate Terrain", FocusedRoadNetwork.RecalculateTerrain);
-            DrawConnections.Value = EditorGUILayout.Toggle("Draw Connections", DrawConnections);
+            //DrawConnections.Value = EditorGUILayout.Toggle("Draw Connections", DrawConnections);
 
             EditorGUILayout.BeginHorizontal();
             _configurationIgnoredTypesExpanded.Value = EditorGUILayout.Foldout(_configurationIgnoredTypesExpanded,
@@ -366,8 +375,13 @@ namespace Dingo.Roads
             EditorGUILayout.LabelField("Tools", EditorStyles.boldLabel);
             if (GUILayout.Button("Snap To Surface"))
             {
-                var wiz = ScriptableWizard.DisplayWizard<SnapNodesToSurfaceWizard>("Snap Nodes To Surface", "Snap All", "Snap Selection");
-                wiz.OnOpened();
+                foreach (var node in FocusedRoadNetwork.Nodes)
+                {
+                    node.ResetSnapPosition();
+                    node.Think();
+                }
+                //var wiz = ScriptableWizard.DisplayWizard<SnapNodesToSurfaceWizard>("Snap Nodes To Surface", "Snap All", "Snap Selection");
+                //wiz.OnOpened();
             }
             if (GUILayout.Button("Force Refresh"))
             {

@@ -54,9 +54,9 @@ namespace Dingo.WorldStamp
 
         // Objects
         private SerializedProperty _objectsEnabled;
-        private SerializedProperty _scaleObjects;
         private SerializedProperty _removeObjectsWithStencil;
         private SerializedProperty _removeBaseObjects;
+        private SerializedProperty _overrideRelativeObjectMode;
         private SerializedProperty _relativeObjectMode;
 
         private bool _editingMask = false;
@@ -84,7 +84,6 @@ namespace Dingo.WorldStamp
             _heightOffset = serializedObject.FindProperty("HeightOffset");
             _treesEnabled = serializedObject.FindProperty("WriteTrees");
             _objectsEnabled = serializedObject.FindProperty("WriteObjects");
-            _scaleObjects = serializedObject.FindProperty("ScaleObjects");
             _splatsEnabled = serializedObject.FindProperty("WriteSplats");
             _previewEnabled = serializedObject.FindProperty("PreviewEnabled");
             _layerName = serializedObject.FindProperty("LayerName");
@@ -93,7 +92,8 @@ namespace Dingo.WorldStamp
             _detailsEnabled = serializedObject.FindProperty("WriteDetails");
             _detailBlendMode = serializedObject.FindProperty("DetailBlendMode");
             _detailsBoost = serializedObject.FindProperty("DetailBoost");
-            _relativeObjectMode = serializedObject.FindProperty("ObjectRelativeMode");
+            _overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
+            _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
         }
 
         void DoHeader(string text, ref bool expanded, SerializedProperty enabled)
@@ -244,10 +244,13 @@ namespace Dingo.WorldStamp
             if (_objectsExpanded)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(_scaleObjects);
                 EditorGUILayout.PropertyField(_removeBaseObjects);
                 EditorGUILayout.PropertyField(_removeObjectsWithStencil);
-                EditorGUILayout.PropertyField(_relativeObjectMode);
+                EditorGUILayout.PropertyField(_overrideRelativeObjectMode);
+                if (_overrideRelativeObjectMode.boolValue)
+                {
+                    EditorGUILayout.PropertyField(_relativeObjectMode);
+                }
                 EditorGUI.indentLevel--;
             }
 

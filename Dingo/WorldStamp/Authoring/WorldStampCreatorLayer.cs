@@ -14,7 +14,7 @@ namespace Dingo.WorldStamp.Authoring
     {
         [HideInInspector]
         public bool GUIExpanded;
-        [HideInInspector]
+        
         public bool Enabled = true;
 
         public virtual bool NeedsRecapture { get; set; }

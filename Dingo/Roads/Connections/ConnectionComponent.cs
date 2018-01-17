@@ -57,7 +57,7 @@ namespace Dingo.Roads
 
         public virtual void Think()
         {
-            if (NodeConnection == null)
+            if (NodeConnection == null || NodeConnection.Equals(null))
             {
                 Destroy();
                 DestroyImmediate(this);

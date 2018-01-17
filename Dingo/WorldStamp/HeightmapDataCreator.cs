@@ -17,7 +17,9 @@ namespace Dingo.WorldStamp.Authoring
         public Serializable2DFloatArray Heights;
 
         public bool AutoZeroLevel = true;
-        [ShowIf("AutoHeightMin", false)]
+
+        [NonSerialized]
+        [ShowIf("AutoZeroLevel", false)]
         public float ZeroLevel = 0;
 
         private WorldStampPreview _preview;
@@ -84,6 +86,7 @@ namespace Dingo.WorldStamp.Authoring
         protected override void CommitInternal(WorldStampData data, WorldStamp stamp)
         {
             data.Heights = Heights.JSONClone();
+            data.ZeroLevel = ZeroLevel;
         }
 
 #if UNITY_EDITOR

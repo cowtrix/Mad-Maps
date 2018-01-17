@@ -8,6 +8,7 @@ namespace Dingo.WorldStamp.Authoring
         [HideInInspector]
         public Serializable2DFloatArray Mask;
         public Vector3 Size;
+        public WorldStampCaptureTemplate Template;
 
         public void OnDrawGizmos()
         {

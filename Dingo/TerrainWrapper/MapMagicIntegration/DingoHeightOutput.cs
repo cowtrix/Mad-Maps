@@ -1,3 +1,4 @@
+#if MAPMAGIC
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine;
 
 namespace Dingo.Terrains.MapMagic
 {
-#if MAPMAGIC
+
     [System.Serializable]
     [GeneratorMenu(menu = "Dingo", name = "Dingo Height", disengageable = true)]
     public class DingoHeightOutput : OutputGenerator
@@ -249,5 +250,5 @@ namespace Dingo.Terrains.MapMagic
             scale = Mathf.NextPowerOfTwo(scale);
         }
     }
-#endif
 }
+#endif

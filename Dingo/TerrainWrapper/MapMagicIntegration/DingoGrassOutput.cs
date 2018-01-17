@@ -2,12 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using Dingo.Common;
-using MapMagic;
 using UnityEngine;
+
+#if MAPMAGIC
+using MapMagic;
 
 namespace Dingo.Terrains.MapMagic
 {
-#if MAPMAGIC
     [System.Serializable]
     [GeneratorMenu(menu = "Dingo", name = "Dingo Grass", disengageable = true)]
     public class DingoGrassOutput : OutputGenerator, Layout.ILayered
@@ -343,5 +344,5 @@ namespace Dingo.Terrains.MapMagic
         }
 
     }
-#endif
 }
+#endif

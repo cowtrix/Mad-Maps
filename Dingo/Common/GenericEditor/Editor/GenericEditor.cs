@@ -11,12 +11,20 @@ namespace Dingo.Common.GenericEditor
 
     public static class GenericEditor
     {
-        public static Dictionary<FieldInfo, bool> ExpandedCache = new Dictionary<FieldInfo, bool>();
+        public static Dictionary<string, bool> ExpandedFieldCache = new Dictionary<string, bool>();
 
         private static Dictionary<Type, IGenericDrawer> _activeDrawers; // Mapping of IGeneriDrawer types to type
         private static Dictionary<Type, IGenericDrawer> _drawerTypeMapping = new Dictionary<Type, IGenericDrawer>();    // Mapping of all types to their drawer
         private static Dictionary<Type, List<FieldInfo>> _typeFieldCache = new Dictionary<Type, List<FieldInfo>>();
-        
+
+        public static GUIContent DeleteContent
+        {
+            get
+            {
+                return new GUIContent("X", "Delete");
+            }
+        }
+
         private static IGenericDrawer GetDrawer(Type type)
         {
             IGenericDrawer drawer;
@@ -124,13 +132,16 @@ namespace Dingo.Common.GenericEditor
             }
 
             var drawer = GetDrawer(targetType);
-            if (drawer != null)
+            if (context != null && drawer != null)
             {
                 target = drawer.DrawGUI(target, label, targetType, fieldInfo, context);
             }
             else
             {
-                EditorGUI.indentLevel++;
+                if (fieldInfo != null)
+                {
+                    EditorGUI.indentLevel++;
+                }
                 var fields = GetFields(targetType);
                 foreach (var field in fields)
                 {
@@ -138,7 +149,10 @@ namespace Dingo.Common.GenericEditor
                     subObj = DrawGUI(subObj, field.Name, subObj != null ? subObj.GetType() : field.FieldType, field, target);
                     field.SetValue(target, subObj);
                 }
-                EditorGUI.indentLevel--;
+                if (fieldInfo != null)
+                {
+                    EditorGUI.indentLevel--;
+                }
             }
 
             return target;
