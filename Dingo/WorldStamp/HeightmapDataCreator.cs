@@ -6,7 +6,6 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
 
 namespace Dingo.WorldStamp.Authoring
 {
@@ -89,7 +88,6 @@ namespace Dingo.WorldStamp.Authoring
             data.ZeroLevel = ZeroLevel;
         }
 
-#if UNITY_EDITOR
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
             AutoZeroLevel = EditorGUILayout.Toggle("Auto Zero Level", AutoZeroLevel);
@@ -126,10 +124,10 @@ namespace Dingo.WorldStamp.Authoring
             HandleExtensions.DrawWireCube(bounds.center.xz().x0z(bounds.min.y + ZeroLevel * bounds.size.y), bounds.size.xz().x0z() / 2, Quaternion.identity, Color.cyan);
         }
 
-#endif
         public override void PreviewInDataInspector()
         {
             DataInspector.SetData(Heights);
         }
     }
 }
+#endif

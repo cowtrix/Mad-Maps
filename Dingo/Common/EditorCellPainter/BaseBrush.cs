@@ -1,5 +1,6 @@
 using UnityEngine;
 
+#if UNITY_EDITOR
 namespace Dingo.Common.Painter
 {
     public abstract class BaseBrush : IBrush
@@ -24,3 +25,4 @@ namespace Dingo.Common.Painter
         public abstract void DrawSpecificGUI();
     }
 }
+#endif

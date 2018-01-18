@@ -5,7 +5,13 @@ using UnityEngine;
 namespace Dingo.WorldStamp.Authoring
 {
     [ExecuteInEditMode]
+#if HURTWORLDSDK
+    [StripComponentOnBuild]
+#endif
     public class StampExitNode : NodeComponent
+#if HURTWORLDSDK
+        , ILevelPreBuildStepCallback
+#endif
     {
         public static Texture2D Icon
         {
@@ -38,9 +44,22 @@ namespace Dingo.WorldStamp.Authoring
             n.Configuration.IsExplicitControl = true;
         }
 
+#if UNITY_EDITOR
         public void OnDrawGizmos()
         {
             EditorExtensions.DrawArrow(transform.position, transform.position + _nodeControl, Color.green, 1);
         }
+#endif
+
+#if HURTWORLDSDK
+        public void OnLevelPreBuildStep()
+        {
+            var allMeshColliders = transform.GetComponentsInChildren<MeshCollider>();
+            for (int i = 0; i < allMeshColliders.Length; i++)
+            {
+                allMeshColliders[i].enabled = true;
+            }
+        }
+#endif
     }
 }

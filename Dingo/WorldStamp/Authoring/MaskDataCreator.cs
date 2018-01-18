@@ -3,11 +3,10 @@ using System.IO;
 using Dingo.Common;
 using Dingo.Common.Collections;
 using UnityEngine;
-using Painter = Dingo.Common.Painter.Painter;
 
 #if UNITY_EDITOR
+using Painter = Dingo.Common.Painter.Painter;
 using UnityEditor;
-#endif
 
 namespace Dingo.WorldStamp.Authoring
 {
@@ -37,9 +36,7 @@ namespace Dingo.WorldStamp.Authoring
         }
         private Common.Painter.GridManagerInt __gridManager;
 
-#if UNITY_EDITOR
         private Painter _maskPainter;
-#endif
         
         private void ResetMask(Bounds bounds)
         {
@@ -115,7 +112,6 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
 
-#if UNITY_EDITOR
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
             var bounds = parent.Template.Bounds;
@@ -317,7 +313,6 @@ namespace Dingo.WorldStamp.Authoring
                 UnityEngine.Object.DestroyImmediate(tex);
             }
         }
-#endif
 
         public override void PreviewInDataInspector()
         {
@@ -342,3 +337,4 @@ namespace Dingo.WorldStamp.Authoring
         }
     }
 }
+#endif

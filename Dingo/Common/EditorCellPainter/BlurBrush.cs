@@ -2,7 +2,6 @@
 
 #if UNITY_EDITOR
 using UnityEditor;
-#endif
 
 namespace Dingo.Common.Painter
 {
@@ -16,16 +15,13 @@ namespace Dingo.Common.Painter
 
         public override void DrawSpecificGUI()
         {
-#if UNITY_EDITOR
             Strength = Mathf.Max(0, EditorGUILayout.Slider("Strength", Strength, 0, 1));
             Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
             Radius = Mathf.Max(0, EditorGUILayoutX.IntSlider("Radius", Radius, 0, 10));
-#endif
         }
 
         protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
-#if UNITY_EDITOR
             var gridSize = gridManager.GetGridSize();
             Handles.color = Color.white*0.5f;
             Handles.CircleHandleCap(-1, inputState.PlanePosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
@@ -45,7 +41,6 @@ namespace Dingo.Common.Painter
             }
             Handles.color = Color.white;
             Handles.CircleHandleCap(-1, inputState.GridPosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
-#endif
         }
 
         public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
@@ -102,8 +97,4 @@ namespace Dingo.Common.Painter
         }
     }
 }
-
-
-namespace EditorCellPainter
-{
-}
+#endif

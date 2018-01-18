@@ -1,11 +1,11 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 namespace Dingo.Common.Painter
 {
-#if UNITY_EDITOR
     public delegate Color CellColorDelegate(int cell, Color color);
 
     public delegate void CellDelegate(int cell);
@@ -412,5 +412,5 @@ namespace Dingo.Common.Painter
             public bool Shift;
         }
     }
-#endif
 }
+#endif

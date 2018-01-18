@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+#if UNITY_EDITOR
 namespace Dingo.Common.Painter
 {
     public static class BrushUtilities
@@ -26,3 +27,4 @@ namespace Dingo.Common.Painter
         }
     }
 }
+#endif

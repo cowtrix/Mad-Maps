@@ -1,6 +1,6 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
+#if UNITY_EDITOR
 namespace Dingo.Common.Painter
 {
     public interface IBrush
@@ -10,3 +10,4 @@ namespace Dingo.Common.Painter
         bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState currentInputState, float minValue, float maxValue, Rect rect, Matrix4x4 TRS);
     }
 }
+#endif

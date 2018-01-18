@@ -5,10 +5,15 @@ using UnityEngine;
 namespace Dingo.WorldStamp.Authoring
 {
     [Serializable]
+#if HURTWORLDSDK
+    [StripComponentOnBuild(DestroyGameObject = true)]
+#endif
     public class WorldStampCaptureTemplate
     {
+#if UNITY_EDITOR
         public Bounds Bounds;
         public Terrain Terrain;
+
 
         public DetailDataCreator DetailDataCreator = new DetailDataCreator();
         public HeightmapDataCreator HeightmapDataCreator = new HeightmapDataCreator();
@@ -39,5 +44,6 @@ namespace Dingo.WorldStamp.Authoring
             }
         }
         private List<WorldStampCreatorLayer> __creators;
+#endif
     }
 }

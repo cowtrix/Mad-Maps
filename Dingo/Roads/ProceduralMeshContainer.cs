@@ -5,9 +5,12 @@ namespace Dingo.Roads
     /// <summary>
     /// A solution to the problem of embedding procedural meshes into prefabs.
     /// This will attempt to mirror the serialization of any assigned mesh
-    /// and then 
+    /// and put it back when it detects that the mesh reference has been lost.
     /// </summary>
     [ExecuteInEditMode]
+#if HURTWORLDSDK
+    [StripComponentOnBuild]
+#endif
     public class ProceduralMeshContainer : MonoBehaviour
     {
         public bool Collider;
