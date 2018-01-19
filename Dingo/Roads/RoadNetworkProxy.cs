@@ -8,6 +8,7 @@ namespace Dingo.Roads
 #if UNITY_EDITOR
     [CustomEditor(typeof(RoadNetworkProxy))]
     [CanEditMultipleObjects]
+
     public class RoadNetworkProxyGUI : Editor
     {
         private SerializedProperty _network;
@@ -48,6 +49,9 @@ namespace Dingo.Roads
     }
 #endif
 
+#if HURTWORLDSDK
+    [StripComponentOnBuild(DestroyGameObject = true)]
+#endif
     public class RoadNetworkProxy : MonoBehaviour
     {
         public RoadNetwork Network;

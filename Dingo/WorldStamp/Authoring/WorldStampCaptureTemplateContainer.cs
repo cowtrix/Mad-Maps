@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace Dingo.WorldStamp.Authoring
 {
+#if HURTWORLDSDK
+    [StripComponentOnBuild(DestroyGameObject = true)]
+#endif
     public class WorldStampCaptureTemplateContainer : MonoBehaviour
     {
         [HideInInspector]

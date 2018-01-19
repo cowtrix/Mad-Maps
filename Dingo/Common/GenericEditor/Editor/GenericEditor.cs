@@ -155,6 +155,12 @@ namespace Dingo.Common.GenericEditor
                 }
             }
 
+            var unityObj = target as UnityEngine.Object;
+            if (unityObj)
+            {
+                EditorUtility.SetDirty(unityObj);
+            }
+
             return target;
         }
     }

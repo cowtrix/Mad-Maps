@@ -5,9 +5,6 @@ using UnityEngine;
 namespace Dingo.WorldStamp.Authoring
 {
     [Serializable]
-#if HURTWORLDSDK
-    [StripComponentOnBuild(DestroyGameObject = true)]
-#endif
     public class WorldStampCaptureTemplate
     {
 #if UNITY_EDITOR

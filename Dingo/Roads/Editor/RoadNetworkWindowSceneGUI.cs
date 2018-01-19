@@ -206,12 +206,12 @@ namespace Dingo.Roads
             if (myEvent.control)
             {
                 var currentSelection = GetCurrentlySelectedNodes();
+                Handles.SphereCap(-1, hitPoint, Quaternion.identity, NodePreviewSize);
                 if (currentSelection.Count != 1)
                 {
                     return;
                 }
-
-                Handles.SphereCap(-1, hitPoint, Quaternion.identity, NodePreviewSize);
+                
                 // Draw the spline preview
                 var currentNode = currentSelection[0];
                 if (currentNode != null)

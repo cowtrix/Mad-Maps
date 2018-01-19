@@ -33,6 +33,15 @@ namespace Dingo.Common.GenericEditor
         }
     }
 
+    public class CurveDrawer : GenericDrawer<AnimationCurve>
+    {
+        protected override AnimationCurve DrawGUIInternal(AnimationCurve target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
+            object context = null)
+        {
+            return EditorGUILayout.CurveField(label, target);
+        }
+    }
+
     public class EnumDrawer : GenericDrawer<System.Enum>
     {
         protected override Enum DrawGUIInternal(Enum target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,

@@ -11,7 +11,7 @@
 	}
 	SubShader 
 	{
-		Tags { "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True" }
+		/*Tags { "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True" }
 		Blend Off
 		Cull Front
 		ZWrite On
@@ -55,8 +55,7 @@
 			o.Alpha = 1;
 			o.Albedo = main.rgb * color.rgb;
 		}
-
-		ENDCG
+		ENDCG*/
 
 		Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True"}
 		LOD 300
@@ -120,17 +119,7 @@
 			o.Normal = normal;
 			o.Specular = max(0.01, specSmooth.rgb);
 			o.Smoothness = _Smoothness;
-			/*
-			float rawZ = SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(IN.screenPos));
-            float sceneZ = LinearEyeDepth(rawZ);
-            float partZ = IN.eyeDepth;
-
-			float fade = 1.0;
-            if ( rawZ > 0.0 ) // Make sure the depth texture exists
-                fade = saturate(sceneZ - partZ);
-
-			//if(sceneZ == 0)
-				o.Alpha = fade > 0;*/
+			clip(o.Alpha - .001);
 		}
 
 		void DecalFinalGBuffer (Input IN, SurfaceOutputStandardSpecular o, inout half4 diffuse, inout half4 specSmoothness, inout half4 normal, inout half4 emission)
@@ -188,6 +177,7 @@
 			o.Normal = normal;
 			o.Specular = specSmooth.rgb;
 			o.Smoothness = specSmooth.a;
+			clip(o.Alpha - .001);
 		}
 
 		void DecalFinalGBuffer (Input IN, SurfaceOutputStandardSpecular o, inout half4 diffuse, inout half4 specSmoothness, inout half4 normal, inout half4 emission)
