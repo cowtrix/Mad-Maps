@@ -46,8 +46,6 @@ namespace Dingo.Terrains
         private Dictionary<LayerBase, CompoundTerrainLayer> _compoundDataCache =
             new Dictionary<LayerBase, CompoundTerrainLayer>();
 
-        public float CullYNormal = .8f;
-
         public BakedTerrainData CompoundTerrainData
         {
             get

@@ -280,10 +280,18 @@ namespace Dingo.Roads
                     }
                     var guiContent = new GUIContent(AssetPreview.GetAssetPreview(gameObject));
                     EditorGUILayout.BeginVertical(GUILayout.Width(70));
-                    if (GUILayout.Button(guiContent, GUIStyle.none, GUILayout.Width(64), GUILayout.Height(64)) || GUILayout.Button(gameObject.name, EditorStyles.miniLabel, GUILayout.Width(64)))
+                    if (GUILayout.Button(guiContent, GUIStyle.none, GUILayout.Width(64), GUILayout.Height(64)))
                     {
                         _currentIntersection = gameObject;
                     }
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label(gameObject.name, EditorStyles.miniLabel, GUILayout.Width(64));
+                    if (GUILayout.Button("x", EditorStyles.miniButton))
+                    {
+                        FocusedRoadNetwork.IntersectionHistory.RemoveAt(i);
+                        _currentIntersection = null;
+                    }
+                    EditorGUILayout.EndHorizontal();
                     EditorGUILayout.EndVertical();
                 }
                 EditorGUILayout.EndHorizontal();

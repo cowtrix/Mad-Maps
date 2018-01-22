@@ -367,7 +367,7 @@ namespace Dingo.Roads
             if ((!LayerMapping.TryGetValue(terrainWrapper, out snapshot) || snapshot == null) && createIfMissing)
             {
                 snapshot = ScriptableObject.CreateInstance<RoadLayer>();
-                snapshot.name = "sRoad";
+                snapshot.name = "Road Network";
                 LayerMapping[terrainWrapper] = snapshot;
                 terrainWrapper.Layers.Insert(0, snapshot);
                 snapshot.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;

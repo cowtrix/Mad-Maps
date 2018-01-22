@@ -4,6 +4,19 @@ namespace Dingo.Common
 {
     public static partial class GUIResources
     {
+        public static Texture2D PopoutIcon
+        {
+            get
+            {
+                if (__popoutIcon == null)
+                {
+                    __popoutIcon = Resources.Load<Texture2D>("PopoutIcon");
+                }
+                return __popoutIcon;
+            }
+        }
+        private static Texture2D __popoutIcon;
+
         public static Texture2D EyeOpenIcon
         {
             get

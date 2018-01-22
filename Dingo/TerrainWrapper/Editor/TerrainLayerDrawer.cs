@@ -306,7 +306,7 @@ namespace Dingo.Terrains
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Update", EditorStyles.toolbarButton))
+            if (GUILayout.Button("Update"))
             {
                 if (EditorUtility.DisplayDialog(string.Format("Update Layer {0} from Terrain?", layer.name), "This will clear any existing data!",
                     "Yes", "No"))
@@ -320,7 +320,7 @@ namespace Dingo.Terrains
                 }
             }
             EditorGUILayout.Space();
-            if (GUILayout.Button("Apply", EditorStyles.toolbarButton))
+            if (GUILayout.Button("Apply"))
             {
                 wrapper.PrepareApply();
                 layer.WriteToTerrain(wrapper);
@@ -330,7 +330,7 @@ namespace Dingo.Terrains
                 EditorSceneManager.MarkAllScenesDirty();
             }
             EditorGUILayout.Space();
-            if (GUILayout.Button("Clear", EditorStyles.toolbarButton))
+            if (GUILayout.Button("Clear"))
             {
                 if (EditorUtility.DisplayDialog(string.Format("Clear Layer {0}?", layer.name), "This will clear any existing data!",
                     "Yes", "No"))
@@ -343,13 +343,9 @@ namespace Dingo.Terrains
                 
             }
             EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
 
-            /*if ((layer.LegacyDetails.Count > 0 || layer.LegacySplats.Count > 0) && GUILayout.Button("Compress"))
-            {
-                layer.Compress();
-            }*/
-
-            if (GUILayout.Button("Debug: Get Compound Splats"))
+            /*if (GUILayout.Button("Debug: Get Compound Splats"))
             {
                 var aRes = wrapper.Terrain.terrainData.alphamapResolution;
                 var splats = wrapper.GetCompoundSplats(layer, 0, 0, aRes, aRes, true);
@@ -384,7 +380,7 @@ namespace Dingo.Terrains
                     layer.Objects[i] = prefabObjectData;
                 }
                 EditorUtility.SetDirty(layer);
-            }
+            }*/
 
             EditorGUILayout.EndVertical();
             

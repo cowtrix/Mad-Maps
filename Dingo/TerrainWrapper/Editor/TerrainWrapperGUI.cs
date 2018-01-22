@@ -54,15 +54,7 @@ namespace Dingo.Terrains
                 Wrapper = target as TerrainWrapper;
                 return;
             }
-
-            if (!IsPopout && GUILayout.Button("Popout Inspector"))
-            {
-                var w = EditorWindow.GetWindow<TerrainWrapperEditorWindow>();
-                w.Wrapper = Wrapper;
-                Selection.objects = new Object[0];
-                return;
-            }
-
+            
             for (int i = Wrapper.Layers.Count - 1; i >= 0; i--)
             {
                 if (!Wrapper.Layers[i])
@@ -85,13 +77,22 @@ namespace Dingo.Terrains
             _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
+            EditorGUILayout.BeginHorizontal();
             CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20));
+
+            if (!IsPopout && GUILayout.Button(new GUIContent(GUIResources.PopoutIcon, "Popout Inspector"), 
+                EditorStyles.label, GUILayout.Width(18), GUILayout.Height(18)))
+            {
+                var w = EditorWindow.GetWindow<TerrainWrapperEditorWindow>();
+                w.Wrapper = Wrapper;
+                Selection.objects = new Object[0];
+                return;
+            }
+
+            EditorGUILayout.EndHorizontal();
             var currentTabTitle = _tabs[CurrentTab].text;
             if (currentTabTitle == "Layers")
             {
-                EditorGUILayout.Space();
-                TerrainWrapper.ComputeShaders = EditorGUILayout.Toggle("Compute Shaders (Experimental)", TerrainWrapper.ComputeShaders);
-                EditorGUILayout.Space();
                 _layerDrawer.List.DoLayoutList();
                 if (_layerDrawer.List.index >= 0 && Wrapper.Layers.Count > 0 && _layerDrawer.List.index < Wrapper.Layers.Count)
                 {
@@ -114,6 +115,11 @@ namespace Dingo.Terrains
             }
             else if (currentTabTitle == "Info")
             {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Compute Shaders (Experimental)");
+                TerrainWrapper.ComputeShaders = EditorGUILayout.Toggle(TerrainWrapper.ComputeShaders);
+                EditorGUILayout.EndHorizontal();
+
                 Wrapper.WriteHeights = EditorGUILayout.Toggle("Write Heights", Wrapper.WriteHeights);
                 Wrapper.WriteSplats = EditorGUILayout.Toggle("Write Splats", Wrapper.WriteSplats);
                 Wrapper.WriteTrees = EditorGUILayout.Toggle("Write Trees", Wrapper.WriteTrees);
@@ -156,8 +162,6 @@ namespace Dingo.Terrains
 
                 EditorGUILayout.LabelField("Compound Trees: ", Wrapper.CompoundTerrainData.Trees.Count.ToString());
                 EditorExtensions.Seperator();
-
-                Wrapper.CullYNormal = EditorGUILayout.FloatField("Y Cull", Wrapper.CullYNormal);
             }
         }
         
