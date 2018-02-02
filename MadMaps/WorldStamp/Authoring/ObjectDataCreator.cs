@@ -154,8 +154,13 @@ namespace MadMaps.WorldStamp.Authoring
 #if UNITY_EDITOR
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
+            EditorGUI.BeginChangeCheck();
             Mask = LayerMaskFieldUtility.LayerMaskField("Layer Mask", Mask, false);
             RelativeMode = (WorldStamp.EObjectRelativeMode) EditorGUILayout.EnumPopup("Relative Mode", RelativeMode);
+            if (EditorGUI.EndChangeCheck())
+            {
+                NeedsRecapture = true;
+            }
         }
 
         protected override void PreviewInSceneInternal(WorldStampCreator parent)

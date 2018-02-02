@@ -90,6 +90,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
+            EditorGUI.BeginChangeCheck();
             AutoZeroLevel = EditorGUILayout.Toggle("Auto Zero Level", AutoZeroLevel);
             if (!AutoZeroLevel)
             {
@@ -101,6 +102,10 @@ namespace MadMaps.WorldStamp.Authoring
                     ZeroLevel = newHeightMin;
                     NeedsRecapture = true;
                 }
+            }
+            if (EditorGUI.EndChangeCheck())
+            {
+                NeedsRecapture = true;
             }
         }
 

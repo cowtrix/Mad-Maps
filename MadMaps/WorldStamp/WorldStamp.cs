@@ -817,8 +817,10 @@ namespace MadMaps.WorldStamp
                 foreach (var prefabObjectData in compoundObjects)
                 {
                     var pos = prefabObjectData.Position;
+
+                    //pos = Quaternion.Inverse(transform.rotation) * (pos - transform.position);
                     pos = new Vector3(pos.x * tSize.x, pos.y, pos.z * tSize.z) + t.GetPosition();
-                    pos = Quaternion.Inverse(transform.rotation) * (pos - transform.position);
+                    
                     var wPos = pos;
                     if (stampBounds.Contains(wPos))
                     {
@@ -828,7 +830,7 @@ namespace MadMaps.WorldStamp
                         if (stencilAmount > 0.5f)
                         {
                             layer.ObjectRemovals.Add(prefabObjectData.Guid);
-                            //Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);
+                            Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);
                         }
                     }
                 }

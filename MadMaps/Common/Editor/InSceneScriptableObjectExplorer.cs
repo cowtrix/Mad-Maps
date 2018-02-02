@@ -13,7 +13,7 @@ namespace MadMaps.Common
             typeof(Editor),
         }; 
         
-        [MenuItem("Tools/Dingo/Utilities/In-Scene Scriptable Objects")]
+        [MenuItem("Tools/Mad Maps/Utilities/In-Scene Scriptable Objects")]
         public static void OpenWindow()
         {
             GetWindow<InSceneScriptableObjectExplorer>();

@@ -5,7 +5,7 @@ namespace MadMaps.Common
 {
     public static class FindProblemMeshes
     {
-        [MenuItem("Tools/Dingo/Utilities/Find Problem Meshes")]
+        [MenuItem("Tools/Mad Maps/Utilities/Find Problem Meshes")]
         public static void Find()
         {
             var allMeshColliders = UnityEngine.Object.FindObjectsOfType<MeshCollider>();

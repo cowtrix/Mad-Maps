@@ -78,7 +78,7 @@ namespace MadMaps.Terrains
             _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
             EditorGUILayout.BeginHorizontal();
-            CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20));
+            CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20), GUILayout.Width(EditorGUIUtility.currentViewWidth - (IsPopout ? 12 : 40)));
 
             if (!IsPopout && GUILayout.Button(new GUIContent(GUIResources.PopoutIcon, "Popout Inspector"), 
                 EditorStyles.label, GUILayout.Width(18), GUILayout.Height(18)))

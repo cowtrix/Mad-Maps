@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    [CreateAssetMenu(menuName = "Dingo/Terrain/Detail Prototype")]
+    [CreateAssetMenu(menuName = "Mad Maps/Terrain/Detail Prototype")]
     public class DetailPrototypeWrapper : ScriptableObject
     {
         public float BendFactor;

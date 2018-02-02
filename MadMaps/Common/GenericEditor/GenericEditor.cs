@@ -9,6 +9,7 @@ namespace MadMaps.Common.GenericEditor
 {
     public static class GenericEditor
     {
+#if UNITY_EDITOR
         public static Dictionary<string, bool> ExpandedFieldCache = new Dictionary<string, bool>();
 
         private static Dictionary<Type, IGenericDrawer> _activeDrawers; // Mapping of IGeneriDrawer types to type
@@ -105,6 +106,10 @@ namespace MadMaps.Common.GenericEditor
                     {
                         continue;
                     }
+                    if (attributes.Any(o => o is NonSerializedAttribute))
+                    {
+                        continue;
+                    }
                     if (fieldInfo.IsPrivate && !attributes.Any(o => o is SerializeField))
                     {
                         continue;
@@ -115,9 +120,11 @@ namespace MadMaps.Common.GenericEditor
             }
             return result;
         }
-
+#endif
+        
         public static object DrawGUI(object target, string label = "", Type targetType = null, FieldInfo fieldInfo = null, object context = null)
         {
+#if UNITY_EDITOR
             if (targetType == null && target == null && fieldInfo == null)
             {
                 Debug.LogError("Insufficient information to determine type.");
@@ -158,8 +165,9 @@ namespace MadMaps.Common.GenericEditor
             {
                 EditorUtility.SetDirty(unityObj);
             }
-
+#endif
             return target;
         }
+
     }
 }

@@ -23,6 +23,11 @@ namespace MadMaps.WorldStamp.Authoring
         private static float MinMaskRes = 4;
         private static float MaskResolution = 128;
 
+        public override bool NeedsRecapture
+        {
+            get { return false; }
+        }
+
         private Common.Painter.GridManagerInt GridManager
         {
             get
@@ -140,7 +145,7 @@ namespace MadMaps.WorldStamp.Authoring
             }
         }
 
-        override public void DrawGUI(WorldStampCreator parent)
+        public override void DrawGUI(WorldStampCreator parent)
         {
             if (parent.SceneGUIOwner != this && _maskPainter != null)
             {
@@ -165,6 +170,11 @@ namespace MadMaps.WorldStamp.Authoring
             GUI.color = parent.SceneGUIOwner == this ? Color.green : Color.white;
             if (GUILayout.Button(previewContent, EditorStyles.miniButton, GUILayout.Width(60), GUILayout.Height(16)))
             {
+                if (parent.SceneGUIOwner == this && _maskPainter != null)
+                {
+                    _maskPainter.Destroy();
+                    _maskPainter = null;
+                }
                 parent.SceneGUIOwner = parent.SceneGUIOwner == this ? null : this;
                 if ((parent.Template.Bounds.size - LastBounds.size).magnitude > 1)
                 {
@@ -195,7 +205,7 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 ResetMask(parent.Template.Bounds);
             }
-            if (EditorGUILayoutX.IndentedButton("Fill From Min Y"))
+            if (EditorGUILayoutX.IndentedButton("Fill From Zero Level"))
             {
                 FillMaskFromMinY(parent.Template.Bounds, parent.GetCreator<HeightmapDataCreator>().Heights);
             }

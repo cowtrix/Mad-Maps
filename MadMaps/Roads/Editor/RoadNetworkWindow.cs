@@ -108,14 +108,14 @@ namespace MadMaps.Roads
             }
         }
 
-        [MenuItem("Tools/Dingo/Road Network Editor")]
+        [MenuItem("Tools/Mad Maps/Road Network Editor")]
         public static void OpenWindow()
         {
             var w = GetWindow<RoadNetworkWindow>();
             w.titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
         }
 
-        [MenuItem("GameObject/3D Object/Dingo/Road Network")]
+        [MenuItem("GameObject/3D Object/Road Network")]
         public static void CreateNetwork()
         {
             var newNetworkGO = new GameObject("Road Network");

@@ -53,10 +53,6 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 DetailPrototypeWrapper wrapper;
                 wrappers.TryGetValue(prototypes[i], out wrapper);
-                if (wrapper != null && IgnoredDetails.Contains(wrapper))
-                {
-                    continue;
-                }
                 var sample = terrain.terrainData.GetDetailLayer(min.x, min.z, width, height, i);
                 var data = new byte[width, height];
                 int sum = 0;
@@ -73,13 +69,9 @@ namespace MadMaps.WorldStamp.Authoring
                 {
                     DetailData.Add(new CompressedDetailData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
                 }
-                else if (wrapper != null)
-                {
-                    Debug.Log(string.Format("WorldStamp Detail Capture: Ignored detail layer {0} as it appeared to be empty.", wrapper.name));
-                }
                 else
                 {
-                    Debug.Log(string.Format("WorldStamp Detail Capture: Unable to resolve prototype at index {0}.", i));
+                    Debug.Log(string.Format("WorldStamp Detail Capture: Empty layer at {0}, ignoring!", i));
                 }
             }
         }
@@ -103,7 +95,7 @@ namespace MadMaps.WorldStamp.Authoring
                         var fV = v / (float)kvp.Data.Height;
                         var wV = bounds.min.z + fV * bounds.size.z;
 
-                        var val = kvp.Data[u, v] / 255f;
+                        var val = kvp.Data[u, v] / 16f;
                         HandleExtensions.DrawXZCell(new Vector3(wU, counter, wV), cellSize,
                             Quaternion.identity, ColorUtils.GetIndexColor(counter).WithAlpha(val));
                     }
@@ -114,9 +106,9 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
-            if (NeedsRecapture)
+            if (DetailData.Count == 0)
             {
-                EditorGUILayout.HelpBox("You need to Capture this layer to edit it.", MessageType.Info);
+                EditorGUILayout.HelpBox("No Details Found", MessageType.Info);
                 return;
             }
             foreach (var compressedDetailData in DetailData)
@@ -159,6 +151,10 @@ namespace MadMaps.WorldStamp.Authoring
             for (int i = 0; i < DetailData.Count; i++)
             {
                 var compressedDetailData = DetailData[i];
+                if (IgnoredDetails.Contains(compressedDetailData.Wrapper))
+                {
+                    continue;
+                }
                 data.DetailData.Add(compressedDetailData.JSONClone());
             }
         }

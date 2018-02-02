@@ -420,6 +420,10 @@ namespace MadMaps.WorldStamp
             {
                 var worldStamp = obj as WorldStamp;
                 var relevantWrappers = worldStamp.GetTerrainWrappers();
+                if (relevantWrappers.Count == 0)
+                {
+                    Debug.LogError("Unable to find any TerrainWrappers to write to. Do you need to add the TerrainWrapper component to your terrain?");
+                }
                 foreach (var relevantWrapper in relevantWrappers)
                 {
                     wrappers.Add(relevantWrapper);
@@ -608,8 +612,12 @@ namespace MadMaps.WorldStamp
             using (new Handles.DrawingScope(rotatedMatrix))
             {
                 _boxBoundsHandle.DrawHandle();
-            }            
-            worldStamp.Size = _boxBoundsHandle.size;
+            }
+            if (worldStamp.Size != _boxBoundsHandle.size)
+            {
+                worldStamp.Size = _boxBoundsHandle.size;
+                SceneView.RepaintAll();
+            }
 
             if (!_editingMask)
             {

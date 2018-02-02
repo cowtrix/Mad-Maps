@@ -54,10 +54,10 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 SplatPrototypeWrapper wrapper;
                 wrappers.TryGetValue(prototypes[i], out wrapper);
-                if (IgnoredSplats.Contains(wrapper))
+                /*if (IgnoredSplats.Contains(wrapper))
                 {
                     continue;
-                }
+                }*/
                 var data = new byte[width, height];
                 float sum = 0;
                 for (var dx = 0; dx < width; ++dx)
@@ -109,9 +109,9 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
-            if (NeedsRecapture)
+            if (SplatData.Count == 0)
             {
-                EditorGUILayout.HelpBox("You need to Capture this layer to edit it.", MessageType.Info);
+                EditorGUILayout.HelpBox("No Splats Found", MessageType.Info);
                 return;
             }
             foreach (var compressedDetailData in SplatData)
@@ -154,6 +154,10 @@ namespace MadMaps.WorldStamp.Authoring
             for (int i = 0; i < SplatData.Count; i++)
             {
                 var compressedSplatData = SplatData[i];
+                if (IgnoredSplats.Contains(compressedSplatData.Wrapper))
+                {
+                    continue;
+                }
                 data.SplatData.Add(compressedSplatData.JSONClone());
             }
         }

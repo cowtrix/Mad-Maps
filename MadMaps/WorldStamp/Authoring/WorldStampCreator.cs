@@ -9,7 +9,7 @@ namespace MadMaps.WorldStamp.Authoring
 {
     public class WorldStampCreator : SceneViewEditorWindow
     {
-        [MenuItem("Tools/Dingo/World Stamp Creator", false, 6)]
+        [MenuItem("Tools/Mad Maps/World Stamp Creator", false, 6)]
         public static void OpenWindow()
         {
             var w = GetWindow<WorldStampCreator>();
@@ -78,7 +78,7 @@ namespace MadMaps.WorldStamp.Authoring
             }
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Size:", Template.Bounds.size.xz().ToString());
+            EditorGUILayout.LabelField("Capture Area:", Template.Bounds.size.xz().ToString());
             if (GUILayout.Button(new GUIContent(BoundsLocked ? GUIResources.LockedIcon : GUIResources.UnlockedIcon, "Lock Bounds"), EditorStyles.label,
                 GUILayout.Width(18), GUILayout.Height(18)))
             {
@@ -92,7 +92,7 @@ namespace MadMaps.WorldStamp.Authoring
             var recaptureContent = new GUIContent("Capture");
             recaptureContent.tooltip = "Recapture this data.";
             GUI.color = Template.Creators.Any(layer => layer.NeedsRecapture) ? Color.Lerp(Color.red, Color.white, .5f) : Color.white;
-            if (GUILayout.Button(recaptureContent, EditorStyles.miniButton, GUILayout.Width(60), GUILayout.Height(16)))
+            if (GUILayout.Button(recaptureContent, EditorStyles.miniButton, GUILayout.Height(16)))
             {
                 for (int i = 0; i < Template.Creators.Count; i++)
                 {
@@ -102,9 +102,7 @@ namespace MadMaps.WorldStamp.Authoring
             }
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
-
-            Template.Layer = EditorGUILayout.LayerField("Layer", Template.Layer);
-
+            
             for (int i = 0; i < Template.Creators.Count; i++)
             {
                 Template.Creators[i].DrawGUI(this);
@@ -139,15 +137,19 @@ namespace MadMaps.WorldStamp.Authoring
             GUI.enabled = true;
             GUILayout.EndHorizontal();
 
+            Template.Layer = EditorGUILayout.LayerField("Create Stamp On Layer:", Template.Layer);
             if (GUILayout.Button("Create New Stamp"))
             {
-                for (int i = 0; i < Template.Creators.Count; i++)
+                if (Template.Creators.Any(layer => layer.Enabled && layer.NeedsRecapture) && EditorUtility.DisplayDialog("Layer {0} Needs Recapture",
+                        string.Format("We need to recapture the terrain. Do this now?"), "Yes", "No"))
                 {
-                    var layer = Template.Creators[i];
-                    if (layer.Enabled && layer.NeedsRecapture && EditorUtility.DisplayDialog(string.Format("Layer {0} Needs Recapture", layer.Label.text), 
-                        string.Format("Layer {0} needs to recapture it's data. Do this now?", layer.Label.text), "Yes", "No"))
+                    for (int i = 0; i < Template.Creators.Count; i++)
                     {
-                        layer.Capture(Template.Terrain, Template.Bounds);
+                        var layer = Template.Creators[i];
+                        if (layer.Enabled && layer.NeedsRecapture)
+                        {
+                            layer.Capture(Template.Terrain, Template.Bounds);
+                        }
                     }
                 }
 
@@ -156,9 +158,12 @@ namespace MadMaps.WorldStamp.Authoring
                 go.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y) + Vector3.up * GetCreator<HeightmapDataCreator>().ZeroLevel * Template.Terrain.terrainData.size.y;
                 var stamp = go.AddComponent<WorldStamp>();
                 var data = new WorldStampData();
-                foreach (var worldStampCreatorLayer in Template.Creators)
+                foreach (var layer in Template.Creators)
                 {
-                    worldStampCreatorLayer.Commit(data, stamp);
+                    if (layer.Enabled)
+                    {
+                        layer.Commit(data, stamp);
+                    }
                 }
                 data.Size = Template.Bounds.size;
                 stamp.SetData(data);

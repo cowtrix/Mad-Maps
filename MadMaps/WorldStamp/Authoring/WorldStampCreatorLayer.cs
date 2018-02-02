@@ -1,4 +1,5 @@
-﻿using MadMaps.Common;
+﻿using MadMaps.Common.GenericEditor;
+using MadMaps.Common;
 using ParadoxNotion.Design;
 using System;
 using UnityEngine;
@@ -86,7 +87,16 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 GUI.enabled = Enabled;
                 EditorGUI.indentLevel++;
+                
+                //EditorGUI.BeginChangeCheck();
+            
                 OnExpandedGUI(parent);
+
+                /*if (EditorGUI.EndChangeCheck())
+                {
+                    NeedsRecapture = true;
+                }*/
+
                 EditorGUI.indentLevel--;
                 GUI.enabled = true;
             }
@@ -105,7 +115,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected virtual void OnExpandedGUI(WorldStampCreator parent)
         {
-            EditorUtils.ShowAutoEditorGUI(this);
+            GenericEditor.DrawGUI(this);
         }
 #endif
 

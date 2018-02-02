@@ -365,9 +365,11 @@ namespace MadMaps.Terrains
                 EditorUtility.SetDirty(layer);
             }
 
+            */
+
             if (GUILayout.Button("Fix bad prefabs"))
             {
-                for (int i = layer.Objects.Count-1; i >= 0; i--)
+                for (int i = layer.Objects.Count - 1; i >= 0; i--)
                 {
                     var prefabObjectData = layer.Objects[i];
                     prefabObjectData.Prefab = PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab);
@@ -379,7 +381,7 @@ namespace MadMaps.Terrains
                     layer.Objects[i] = prefabObjectData;
                 }
                 EditorUtility.SetDirty(layer);
-            }*/
+            }
 
             if (GUILayout.Button("Resample"))
             {

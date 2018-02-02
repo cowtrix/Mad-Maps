@@ -8,7 +8,7 @@ namespace MadMaps.Roads
     {
         private RoadNetworkWindow _currentWindow;
 
-        [MenuItem("GameObject/Dingo/Road Network")]
+        [MenuItem("GameObject/Mad Maps Road Network")]
         public static void CreateInstance()
         {
             var go = new GameObject("Road Network");

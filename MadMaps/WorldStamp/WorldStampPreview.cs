@@ -129,6 +129,7 @@ namespace MadMaps.WorldStamp
 #if UNITY_EDITOR
         private void OnSceneGUIDelegate(UnityEditor.SceneView sceneView)
         {
+            //Debug.Log(Time.renderedFrameCount);
             if (!_existenceHook())
             {
                 UnityEditor.SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Reflection;
 using UnityEditor;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace MadMaps.Common.GenericEditor
 {
+
     public interface IGenericDrawer
     {
         object DrawGUI(object target, string label = "", Type targetType = null, FieldInfo fieldInfo = null, object context = null);
@@ -291,3 +293,4 @@ namespace MadMaps.Common.GenericEditor
         }
     }
 }
+#endif

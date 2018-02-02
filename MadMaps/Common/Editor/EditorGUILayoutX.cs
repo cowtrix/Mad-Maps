@@ -20,32 +20,6 @@ namespace MadMaps.Common
             return value;
         }
 
-        public static void DrawTODStackReflective<T>(T obj, float time)
-        {
-            if (obj == null)
-            {
-                EditorGUILayout.HelpBox(string.Format("Obj of type {0} was null", typeof(T).FullName), MessageType.Info);
-                return;
-            }
-            GUI.enabled = false;
-            var properties = (typeof(T)).GetProperties();
-            foreach (var propertyInfo in properties)
-            {
-                EditorGUILayout.LabelField(string.Format("[P]{0}:", propertyInfo.Name), propertyInfo.GetValue(obj, null).ToString());
-            }
-            var t = time;
-            // We can assume the only paramter it t
-            var methods = (typeof(T)).GetMethods();
-            foreach (var methodInfo in methods)
-            {
-                if (methodInfo.ReturnType == typeof(Color))
-                {
-                    EditorGUILayout.ColorField(string.Format("[M]{0}:", methodInfo.Name), (Color)methodInfo.Invoke(obj, new object[] { t }));
-                }
-            }
-            GUI.enabled = true;
-        }
-        
         public static T Indent<T>(Func<T> function, int indent = 16)
         {
             EditorGUILayout.BeginHorizontal();
@@ -155,35 +129,45 @@ namespace MadMaps.Common
             return JsonUtility.FromJson<T>(JsonUtility.ToJson(p));
         }
 
-        public static int Toolbar(int currentValue, string[] toolbarItems, float rectWidth)
+        public static int Toolbar(int currentValue, GUIContent[] toolbarItems, float width, float height)
         {
-            var currentWidthCounter = 0;
+            var currentWidthCounter = 0f;
             EditorGUILayout.BeginHorizontal();
+            int columnCounter = 0;
+
             for (int i = 0; i < toolbarItems.Length; i++)
             {
-                var stringWidth = toolbarItems[i].Length * 14;
-                currentWidthCounter += stringWidth;
-
-                if (currentWidthCounter > rectWidth)
+                var style = EditorStyles.miniButtonMid;
+                if (columnCounter == 0)
                 {
-                    currentWidthCounter = stringWidth;
+                    style = EditorStyles.miniButtonLeft;
+                }
+                style.stretchWidth = true;
+                var contentWidth = style.CalcSize(toolbarItems[i]).x;
+                currentWidthCounter += contentWidth;
+
+                if (currentWidthCounter > width)
+                {
+                    currentWidthCounter = contentWidth;
                     EditorGUILayout.EndHorizontal();
                     EditorGUILayout.BeginHorizontal();
+                    columnCounter = 0;
                 }
-
+                
                 if (i == currentValue)
                 {
                     GUI.enabled = false;
-                    GUILayout.Button(toolbarItems[i], EditorStyles.toolbarButton, GUILayout.MinWidth(stringWidth), GUILayout.ExpandWidth(true));
+                    GUILayout.Button(toolbarItems[i], style, GUILayout.ExpandWidth(true), GUILayout.Height(height));
                     GUI.enabled = true;
                 }
                 else
                 {
-                    if (GUILayout.Button(toolbarItems[i], EditorStyles.toolbarButton, GUILayout.MinWidth(stringWidth), GUILayout.ExpandWidth(true)))
+                    if (GUILayout.Button(toolbarItems[i], style, GUILayout.ExpandWidth(true), GUILayout.Height(height)))
                     {
                         return i;
                     }
                 }
+                columnCounter++;
             }
             EditorGUILayout.EndHorizontal();
             return currentValue;
