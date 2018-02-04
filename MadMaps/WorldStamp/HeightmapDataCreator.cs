@@ -1,7 +1,6 @@
 using System;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
-using ParadoxNotion.Design;
 using UnityEngine;
 
 #if UNITY_EDITOR
@@ -18,7 +17,7 @@ namespace MadMaps.WorldStamp.Authoring
         public bool AutoZeroLevel = true;
 
         [NonSerialized]
-        [ShowIf("AutoZeroLevel", false)]
+        [Common.GenericEditor.ShowIf("AutoZeroLevel", false)]
         public float ZeroLevel = 0;
 
         private WorldStampPreview _preview;

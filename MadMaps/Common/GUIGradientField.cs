@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -45,3 +46,4 @@ namespace MadMaps.Common
 
     }
 }
+#endif

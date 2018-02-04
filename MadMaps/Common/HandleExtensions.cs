@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+
+using UnityEditor;
 using UnityEngine;
 
 namespace MadMaps.Common
@@ -74,3 +76,4 @@ namespace MadMaps.Common
         }
     }
 }
+#endif

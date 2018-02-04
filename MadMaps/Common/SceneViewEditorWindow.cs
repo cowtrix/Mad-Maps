@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#if UNITY_EDITOR
+using UnityEditor;
 
 namespace MadMaps.Common
 {
@@ -26,3 +27,4 @@ namespace MadMaps.Common
         }
     }
 }
+#endif

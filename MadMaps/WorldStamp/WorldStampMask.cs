@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using MadMaps.Common;
+using MadMaps.Common.Collections;
 using UnityEngine;
 
 namespace MadMaps.WorldStamp
