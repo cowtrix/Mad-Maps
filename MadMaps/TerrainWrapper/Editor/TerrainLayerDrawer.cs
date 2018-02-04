@@ -367,7 +367,7 @@ namespace MadMaps.Terrains
 
             */
 
-            if (GUILayout.Button("Fix bad prefabs"))
+            /*if (GUILayout.Button("Fix bad prefabs"))
             {
                 for (int i = layer.Objects.Count - 1; i >= 0; i--)
                 {
@@ -395,7 +395,7 @@ namespace MadMaps.Terrains
                         layer.Heights[u, v] = h.BilinearSample(new Vector2(u/(float) newHRes, v/(float) newHRes));
                     }
                 }
-            }
+            }*/
 
             EditorGUILayout.EndVertical();
             

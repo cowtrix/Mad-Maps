@@ -5,11 +5,11 @@ using System.Collections.Generic;
 using MapMagic;
 using UnityEngine;
 
-namespace Dingo.Terrains.MapMagic
+namespace MadMaps.Terrains.MapMagic
 {
 
     [System.Serializable]
-    [GeneratorMenu(menu = "Dingo", name = "Dingo Textures", disengageable = true)]
+    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Textures", disengageable = true)]
     public class DingoSplatOutput : OutputGenerator, Layout.ILayered
     {
         public string LayerName = "MapMagic";

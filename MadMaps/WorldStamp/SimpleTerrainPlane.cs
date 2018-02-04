@@ -33,7 +33,7 @@ namespace MadMaps.WorldStamp
         public AnimationCurve Falloff;
         public Texture2D FalloffTexture;
         public BoundsFalloffMode FalloffMode;
-        public string LayerName = "sRoad";
+        public string LayerName = "Road Network";
         public Vector3 Offset;
 
         public bool RemoveObjects = true;
@@ -202,6 +202,8 @@ namespace MadMaps.WorldStamp
             var floatArraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
             
             var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
+            
             if (layer.Stencil == null || layer.Stencil.Width != hRes || layer.Stencil.Height != hRes)
             {
                 layer.Stencil = new Serializable2DFloatArray(hRes, hRes);

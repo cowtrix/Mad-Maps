@@ -1,16 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Dingo.WorldStamp;
+using MadMaps.WorldStamp;
 #if MAPMAGIC
 using MapMagic;
 using UnityEngine;
 
-namespace Dingo.Terrains.MapMagic
+namespace MadMaps.Terrains.MapMagic
 {
 
     [System.Serializable]
-    [GeneratorMenu(menu = "Dingo", name = "Dingo Objects", disengageable = true)]
+    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Objects", disengageable = true)]
     public class DingoObjectOutput : OutputGenerator, Layout.ILayered
     {
         public string LayerName = "MapMagic";

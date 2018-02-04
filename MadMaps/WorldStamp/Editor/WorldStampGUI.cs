@@ -191,8 +191,8 @@ namespace MadMaps.WorldStamp
             GUI.enabled = !_editingMask;
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.PropertyField(_snapPosition);
-            EditorGUILayout.PropertyField(_snapRotation, new GUIContent("Snap Rotation (90\u00B0)"));
+            /*EditorGUILayout.PropertyField(_snapPosition);
+            EditorGUILayout.PropertyField(_snapRotation, new GUIContent("Snap Rotation (90\u00B0)"));*/
             EditorGUILayout.PropertyField(_snapToTerrain);
             EditorGUILayout.PropertyField(_snapToTerrainOffset);
 

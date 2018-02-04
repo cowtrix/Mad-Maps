@@ -6,11 +6,11 @@ using System.Linq;
 using MapMagic;
 using UnityEngine;
 
-namespace Dingo.Terrains.MapMagic
+namespace MadMaps.Terrains.MapMagic
 {
 
     [System.Serializable]
-    [GeneratorMenu(menu = "Dingo", name = "Dingo Trees", disengageable = true)]
+    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Trees", disengageable = true)]
     public class DingoTreeOutput : OutputGenerator, Layout.ILayered
     {
         public string LayerName = "MapMagic";

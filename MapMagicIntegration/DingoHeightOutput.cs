@@ -2,15 +2,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Dingo.Common;
+using MadMaps.Common;
 using MapMagic;
 using UnityEngine;
 
-namespace Dingo.Terrains.MapMagic
+namespace MadMaps.Terrains.MapMagic
 {
 
     [System.Serializable]
-    [GeneratorMenu(menu = "Dingo", name = "Dingo Height", disengageable = true)]
+    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Height", disengageable = true)]
     public class DingoHeightOutput : OutputGenerator
     {
         public string LayerName = "MapMagic";
