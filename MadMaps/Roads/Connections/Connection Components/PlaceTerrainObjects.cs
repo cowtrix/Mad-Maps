@@ -18,7 +18,7 @@ namespace MadMaps.Roads.Connections
             public List<GameObject> Objects = new List<GameObject>();
             public FloatMinMax Distance = new FloatMinMax(1, 1);
             public float InitialOffset = 0;
-            public int MaxInstancesPerConnection = 10;
+            public int MaxInstances = 1000;
 
             public FloatMinMax SplineOffset = new FloatMinMax(0, 0);
             public Vec3MinMax Scale = new Vec3MinMax(Vector3.one, Vector3.one);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using MadMaps.Common.Serialization;
 using MadMaps.Roads;
 using MadMaps.Terrains.Lookups;
@@ -11,7 +12,7 @@ using Random = UnityEngine.Random;
 
 namespace MadMaps.Terrains
 {
-    public abstract class ProceduralLayerComponent
+    public abstract class ProceduralLayerComponent : IHelpLinkProvider, IShowEnableToggle
     {
         public enum ApplyTiming
         {
@@ -23,11 +24,28 @@ namespace MadMaps.Terrains
         }
 
         public abstract ApplyTiming Timing { get; }
+        [HideInInspector]
         public bool Enabled = true;
         public abstract void Apply(ProceduralLayer layer, TerrainWrapper wrapper);
+
+        public virtual string HelpURL
+        {
+            get { return null; }
+        }
+
+        public bool Editor_Enabled
+        {
+            get { return Enabled; }
+            set { Enabled = value; }
+        }
+
+        public override string ToString()
+        {
+            return GetType().Name.SplitCamelCase();
+        }
     }
 
-    [UserInstantiable(true)]
+    [Name("Procedural Layer")]
     public class ProceduralLayer : LayerBase, ISerializationCallbackReceiver
     {
         public List<ProceduralLayerComponent> Components = new List<ProceduralLayerComponent>();

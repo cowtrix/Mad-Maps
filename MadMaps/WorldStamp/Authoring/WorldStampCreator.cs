@@ -4,6 +4,7 @@ using System.Linq;
 using MadMaps.Common;
 using UnityEditor;
 using UnityEngine;
+using EditorGUILayoutX = MadMaps.Common.EditorGUILayoutX;
 
 namespace MadMaps.WorldStamp.Authoring
 {
@@ -13,7 +14,7 @@ namespace MadMaps.WorldStamp.Authoring
         public static void OpenWindow()
         {
             var w = GetWindow<WorldStampCreator>();
-            w.titleContent = new GUIContent("World Stamp Creator");
+            w.titleContent = new GUIContent("Stamp Creator");
         }
 
         public bool BoundsLocked;
@@ -21,7 +22,7 @@ namespace MadMaps.WorldStamp.Authoring
         public WorldStampCreatorLayer SceneGUIOwner;
 
         public WorldStamp TargetInjectionStamp;
-        public WorldStampCaptureTemplateContainer TargetInjectionTemplate;
+        public WorldStampTemplate TargetInjectionTemplate;
 
         private GUIContent _createStampTemplateContent = new GUIContent("Create Stamp Template", "Create an in-scene object to preserve stamp capture settings.");
 
@@ -70,7 +71,10 @@ namespace MadMaps.WorldStamp.Authoring
         
         protected void OnGUI()
         {
+            EditorGUILayout.BeginHorizontal();
             Template.Terrain = (Terrain)EditorGUILayout.ObjectField("Target Terrain", Template.Terrain, typeof(Terrain), true);
+            EditorExtensions.HelpButton("http://lrtw.net/madmaps/index.php?title=World_Stamp_Creator");
+            EditorGUILayout.EndHorizontal();
             if (Template.Terrain == null)
             {
                 EditorGUILayout.HelpBox("Please Select a Target Terrain", MessageType.Info);
@@ -115,7 +119,7 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 var mask = GetCreator<MaskDataCreator>();
                 var newTemplate = new GameObject("Stamp Template");
-                var temp = newTemplate.AddComponent<WorldStampCaptureTemplateContainer>();
+                var temp = newTemplate.AddComponent<WorldStampTemplate>();
                 temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
                 temp.Mask = mask.GetArrayFromMask(this);
                 temp.Template = Template.JSONClone();
@@ -123,8 +127,8 @@ namespace MadMaps.WorldStamp.Authoring
             }
 
             GUILayout.BeginHorizontal();
-            TargetInjectionTemplate = (WorldStampCaptureTemplateContainer) EditorGUILayout.ObjectField(TargetInjectionTemplate,
-                typeof (WorldStampCaptureTemplateContainer), true);
+            TargetInjectionTemplate = (WorldStampTemplate) EditorGUILayout.ObjectField(TargetInjectionTemplate,
+                typeof (WorldStampTemplate), true);
             GUI.enabled = TargetInjectionTemplate;
             if (GUILayout.Button("Replace Existing Stamp Template", GUILayout.Width(220)))
             {
@@ -136,6 +140,8 @@ namespace MadMaps.WorldStamp.Authoring
             }
             GUI.enabled = true;
             GUILayout.EndHorizontal();
+
+            EditorExtensions.Seperator();
 
             Template.Layer = EditorGUILayout.LayerField("Create Stamp On Layer:", Template.Layer);
             if (GUILayout.Button("Create New Stamp"))

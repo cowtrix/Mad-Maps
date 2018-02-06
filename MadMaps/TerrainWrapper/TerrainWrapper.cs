@@ -14,7 +14,7 @@ namespace MadMaps.Terrains
     [StripComponentOnBuild]
 #endif
     [ExecuteInEditMode]
-    [HelpURL("http://example.com/docs/MyComponent.html")] // TODO if worth it
+    [HelpURL("http://lrtw.net/madmaps/index.php?title=Terrain_Wrapper")]
     public class TerrainWrapper : MonoBehaviour
 #if HURTWORLDSDK
         , ILevelPreBuildStepCallback

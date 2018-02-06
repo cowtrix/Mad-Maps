@@ -9,6 +9,7 @@ using UnityEngine;
 namespace MadMaps.WorldStamp
 {
     [ExecuteInEditMode]
+    [HelpURL("http://lrtw.net/madmaps/index.php?title=World_Stamps")]
     #if HURTWORLDSDK
     [StripComponentOnBuild()]
     #endif

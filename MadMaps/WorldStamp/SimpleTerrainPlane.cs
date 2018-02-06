@@ -236,6 +236,10 @@ namespace MadMaps.WorldStamp
                     var zDist = localPos.z/objectBounds.size.z;
 
                     float falloff = GetFalloff(new Vector2(xDist, zDist));
+                    if (Mathf.Approximately(falloff, 0))
+                    {
+                        continue;
+                    }
 
                     var planeRay = new Ray(worldPos, Vector3.up);
                     float dist;
@@ -249,6 +253,9 @@ namespace MadMaps.WorldStamp
 
                     switch (BlendMode)
                     {
+                        case HeightBlendMode.Set:
+                            blendedHeight = Mathf.Lerp(existingHeight, blendedHeight, falloff);
+                            break;
                         case HeightBlendMode.Max:
                             blendedHeight = Mathf.Max(existingHeight, blendedHeight);
                             break;
@@ -262,7 +269,7 @@ namespace MadMaps.WorldStamp
 
                     layer.Stencil[matrixMin.x + dx, matrixMin.z + dz] =
                         MiscUtilities.CompressStencil(stencilKey, 1);
-                    layerHeights[dx, dz] = Mathf.Lerp(existingHeight, blendedHeight, falloff);
+                    layerHeights[dx, dz] = blendedHeight;
                 }
             }
 

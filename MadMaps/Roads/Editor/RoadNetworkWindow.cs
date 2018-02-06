@@ -125,6 +125,8 @@ namespace MadMaps.Roads
 
         public void OnGUI()
         {
+            titleContent = new GUIContent("Road Network", GUIResources.RoadNetworkIcon);
+
             EditorGUILayout.BeginHorizontal();
             FocusedRoadNetwork = (RoadNetwork) EditorGUILayout.ObjectField(FocusedRoadNetwork, typeof (RoadNetwork), false);
             GUI.color = FocusedRoadNetwork != null && FocusedRoadNetwork.SceneViewEnabled ? Color.black : Color.grey;
@@ -134,6 +136,7 @@ namespace MadMaps.Roads
                 FocusedRoadNetwork.SceneViewEnabled = !FocusedRoadNetwork.SceneViewEnabled;
             }
             GUI.color = Color.white;
+            EditorExtensions.HelpButton("http://lrtw.net/madmaps/index.php?title=Road_Network");
             EditorGUILayout.EndHorizontal();
             if (FocusedRoadNetwork == null)
             {
@@ -340,7 +343,7 @@ namespace MadMaps.Roads
         private void DoConfigUI()
         {
             FocusedRoadNetwork.SplineResolution = EditorGUILayout.FloatField("Spline Resolution", FocusedRoadNetwork.SplineResolution);
-            FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
+            //FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
             FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
             FocusedRoadNetwork.RecalculateTerrain = EditorGUILayout.Toggle("Recalculate Terrain", FocusedRoadNetwork.RecalculateTerrain);

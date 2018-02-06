@@ -37,6 +37,7 @@ public class TerrainSurfaceObjectGUI : Editor
 #if HURTWORLDSDK
 [StripComponentOnBuild]
 #endif
+[HelpURL("http://lrtw.net/madmaps/index.php?title=Terrain_Surface_Object")]
 public class TerrainSurfaceObject : MonoBehaviour
 {
 #if UNITY_EDITOR

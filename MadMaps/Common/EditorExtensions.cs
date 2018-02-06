@@ -10,6 +10,17 @@ namespace MadMaps.Common
 {
     public static class EditorExtensions
     {
+        public static void HelpButton(string url, float size = 20)
+        {
+            var content = EditorGUIUtility.IconContent("_Help");
+            content.text = null;
+            content.tooltip = "Open Documentation";
+            if (GUILayout.Button(content, EditorStyles.label, GUILayout.Width(size), GUILayout.Height(size)))
+            {
+                Application.OpenURL(url);
+            }
+        }
+
         [MenuItem("CONTEXT/MeshCollider/Dump Info")]
         public static void DumpMeshColliderInfo(MenuCommand command)
         {

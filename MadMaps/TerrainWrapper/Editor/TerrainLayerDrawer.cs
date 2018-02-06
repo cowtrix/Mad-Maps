@@ -139,8 +139,6 @@ namespace MadMaps.Terrains
             {
                 DrawLayerHeader(terrainlayer, infoRect);
             }
-
-
             
             var enabledRect = new Rect(rect.xMax - 20, rect.y, 20, rect.height);
             layer.Enabled = GUI.Toggle(enabledRect, layer.Enabled, GUIContent.none);
@@ -173,11 +171,7 @@ namespace MadMaps.Terrains
             {
                 EditorGUILayout.BeginVertical("Box");
                 EditorGUI.indentLevel++;
-
-                /*AutoEditorWrapper.ListEditorNicer("Components", procLayer.Components,
-                    , procLayer.Components, true);*/
-                GenericEditor.DrawGUI(procLayer.Components, "Components", typeof(List<ProceduralLayerComponent>), null, procLayer);
-
+                GenericEditor.DrawGUI(procLayer.Components, "Components", typeof(List<ProceduralLayerComponent>), typeof(ProceduralLayer).GetField("Components"), procLayer);
                 EditorGUI.indentLevel--;
                 EditorGUILayout.EndVertical();
                 return procLayer;
@@ -400,39 +394,6 @@ namespace MadMaps.Terrains
             EditorGUILayout.EndVertical();
             
             return layer;
-        }
-
-    }
-
-    public class OffsetTrees : ScriptableWizard
-    {
-        public GameObject Tree;
-        public Terrain Terrain;
-        public AnimationCurve Offset = new AnimationCurve(new []{new Keyframe(0,0), new Keyframe(1, 0), });
-
-        [MenuItem("CONTEXT/Terrain/Offset Tree")]
-        public static void OpenWizard()
-        {
-            DisplayWizard<OffsetTrees>("Offset Tree", "Offset");
-        }
-        void OnWizardCreate()
-        {
-            var trees = Terrain.terrainData.treeInstances;
-            var prototypes = Terrain.terrainData.treePrototypes;
-            for (int i = 0; i < trees.Length; i++)
-            {
-                var treeInstance = trees[i];
-                if (prototypes[treeInstance.prototypeIndex].prefab != Tree)
-                {
-                    continue;
-                }
-
-                treeInstance.position.y = (Terrain.SampleHeight(Terrain.TreeToWorldPos(treeInstance.position)) 
-                    + Offset.Evaluate(Terrain.terrainData.GetInterpolatedNormal(treeInstance.position.x, treeInstance.position.y).y))/Terrain.terrainData.size.y;
-                trees[i] = treeInstance;
-            }
-            Terrain.terrainData.treeInstances = trees;
-            Terrain.Flush();
         }
     }
 }

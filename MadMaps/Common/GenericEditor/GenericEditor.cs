@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Object = UnityEngine.Object;
+using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -10,8 +11,38 @@ using UnityEditor;
 
 namespace MadMaps.Common.GenericEditor
 {
+    public interface IHelpLinkProvider
+    {
+        string HelpURL { get; }
+    }
+
+    public interface IShowEnableToggle
+    {
+        bool Editor_Enabled { get; set; }
+    }
+
     public static class GenericEditor
     {
+        public static string GetFriendlyName(Type t)
+        {
+            var nameAttr = t.GetAttribute<NameAttribute>();
+            if (nameAttr != null)
+            {
+                return nameAttr.Name;
+            }
+            return t.Name.SplitCamelCase();
+        }
+
+        public static string GetFriendlyName(FieldInfo fieldInfo)
+        {
+            var nameAttr = fieldInfo.GetAttribute<NameAttribute>();
+            if (nameAttr != null)
+            {
+                return nameAttr.Name;
+            }
+            return fieldInfo.Name.SplitCamelCase();
+        }
+
 #if UNITY_EDITOR
         public static Dictionary<string, bool> ExpandedFieldCache = new Dictionary<string, bool>();
 
@@ -23,10 +54,13 @@ namespace MadMaps.Common.GenericEditor
         {
             get
             {
-                return new GUIContent("X", "Delete");
+                var content = EditorGUIUtility.IconContent("TreeEditor.Trash");
+                content.tooltip = "Delete";
+                content.text = null;
+                return content;
             }
         }
-
+        
         private static IGenericDrawer GetDrawer(Type type)
         {
             IGenericDrawer drawer;
@@ -53,7 +87,7 @@ namespace MadMaps.Common.GenericEditor
             // Subclass = distance from actual class
             // Exact match - instant return
             Type bestDrawer = null;
-            int bestScore = int.MinValue;
+            int bestScore = Int32.MinValue;
             foreach(var mapping in _activeDrawers)
             {
                 var targetType = mapping.Key;
@@ -154,7 +188,7 @@ namespace MadMaps.Common.GenericEditor
                 foreach (var field in fields)
                 {
                     var subObj = field.GetValue(target);
-                    subObj = DrawGUI(subObj, field.Name, subObj != null ? subObj.GetType() : field.FieldType, field, target);
+                    subObj = DrawGUI(subObj, GetFriendlyName(field), subObj != null ? subObj.GetType() : field.FieldType, field, target);
                     field.SetValue(target, subObj);
                 }
                 if (fieldInfo != null)
@@ -163,7 +197,7 @@ namespace MadMaps.Common.GenericEditor
                 }
             }
 
-            var unityObj = target as UnityEngine.Object;
+            var unityObj = target as Object;
             if (unityObj)
             {
                 EditorUtility.SetDirty(unityObj);
@@ -171,6 +205,5 @@ namespace MadMaps.Common.GenericEditor
 #endif
             return target;
         }
-
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MadMaps.Roads.Connections;
 using UnityEngine;
 
 namespace MadMaps.Common
@@ -15,8 +16,8 @@ namespace MadMaps.Common
             ZPos,
             ZNeg
         }
-        
-        static List<Vector3> _uvCache = new List<Vector3>();
+
+        private static List<Vector3> _uvCache = new List<Vector3>();
 
         public static Mesh Clone(this Mesh mesh)
         {
@@ -46,7 +47,7 @@ namespace MadMaps.Common
             mesh.GetUVs(channel, _uvCache);
             otherMesh.SetUVs(channel, _uvCache);
         }
-        
+
         public static void ProcessRemovedVerts(HashSet<int> removedVerts, List<int> tris, List<Vector4> uvs)
         {
             if (removedVerts.Count == 0)
@@ -68,7 +69,7 @@ namespace MadMaps.Common
         public static Mesh FlipNormals(this Mesh mesh)
         {
             var n = new List<Vector3>(mesh.normals);
-            for (int i = 0; i < n.Count; i++)
+            for (var i = 0; i < n.Count; i++)
             {
                 n[i] *= -1;
             }
@@ -94,21 +95,16 @@ namespace MadMaps.Common
         }
 
         // Distorts a mesh along a spline
-        public static Mesh DistortAlongSpline(
-            this Mesh sourceMesh,
-            SplineSegment spline,
-            Matrix4x4 meshTransform,
-            float splineStartTime = 0,
-            float splineEndTime = 1,
-            float tSnap = 0)
+        public static Mesh DistortAlongSpline(this Mesh sourceMesh, SplineSegment spline, Matrix4x4 meshTransform,
+            float splineStartTime = 0, float splineEndTime = 1, float snapDistance = 0,
+            CreateRenderMesh.Config.LodLevel.ESplineInterpolation splineInterpolation =
+                CreateRenderMesh.Config.LodLevel.ESplineInterpolation.Natural)
         {
-            //spline.Recalculate();
-
-            Mesh result = new Mesh();
+            var result = new Mesh();
             var verts = new List<Vector3>(sourceMesh.vertices);
 
             var meshBounds = new Bounds();
-            for (int i = 0; i < verts.Count; i++)
+            for (var i = 0; i < verts.Count; i++)
             {
                 verts[i] = meshTransform.MultiplyPoint3x4(verts[i]);
                 if (i == 0)
@@ -122,45 +118,54 @@ namespace MadMaps.Common
             }
             //DebugHelper.DrawCube(meshBounds.center, meshBounds.extents, Quaternion.identity, Color.white, 20);
 
+            var splineLength = spline.Length;
             var colors = new Color[verts.Count];
             // Transform vert from mesh space to spline-axis space
             for (var i = verts.Count - 1; i >= 0; i--)
             {
                 var vert = verts[i];
-                
-                // First is finding the vert on the spline axis
-                var normalizedVert = vert - meshBounds.min; // Normalized vert tells us where it falls on the splines 't' axis
-                normalizedVert = new Vector3(
-                    normalizedVert.x / Mathf.Max(float.Epsilon, meshBounds.size.x),
-                    normalizedVert.y/ Mathf.Max(float.Epsilon, meshBounds.size.y),
-                    normalizedVert.z / Mathf.Max(float.Epsilon, meshBounds.size.z));
-                var t = Mathf.Lerp(splineStartTime, splineEndTime, normalizedVert.x);
-                t = Mathf.Clamp01(t);
 
-                var scaledTSnap = tSnap;
-                if (t < scaledTSnap)
+                // First is finding the vert on the spline axis
+                var normalizedVert = vert - meshBounds.min;
+                    // Normalized vert tells us where it falls on the splines 't' axis
+                normalizedVert = new Vector3(
+                    normalizedVert.x/Mathf.Max(float.Epsilon, meshBounds.size.x),
+                    normalizedVert.y/Mathf.Max(float.Epsilon, meshBounds.size.y),
+                    normalizedVert.z/Mathf.Max(float.Epsilon, meshBounds.size.z));
+                var t = Mathf.Lerp(splineStartTime, splineEndTime, normalizedVert.x);
+
+                var dist = t*splineLength;
+                if (dist < snapDistance)
                 {
                     t = 0;
                 }
-                if (t > 1 - scaledTSnap)
+
+                var distRemaining = splineLength - dist;
+                if (distRemaining < snapDistance)
                 {
                     t = 1;
                 }
 
-                var natT = spline.UniformToNaturalTime(t);
+                t = Mathf.Clamp01(t);
 
+                var natT = t;
+                if (splineInterpolation == CreateRenderMesh.Config.LodLevel.ESplineInterpolation.Uniform)
+                {
+                    natT = spline.UniformToNaturalTime(t);
+                }
+                
                 //var rotation = spline.GetRotation(natT);
                 var tangent = spline.GetTangent(natT);
                 var splineForward = Quaternion.LookRotation(tangent, spline.GetUpVector(natT));
                 //var axisRotation = GetAxisRotation(axis);
 
                 //var uniformT = spline.NaturalToUniformTime(t);
-                Vector3 pointAlongSpline = /*transform.worldToLocalMatrix**/spline.GetUniformPointOnSpline(t);
+                var pointAlongSpline = /*transform.worldToLocalMatrix**/ spline.GetUniformPointOnSpline(t);
 
                 //var vectorFromAxis = GetVectorFromAxis(vert, axis);
                 //var splineAdjustedVert = vert - vectorFromAxis;
 
-                verts[i] = pointAlongSpline + splineForward * new Vector3(0, vert.y, vert.z);
+                verts[i] = pointAlongSpline + splineForward*new Vector3(0, vert.y, vert.z);
                 colors[i] = Color.Lerp(Color.black, Color.white, t);
             }
 
@@ -255,4 +260,3 @@ namespace MadMaps.Common
         }
     }
 }
-

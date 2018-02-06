@@ -1,7 +1,9 @@
+using MadMaps.Common.GenericEditor;
 using UnityEngine;
 
 namespace MadMaps.Terrains
 {
+    [Name("Objects/Terrain Surface Object Applier")]
     public class TerrainSurfaceObjectApplier : ProceduralLayerComponent
     {
         public float RequiredY = .9f;
@@ -9,6 +11,11 @@ namespace MadMaps.Terrains
         public override ApplyTiming Timing
         {
             get { return ApplyTiming.OnFrameAfterPostFinalise; }
+        }
+
+        public override string HelpURL
+        {
+            get { return "http://lrtw.net/madmaps/index.php?title=Terrain_Surface_Object"; }
         }
 
         public override void Apply(ProceduralLayer layer, TerrainWrapper wrapper)

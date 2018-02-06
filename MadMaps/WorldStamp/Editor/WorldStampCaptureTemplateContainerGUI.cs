@@ -7,7 +7,7 @@ using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 
 namespace MadMaps.WorldStamp.Authoring
 {
-    [CustomEditor(typeof(WorldStampCaptureTemplateContainer))]
+    [CustomEditor(typeof(WorldStampTemplate))]
     public class WorldStampCaptureTemplateContainerGUI : Editor
     {
         private bool _isPreviewing;
@@ -15,7 +15,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void OnInspectorGUI()
         {
-            var wsct = target as WorldStampCaptureTemplateContainer;
+            var wsct = target as WorldStampTemplate;
             if (GUILayout.Button("Set as Capture Settings"))
             {
                 var w = EditorWindow.GetWindow<WorldStampCreator>();
@@ -59,7 +59,7 @@ namespace MadMaps.WorldStamp.Authoring
             }
             _hasSet = true;
             Common.Painter.EditorCellHelper.Clear(false);
-            var wsct = target as WorldStampCaptureTemplateContainer;
+            var wsct = target as WorldStampTemplate;
             var min = wsct.transform.position - wsct.Size.Flatten()/2;
             for (var u = 0; u < wsct.Mask.Width; u++)
             {

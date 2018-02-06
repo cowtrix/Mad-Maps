@@ -69,17 +69,10 @@ namespace MadMaps.Roads
         }
         private RoadNetwork __network;
 
-        /*
-#region legacy
-
-        public bool LegacyCheck = false;
-        public bool SnapToGround = true;
-        public float SnapOffset = 0;
-        public bool IsExplicitControl = false;
-        public Vector3 ExplicitControl = new Vector3();
-        public bool OverrideCurviness = false;
-        public float Curviness = 30;
-#endregion*/
+        public int ConnectionCount
+        {
+            get { return InConnections.Count + OutConnections.Count; }
+        }
 
         public bool Locked;
 
@@ -386,7 +379,19 @@ namespace MadMaps.Roads
             {
                 return Configuration.Curviness;
             }
-            return Network != null ? Network.Curviness : 30;
+            float curve = 0;
+            foreach (var nodeConnection in AllConnections())
+            {
+                if (nodeConnection.Configuration != null)
+                {
+                    curve += nodeConnection.Configuration.Curviness;
+                }
+                else
+                {
+                    curve += ConnectionConfiguration.DefaultCurviness;
+                }
+            }
+            return curve/ConnectionCount;
         }
 
         public IEnumerable<NodeConnection> AllConnections()

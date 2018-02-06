@@ -16,6 +16,12 @@ namespace MadMaps.Roads.Connections
         {
             public class LodLevel
             {
+                public enum ESplineInterpolation
+                {
+                    Natural,
+                    Uniform,
+                }
+
                 public Mesh SourceMesh;
                 public Material[] Materials = new Material[0];
                 public float LodDistance = 1f;
@@ -23,9 +29,9 @@ namespace MadMaps.Roads.Connections
                 public int Layer;
                 public bool CopyToCollider;
                 public float BreakDistance = 50;
-
+                public ESplineInterpolation SplineInterpolation = ESplineInterpolation.Natural;
                 [Range(0, 1)]
-                public float SnapStrength = 0.05f;
+                public float SnapDistance = 0.05f;
                 public MeshTools.Axis Axis;
                 public Vector3 Scale = new Vector3(1, 1, 1);
                 public Vector3 Offset = new Vector3(0, 0, 0);
@@ -177,7 +183,9 @@ namespace MadMaps.Roads.Connections
 
             var perMeshLength = Math.Min(totalSplineLength, sourceMeshAxisLength);
             var perMeshPercentage = perMeshLength / totalSplineLength;
-            var snapT = perMeshPercentage * config.SnapStrength;
+
+            var snapDistance = config.SnapDistance;
+
             var matrix = Matrix4x4.TRS(
                 config.Offset,
                 Quaternion.Euler(config.Rotation),
@@ -196,12 +204,16 @@ namespace MadMaps.Roads.Connections
             for (var i = SplineRange.x; i < 1; i += perMeshPercentage)
             {
                 var startTime = i;
-                var endTime = i + perMeshPercentage;
-                if (startTime <= snapT)
+                var endTime = Mathf.Clamp01(i + perMeshPercentage);
+
+                if (config.SplineInterpolation == Config.LodLevel.ESplineInterpolation.Uniform)
                 {
-                    startTime = 0;
+                    startTime = spline.NaturalToUniformTime(startTime);
+                    endTime = spline.NaturalToUniformTime(endTime);
                 }
-                if (endTime >= 1 - snapT)
+
+                var distanceLeft = totalSplineLength - (endTime * totalSplineLength);
+                if (endTime < 1 && distanceLeft <= snapDistance)
                 {
                     endTime = 1;
                 }
@@ -219,7 +231,7 @@ namespace MadMaps.Roads.Connections
 
                 workingMeshes.Add(new CombineInstance()
                 {
-                    mesh = config.SourceMesh.DistortAlongSpline(spline, matrix, startTime, endTime, snapT),
+                    mesh = config.SourceMesh.DistortAlongSpline(spline, matrix, startTime, endTime, snapDistance, config.SplineInterpolation),
                     transform = meshCombineMatrix,
                 });
 
@@ -227,7 +239,7 @@ namespace MadMaps.Roads.Connections
                 {
                     workingMeshes.Add(new CombineInstance()
                     {
-                        mesh = config.SourceMesh.DistortAlongSpline(spline, mirrorMatrix, startTime, endTime, snapT)
+                        mesh = config.SourceMesh.DistortAlongSpline(spline, mirrorMatrix, startTime, endTime, snapDistance, config.SplineInterpolation)
                             .FlipWindingOrder(),
                         transform = Matrix4x4.identity,
                     });

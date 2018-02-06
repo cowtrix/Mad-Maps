@@ -74,7 +74,7 @@ namespace MadMaps.WorldStamp.Authoring
                     }
                     continue;
                 }
-                var template = transform.GetComponentInAncestors<WorldStampCaptureTemplateContainer>();
+                var template = transform.GetComponentInAncestors<WorldStampTemplate>();
                 if (template)
                 {
                     ignores.Add(template.transform);

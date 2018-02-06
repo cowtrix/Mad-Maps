@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
+using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains.Lookups;
 using MadMaps.WorldStamp;
 using UnityEngine;
@@ -10,14 +11,14 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    [UserInstantiable(true)]
+    [Name("Terrain Layer")]
     public class TerrainLayer : LayerBase
     {
         public enum ETerrainLayerBlendMode
         {
             Additive,
             Set,
-            Stencil
+            Stencil,
         }
 
         public ETerrainLayerBlendMode BlendMode = ETerrainLayerBlendMode.Set;

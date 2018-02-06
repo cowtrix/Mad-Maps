@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using UnityEngine;
 
 namespace MadMaps.Terrains
 {
+    [Name("Trees/Gradient Filter")]
     public class TreeGradientFilter : ProceduralLayerComponent
     {
         public List<GameObject> Prefabs = new List<GameObject>();
@@ -16,6 +18,11 @@ namespace MadMaps.Terrains
             get { return ApplyTiming.OnPreFinalise; }
         }
 
+        public override string HelpURL
+        {
+            get { return "http://lrtw.net/madmaps/index.php?title=Tree_Gradient_Filter"; }
+        }
+        
         public override void Apply(ProceduralLayer layer, TerrainWrapper wrapper)
         {
             var trees = wrapper.CompoundTerrainData.Trees;

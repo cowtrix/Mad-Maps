@@ -6,9 +6,15 @@ using UnityEngine;
 namespace MadMaps.Roads
 {
     [CreateAssetMenu(menuName = "Mad Maps/Roads/Connection Configuration")]
+    [HelpURL("http://lrtw.net/madmaps/index.php?title=Connection_Configuration")]
     public class ConnectionConfiguration : ScriptableObject, ISerializationCallbackReceiver
     {
+        public const float DefaultCurviness = 60;
+
+        [Tooltip("The color this connection will show in the Scene window.")]
         public Color Color = UnityEngine.Color.white;
+        [Tooltip("The curviness of the splines with this configuration.")]
+        public float Curviness = DefaultCurviness;
         
         public List<ConnectionConfigurationBase> Components = new List<ConnectionConfigurationBase>();
 

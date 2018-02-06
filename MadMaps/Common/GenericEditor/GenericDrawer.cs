@@ -118,19 +118,27 @@ namespace MadMaps.Common.GenericEditor
 
     public class Vec3MinMaxDrawer : GenericDrawer<Vec3MinMax>
     {
+        private const int labelWidth = 70;
+        private const int vectorLabelWidth = 30;
+
         protected override Vec3MinMax DrawGUIInternal(Vec3MinMax target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
             object context = null)
         {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(label, GUILayout.Width(150));
-            EditorGUILayout.LabelField("Min", GUILayout.Width(64));
-            target.Min = EditorGUILayout.Vector3Field("", target.Min);
+            var indentLevel = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
+            EditorGUILayout.BeginHorizontal(/*GUILayout.MaxWidth(maxWidth)*/);
+            GUILayout.Space(indentLevel * 16);
+            EditorGUILayout.LabelField(label, GUILayout.Width(labelWidth));
+            EditorGUILayout.LabelField("Min", EditorStyles.miniLabel, GUILayout.Width(vectorLabelWidth));
+            target.Min = EditorGUILayout.Vector3Field(GUIContent.none, target.Min);
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("", GUILayout.Width(150));
-            EditorGUILayout.LabelField("Max", GUILayout.Width(64));
-            target.Max = EditorGUILayout.Vector3Field("", target.Max);
+            EditorGUILayout.BeginHorizontal(/*GUILayout.MaxWidth(maxWidth)*/);
+            GUILayout.Space(indentLevel * 16);
+            EditorGUILayout.LabelField("", GUILayout.Width(labelWidth));
+            EditorGUILayout.LabelField("Max", EditorStyles.miniLabel, GUILayout.Width(vectorLabelWidth));
+            target.Max = EditorGUILayout.Vector3Field(GUIContent.none, target.Max);
             EditorGUILayout.EndHorizontal();
+            EditorGUI.indentLevel = indentLevel;
             return target;
         }
     }
@@ -186,7 +194,7 @@ namespace MadMaps.Common.GenericEditor
         {
             var expandedKey = fieldInfo != null ? context + fieldInfo.Name : context + "list";
             var listType = targetType.IsArray ? targetType.GetElementType() : targetType.GetGenericArguments()[0];
-
+            ListGenericUIAttribute listAttribute = fieldInfo != null ? fieldInfo.GetAttribute<ListGenericUIAttribute>() : null;
             if (!GenericEditor.ExpandedFieldCache.ContainsKey(expandedKey))
             {
                 GenericEditor.ExpandedFieldCache[expandedKey] = false;
@@ -199,9 +207,9 @@ namespace MadMaps.Common.GenericEditor
 
             if (fieldInfo == null || GenericEditor.ExpandedFieldCache[expandedKey])
             {
-                EditorGUI.indentLevel++;
                 for (var i = 0; i < target.Count; i++)
                 {
+                    EditorGUI.indentLevel++;
                     var o = target[i];
                     if (!GenericEditor.ExpandedFieldCache.ContainsKey(expandedKey + i))
                     {
@@ -212,7 +220,7 @@ namespace MadMaps.Common.GenericEditor
                     {
                         EditorGUILayout.BeginHorizontal();
                         o = EditorGUILayout.ObjectField((UnityEngine.Object)o, listType, true);
-                        if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.miniButton, GUILayout.Width(20)))
+                        if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)))
                         {
                             if (targetType.IsArray)
                             {
@@ -229,14 +237,44 @@ namespace MadMaps.Common.GenericEditor
                     else
                     {
                         EditorGUILayout.BeginHorizontal();
-                        GenericEditor.ExpandedFieldCache[expandedKey + i] = EditorGUILayout.Foldout(GenericEditor.ExpandedFieldCache[expandedKey + i],
-                            o != null ? string.Format("[{0}] {1}", i, o) : "Null");
-                        if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.miniButton, GUILayout.Width(20)))
+
+                        string objectLabel = "NULL";
+                        if (o != null)
+                        {
+                            objectLabel = o.ToString();
+                        }
+
+                        EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                        GenericEditor.ExpandedFieldCache[expandedKey + i] = 
+                            EditorGUILayout.Foldout(GenericEditor.ExpandedFieldCache[expandedKey + i], objectLabel);
+                        EditorGUILayout.EndHorizontal();
+
+                        if (o != null && typeof(IHelpLinkProvider).IsAssignableFrom(listType))
+                        {
+                            var helpURL = (o as IHelpLinkProvider).HelpURL;
+                            if (!string.IsNullOrEmpty(helpURL))
+                            {
+                                EditorExtensions.HelpButton(helpURL);
+                            }
+                        }
+                        
+                        if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)))
                         {
                             target.RemoveAt(i);
                             break;
                         }
+
+                        var enableToggle = o as IShowEnableToggle;
+                        if (enableToggle != null)
+                        {
+                            var lastIndent = EditorGUI.indentLevel;
+                            EditorGUI.indentLevel = 0;
+                            enableToggle.Editor_Enabled = EditorGUILayout.Toggle(GUIContent.none, enableToggle.Editor_Enabled, GUILayout.Width(20));
+                            EditorGUI.indentLevel = lastIndent;
+                        }
+                        
                         EditorGUILayout.EndHorizontal();
+
                         if (GenericEditor.ExpandedFieldCache[expandedKey + i])
                         {
                             if (o != null)
@@ -249,13 +287,12 @@ namespace MadMaps.Common.GenericEditor
                             }
                         }
                     }
-                    
                     target[i] = o;
+                    EditorGUI.indentLevel--;
                     EditorExtensions.Seperator();
                 }
-                EditorGUI.indentLevel--;
                 
-                if (listType.IsAbstract || listType.IsInterface || (fieldInfo != null && fieldInfo.HasAttribute<ListGenericUIAttribute>() && fieldInfo.GetAttribute<ListGenericUIAttribute>().AllowDerived))
+                if (listType.IsAbstract || listType.IsInterface || (fieldInfo != null && listAttribute != null && listAttribute.AllowDerived))
                 {
                     EditorGUILayoutX.DerivedTypeSelectButton(listType, (o) => target.Add(o));
                 }

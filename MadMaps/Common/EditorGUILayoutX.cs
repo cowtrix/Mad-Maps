@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MadMaps.Common.GenericEditor;
 using UnityEditor;
 using UnityEngine;
 
@@ -217,39 +218,19 @@ namespace MadMaps.Common
         }
 
         ///Get a selection menu of types deriving base type
-        public static GenericMenu GetTypeSelectionMenu(Type baseType, Action<Type> callback, GenericMenu menu = null, string subCategory = null)
+        public static GenericMenu GetTypeSelectionMenu(Type baseType, Action<Type> callback)
         {
-
-            if (menu == null)
-                menu = new GenericMenu();
-
-            if (subCategory != null)
-                subCategory = subCategory + "/";
-
-            GenericMenu.MenuFunction2 Selected = delegate (object selectedType)
-            {
-                callback((Type)selectedType);
-            };
+            var menu = new GenericMenu();
 
             var types = baseType.GetAllChildTypes().Where(t => !t.IsAbstract);
             foreach (var type in types)
             {
-                menu.AddItem(new GUIContent(type.FullName), false, () => callback(type));
+                if (type.HasAttribute<InternalManagedType>())
+                {
+                    continue;
+                }
+                menu.AddItem(new GUIContent(GenericEditor.GenericEditor.GetFriendlyName(type)), false, () => callback(type));
             }
-
-            /*var scriptInfos = EditorUtils.GetScriptInfosOfType(baseType);
-
-            foreach (var info in scriptInfos.Where(info => string.IsNullOrEmpty(info.category)))
-            {
-                menu.AddItem(new GUIContent(subCategory + info.name, info.icon, info.description), false, info.type != null ? Selected : null, info.type);
-            }
-
-            //menu.AddSeparator("/");
-
-            foreach (var info in scriptInfos.Where(info => !string.IsNullOrEmpty(info.category)))
-            {
-                menu.AddItem(new GUIContent(subCategory + info.category + "/" + info.name, info.icon, info.description), false, info.type != null ? Selected : null, info.type);
-            }*/
 
             return menu;
         }        

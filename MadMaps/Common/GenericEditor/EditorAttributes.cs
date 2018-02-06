@@ -27,4 +27,8 @@ namespace MadMaps.Common.GenericEditor
 		public bool Reorderable;
 		public bool AllowDerived;
 	}
+
+    public class InternalManagedType : Attribute
+    {
+    }
 }

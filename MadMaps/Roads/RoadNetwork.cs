@@ -22,7 +22,7 @@ namespace MadMaps.Roads
         
         public float NodePreviewSize = 5;
         public float SplineResolution = 1; 
-        public float Curviness = 60;
+        //public float Curviness = 60;
         public float BreakAngle = 90;
         public bool RecalculateTerrain = true;
         public List<Node> Nodes = new List<Node>();

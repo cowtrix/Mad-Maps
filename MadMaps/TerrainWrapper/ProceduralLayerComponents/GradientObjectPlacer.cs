@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using MadMaps.WorldStamp;
 using UnityEngine;
 using Random = System.Random;
 
 namespace MadMaps.Terrains
 {
+    [Name("Objects/Gradient Object Placer")]
     public class GradientObjectPlacer : ProceduralLayerComponent
     {
         public float RequiredY = .9f;
@@ -22,6 +24,11 @@ namespace MadMaps.Terrains
         public override ApplyTiming Timing
         {
             get { return ApplyTiming.Instant; }
+        }
+
+        public override string HelpURL
+        {
+            get { return "http://lrtw.net/madmaps/index.php?title=Gradient_Object_Placer"; }
         }
 
         public override void Apply(ProceduralLayer layer, TerrainWrapper wrapper)

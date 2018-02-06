@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MadMaps.Common.GenericEditor;
 
 namespace MadMaps.Common
 {
@@ -26,6 +27,8 @@ namespace MadMaps.Common
 
     public static class TypeExtensions
     {
+        
+
         public static List<Type> GetAllChildTypes(this Type type)
         {
             List<Type> result = new List<Type>();
@@ -36,6 +39,16 @@ namespace MadMaps.Common
                 if (allTypes[i].IsSubclassOf(type)) result.Add(allTypes[i]); //nb: IsAssignableFrom will return derived classes
 
             return result;
+        }
+
+        public static T GetAttribute<T>(this Type type) where T : Attribute
+        {
+            var allAttributes = type.GetCustomAttributes(typeof(T), true);
+            if (allAttributes.Length == 0)
+            {
+                return null;
+            }
+            return allAttributes[0] as T;
         }
 
         public static List<Type> GetAllTypesImplementingInterface(this Type interfaceType, Type assemblyType = null)
@@ -73,6 +86,12 @@ namespace MadMaps.Common
         public static int GetInheritanceDistance(this Type type, Type otherType)
         {
             return type.GetInheritancHierarchy().TakeWhile(t => t != otherType).Count();
+        }
+
+        public static bool HasAttribute<T>(this Type field) where T : Attribute
+        {
+            var allAttributes = field.GetCustomAttributes(typeof(T), true);
+            return allAttributes.Length > 0;
         }
     }
 }

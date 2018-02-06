@@ -36,26 +36,26 @@ namespace MadMaps.Common
             return Vector3.Cross(s.GetDeltaOnSpline(naturalT), up);
         }
 
-        public static Quaternion GetRotation(this SplineSegment s, float t)
+        public static Quaternion GetRotation(this SplineSegment s, float naturalT)
         {
-            return Quaternion.Euler(Vector3.Lerp(s.FirstControlPoint.Rotation, s.SecondControlPoint.Rotation, t));
+            return Quaternion.Euler(Vector3.Lerp(s.FirstControlPoint.Rotation, s.SecondControlPoint.Rotation, naturalT));
         }
 
-        public static Vector3 GetUpVector(this SplineSegment s, float t)
+        public static Vector3 GetUpVector(this SplineSegment s, float naturalT)
         {
-            return Vector3.Lerp(s.FirstControlPoint.UpVector, s.SecondControlPoint.UpVector, t);
+            return Vector3.Lerp(s.FirstControlPoint.UpVector, s.SecondControlPoint.UpVector, naturalT);
         }
 
-        public static Vector3 GetDeltaOnSpline(this SplineSegment s, float t)
+        public static Vector3 GetDeltaOnSpline(this SplineSegment s, float naturalT)
         {
             var p0 = s.FirstControlPoint.Position;
             var p1 = s.FirstControlPoint.Position + s.FirstControlPoint.Control;
             var p2 = s.SecondControlPoint.Position + s.SecondControlPoint.Control;
             var p3 = s.SecondControlPoint.Position;
 
-            var a = 3*Mathf.Pow(1 - t, 2)*(p1 - p0);
-            var b = 6*(1 - t)*t*(p2 - p1);
-            var c = 3*Mathf.Pow(t, 2)*(p3 - p2);
+            var a = 3*Mathf.Pow(1 - naturalT, 2)*(p1 - p0);
+            var b = 6*(1 - naturalT)*naturalT*(p2 - p1);
+            var c = 3*Mathf.Pow(naturalT, 2)*(p3 - p2);
             return a + b + c;
         }
 
@@ -105,24 +105,24 @@ namespace MadMaps.Common
             return 1;
         }
 
-        public static Vector3 GetNaturalPointOnSpline(this SplineSegment s, float t)
+        public static Vector3 GetNaturalPointOnSpline(this SplineSegment s, float naturalT)
         {
             var p0 = s.FirstControlPoint.Position;
             var p1 = s.FirstControlPoint.Position + s.FirstControlPoint.Control;
             var p2 = s.SecondControlPoint.Position + s.SecondControlPoint.Control;
             var p3 = s.SecondControlPoint.Position;
 
-            var t2 = t*t;
-            var t3 = t*t2;
+            var t2 = naturalT*naturalT;
+            var t3 = naturalT*t2;
 
-            var mt = 1 - t;
+            var mt = 1 - naturalT;
             var mt2 = mt*mt;
             var mt3 = mt*mt2;
 
-            return p0*mt3 + 3*p1*mt2*t + 3*p2*mt*t2 + p3*t3;
+            return p0*mt3 + 3*p1*mt2*naturalT + 3*p2*mt*t2 + p3*t3;
         }
 
-        public static Vector3 GetUniformPointOnSpline(this SplineSegment s, float targetPercentage)
+        public static Vector3 GetUniformPointOnSpline(this SplineSegment s, float uniformTime)
         {
             var totalDist = s.Length;
 
@@ -132,7 +132,7 @@ namespace MadMaps.Common
                 var thisPoint = s.Points[i];
                 var percentageThrough = thisPoint.AccumLength/totalDist;
 
-                if (percentageThrough >= targetPercentage)
+                if (percentageThrough >= uniformTime)
                 {
                     // We've found our point...
                     if (i == 0)
@@ -143,7 +143,7 @@ namespace MadMaps.Common
                     // Interpolate - tricky!
                     var lastPoint = s.Points[i - 1];
                     var lastPercent = lastPoint.AccumLength/totalDist;
-                    var percentDelta = (targetPercentage - lastPercent)/(percentageThrough - lastPercent);
+                    var percentDelta = (uniformTime - lastPercent)/(percentageThrough - lastPercent);
                     return Vector3.Lerp(lastPoint.Position, thisPoint.Position, percentDelta);
                 }
             }

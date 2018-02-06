@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using UnityEngine;
 
 namespace MadMaps.Terrains
 {
+    [Name("Trees/Proximity Filter")]
     public class TreeProximityFilter : ProceduralLayerComponent
     {
         public float Distance = 1;
@@ -12,6 +14,11 @@ namespace MadMaps.Terrains
         public override ApplyTiming Timing
         {
             get { return ApplyTiming.Instant; }
+        }
+
+        public override string HelpURL
+        {
+            get { return "http://lrtw.net/madmaps/index.php?title=Tree_Proximity_Filter"; }
         }
 
         public override void Apply(ProceduralLayer layer, TerrainWrapper wrapper)

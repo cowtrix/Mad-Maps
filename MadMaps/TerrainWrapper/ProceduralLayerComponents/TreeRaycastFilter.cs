@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using UnityEngine;
 
 namespace MadMaps.Terrains
 {
+    [Name("Trees/Raycast Filter")]
     public class TreeRaycastFilter : ProceduralLayerComponent
     {
         public LayerMask Mask = ~0;
@@ -13,6 +15,11 @@ namespace MadMaps.Terrains
         public override ApplyTiming Timing
         {
             get { return ApplyTiming.OnFrameAfterPostFinalise; }
+        }
+
+        public override string HelpURL
+        {
+            get { return "http://lrtw.net/madmaps/index.php?title=Tree_Raycast_Filter"; }
         }
 
         public override void Apply(ProceduralLayer layer, TerrainWrapper wrapper)
