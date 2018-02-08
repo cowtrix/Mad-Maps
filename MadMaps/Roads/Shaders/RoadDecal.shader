@@ -20,7 +20,7 @@ Shader "MadMaps/Road Decal"
 	}
 	SubShader 
 	{
-		Tags {"Queue"="AlphaTest" "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True"}
+		Tags {"Queue"="Geometry-90" "IgnoreProjector"="True" "RenderType"="Opaque" "ForceNoShadowCasting"="True"}
 		LOD 300
 		Offset -1, -1
 		//ZWrite Off
@@ -41,7 +41,6 @@ Shader "MadMaps/Road Decal"
 		{
 			float2 uv_MainTex;
 			float4 color : COLOR;
-			float4 auxData;
 		};
 
 		fixed3 _ColorMain;
@@ -71,9 +70,6 @@ Shader "MadMaps/Road Decal"
 			float dist = length(worldPos - _WorldSpaceCameraPos) - _DropMin;
 			float multiplier = 1-saturate( dist / _DropDistance);
 
-			o.auxData.rgb = worldPos.xyz;
-			o.auxData.a = multiplier;
-
 			v.vertex.y += multiplier * _DropAmount;
         }
 		
@@ -89,22 +85,81 @@ Shader "MadMaps/Road Decal"
 			o.Normal = normal;
 			o.Specular = max(0.01, specSmooth.rgb);
 			o.Smoothness = _Smoothness;
-
-			//o.Alpha = IN.auxData.a;
-			//o.Albedo = fixed3(frac(IN.auxData.xz), 1);
-			//o.Albedo = IN.auxData.a;
 		}
 
 		void DecalFinalGBuffer (Input IN, SurfaceOutputStandardSpecular o, inout half4 diffuse, inout half4 specSmoothness, inout half4 normal, inout half4 emission)
 		{
-			//float4 color = lerp(_Color1, _Color2,  GetColorLerp(IN.color));
-			//float alphaMultiplier = color.a;
-			float alphaMultiplier = 1;
+			float alphaMultiplier =  1;
 
 			diffuse.a = o.Alpha * alphaMultiplier;
 			specSmoothness.a = o.Alpha * alphaMultiplier;
 			normal.a = o.Alpha * alphaMultiplier; 
+			normal.a = o.Alpha * alphaMultiplier; 
 			emission.a = o.Alpha * alphaMultiplier;
+		}
+
+		ENDCG
+
+		Blend One One
+		ColorMask A
+		ZWrite On
+		Cull Back
+
+		CGPROGRAM
+
+		#pragma surface surf StandardSpecular finalgbuffer:DecalFinalGBuffer vertex:vert exclude_path:forward exclude_path:prepass noshadow noforwardadd keepalpha
+		#pragma target 3.0
+
+		sampler2D _MainTex;
+		sampler2D _Spec;
+		sampler2D _BumpMap;
+
+		struct Input 
+		{
+			float2 uv_MainTex;
+			float4 color : COLOR;
+		};
+
+		float _DropAmount;
+		float _DropMin;
+		float _DropDistance;
+
+		float4 _Color1;
+		float4 _Color2;
+
+		inline half GetColorLerp(float4 color)
+		{
+			return color.r;
+		}
+
+		void vert (inout appdata_full v, out Input o)
+        {	
+			UNITY_INITIALIZE_OUTPUT(Input, o);
+			float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+			float dist = length(worldPos - _WorldSpaceCameraPos) - _DropMin;
+			float multiplier = 1-saturate( dist / _DropDistance);
+
+			v.vertex.y += multiplier * _DropAmount;
+        }
+
+		void surf (Input IN, inout SurfaceOutputStandardSpecular o) 
+		{
+			fixed4 main = tex2D(_MainTex, IN.uv_MainTex);
+			fixed3 normal = UnpackNormal(tex2D(_BumpMap, IN.uv_MainTex));
+			fixed4 specSmooth = tex2D(_Spec, IN.uv_MainTex);
+			float4 color = lerp(_Color1, _Color2, GetColorLerp(IN.color));
+
+			o.Albedo = main.rgb * color.rgb;
+			o.Alpha = main.a;
+			o.Normal = normal;
+			o.Specular = specSmooth.rgb;
+			o.Smoothness = specSmooth.a;
+		}
+
+		void DecalFinalGBuffer (Input IN, SurfaceOutputStandardSpecular o, inout half4 diffuse, inout half4 specSmoothness, inout half4 normal, inout half4 emission)
+		{
+			float alphaMultiplier = 1;
+			specSmoothness.a *= o.Alpha * alphaMultiplier;
 		}
 
 		ENDCG

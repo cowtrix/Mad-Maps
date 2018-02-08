@@ -189,7 +189,7 @@ namespace MadMaps.WorldStamp
                 _preview.Invalidate(
                     Data.Heights, () => Size, () => transform.position, () => transform.lossyScale,
                     () => transform.rotation, () => this.Data.Size, HaveHeightsBeenFlipped, GetMask(), Data.GridManager,
-                    () => this, 32);
+                    () => this && gameObject.activeInHierarchy, 32);
             }
         }
 
@@ -481,6 +481,12 @@ namespace MadMaps.WorldStamp
                 return;
             }
 
+            var missingWrapperCount = Data.SplatData.Count(data => data.Wrapper == null);
+            if (missingWrapperCount > 0)
+            {
+                Debug.LogWarning(string.Format("Stamp {0} had {1} missing SplatPrototypes", name, missingWrapperCount), this);
+            }
+
             UnityEngine.Profiling.Profiler.BeginSample("StampSplats");
             if (SplatBlendMode > ESplatBlendMode.Average)
             {
@@ -613,6 +619,12 @@ namespace MadMaps.WorldStamp
             if (!WriteDetails)
             {
                 return;
+            }
+
+            var missingWrapperCount = Data.DetailData.Count(data => data.Wrapper == null);
+            if (missingWrapperCount > 0)
+            {
+                Debug.LogWarning(string.Format("Stamp {0} had {1} missing DetailPrototypes", name, missingWrapperCount), this);
             }
 
             UnityEngine.Profiling.Profiler.BeginSample("StampDetails");

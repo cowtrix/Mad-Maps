@@ -65,14 +65,13 @@ namespace MadMaps.WorldStamp.Authoring
                         sum += sampleData;
                     }
                 }
-                if (sum > 0)
+                if (sum < 0.01f)
                 {
-                    DetailData.Add(new CompressedDetailData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
+                    Debug.Log(string.Format("WorldStamp Splat Capture: Ignored splat layer {0} as it appeared to be empty.", wrapper != null ? wrapper.name : "Unresolved Splat"));
+                    continue;
                 }
-                else
-                {
-                    Debug.Log(string.Format("WorldStamp Detail Capture: Empty layer at {0}, ignoring!", i));
-                }
+
+                DetailData.Add(new CompressedDetailData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
             }
         }
 

@@ -21,7 +21,7 @@ namespace MadMaps.Terrains.MapMagic
             public Input input = new Input(InoutType.Objects);
 
             public Transform prefab;
-            public bool relativeHeight = true;
+            //public bool relativeHeight = true;
             public bool rotate = true;
             public bool takeTerrainNormal = false;
             public bool scale = true;
@@ -46,7 +46,7 @@ namespace MadMaps.Terrains.MapMagic
                 input.DrawIcon(layout);
                 layout.Field(ref prefab, rect: layout.Inset());
 
-                layout.Toggle(ref relativeHeight, "Relative Height");
+                //layout.Toggle(ref relativeHeight, "Relative Height");
                 layout.Toggle(ref rotate, "Rotate");
                 layout.Toggle(ref takeTerrainNormal, "Incline by Terrain");
                 layout.Par(); layout.Toggle(ref scale, "Scale", rect: layout.Inset(60));
@@ -200,8 +200,8 @@ namespace MadMaps.Terrains.MapMagic
 
                         //flooring
                         float terrainHeight = 0;
-                        if (layer.relativeHeight && results.heights != null) //if checbox enabled and heights exist (at least one height generator is in the graph)
-                            terrainHeight = results.heights.GetInterpolated(obj.pos.x, obj.pos.y);
+                        //if (layer.relativeHeight && results.heights != null) //if checbox enabled and heights exist (at least one height generator is in the graph)
+                        //    terrainHeight = results.heights.GetInterpolated(obj.pos.x, obj.pos.y);
                         if (terrainHeight > 1) terrainHeight = 1;
 
 
@@ -291,7 +291,7 @@ namespace MadMaps.Terrains.MapMagic
                         transition.pos.z/terrainSize.z);
                     var prefabObj = new PrefabObjectData()
                     {
-                        AbsoluteHeight = true,
+                        AbsoluteHeight = false,
                         Guid = System.Guid.NewGuid().ToString(),
                         Prefab = prefab.gameObject,
                         Rotation = transition.rotation.eulerAngles,

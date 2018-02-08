@@ -173,5 +173,10 @@ namespace MadMaps.Terrains
         public virtual void PrepareApply(TerrainWrapper terrainWrapper)
         {
         }
+
+        public virtual void ForceDirty()
+        {
+            Stencil.ForceDirty();
+        }
     }
 }

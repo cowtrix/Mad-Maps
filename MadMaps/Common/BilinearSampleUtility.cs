@@ -25,10 +25,10 @@ namespace MadMaps.Common
             yMin = Mathf.Clamp(yMin, 0, array.Height - 1);
             yMax = Mathf.Clamp(yMax, 0, array.Height - 1);
 
-            float v1 = array.Data[yMin * array.Width + xMin];
-            float v2 = array.Data[yMax * array.Width + xMin];
-            float v3 = array.Data[yMin * array.Width + xMax];
-            float v4 = array.Data[yMax * array.Width + xMax];
+            float v1 = array[xMin, yMin];
+            float v2 = array[xMin, yMax];
+            float v3 = array[xMax, yMin];
+            float v4 = array[xMax, yMax];
 
             int v1Index;
             int v2Index;
@@ -85,10 +85,10 @@ namespace MadMaps.Common
             yMin = Mathf.Clamp(yMin, 0, array.Height - 1);
             yMax = Mathf.Clamp(yMax, 0, array.Height - 1);
 
-            float v1 = array.Data[yMin * array.Width + xMin];
-            float v2 = array.Data[yMax * array.Width + xMin];
-            float v3 = array.Data[yMin * array.Width + xMax];
-            float v4 = array.Data[yMax * array.Width + xMax];
+            float v1 = array[xMin, yMin];
+            float v2 = array[xMin, yMax];
+            float v3 = array[xMax, yMin];
+            float v4 = array[xMax, yMax];
 
             int v1Index;
             int v2Index;
@@ -262,10 +262,10 @@ namespace MadMaps.Common
             yMin = Mathf.Clamp(yMin, 0, array.Height - 1);
             yMax = Mathf.Clamp(yMax, 0, array.Height - 1);
 
-            float v1 = array.Data[yMin * array.Width + xMin];
-            float v2 = array.Data[yMax * array.Width + xMin];
-            float v3 = array.Data[yMin * array.Width + xMax];
-            float v4 = array.Data[yMax * array.Width + xMax];
+            float v1 = array[xMin, yMin];
+            float v2 = array[xMin, yMax];
+            float v3 = array[xMax, yMin];
+            float v4 = array[xMax, yMax];
 
             if (Math.Abs(v1 + v2 + v3 + v4) < Single.Epsilon)
             {
@@ -304,10 +304,10 @@ namespace MadMaps.Common
             yMin = Mathf.Clamp(yMin, 0, array.Height - 1);
             yMax = Mathf.Clamp(yMax, 0, array.Height - 1);
 
-            float v1 = array.Data[yMin * array.Width + xMin];
-            float v2 = array.Data[yMax * array.Width + xMin];
-            float v3 = array.Data[yMin * array.Width + xMax];
-            float v4 = array.Data[yMax * array.Width + xMax];
+            float v1 = array[xMin, yMin];
+            float v2 = array[xMin, yMax];
+            float v3 = array[xMax, yMin];
+            float v4 = array[xMax, yMax];
 
             if (Math.Abs(v1 + v2 + v3 + v4) < Single.Epsilon)
             {
@@ -352,10 +352,10 @@ namespace MadMaps.Common
             yMin = Mathf.Clamp(yMin, 0, array.Height - 1);
             yMax = Mathf.Clamp(yMax, 0, array.Height - 1);
 
-            float v1 = array.Data[yMin * array.Width + xMin];
-            float v2 = array.Data[yMax * array.Width + xMin];
-            float v3 = array.Data[yMin * array.Width + xMax];
-            float v4 = array.Data[yMax * array.Width + xMax];
+            float v1 = array[xMin, yMin];
+            float v2 = array[xMin, yMax];
+            float v3 = array[xMax, yMin];
+            float v4 = array[xMax, yMax];
 
             if (Math.Abs(v1 + v2 + v3 + v4) < Single.Epsilon)
             {

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using JetBrains.Annotations;
 
 namespace MadMaps.Common.Collections
@@ -63,6 +64,11 @@ namespace MadMaps.Common.Collections
                     data[u, v] = Data[index];
                 }
             }
+        }
+
+        protected override byte ReadFromStream(BinaryReader br)
+        {
+            return br.ReadByte();
         }
     }
 }

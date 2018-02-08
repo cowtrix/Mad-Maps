@@ -71,7 +71,7 @@ namespace MadMaps.WorldStamp.Authoring
                 }
                 if (sum < 0.01f)
                 {
-                    Debug.Log(string.Format("WorldStamp Splat Capture: Ignored splat layer {0} as it appeared to be empty.", wrapper.name));
+                    Debug.Log(string.Format("WorldStamp Splat Capture: Ignored splat layer {0} as it appeared to be empty.", wrapper!=null ? wrapper.name : "Unresolved Splat"));
                     continue;
                 }
 

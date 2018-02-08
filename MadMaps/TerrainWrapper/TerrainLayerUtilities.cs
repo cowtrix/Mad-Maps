@@ -1,3 +1,4 @@
+using MadMaps.Roads;
 using MadMaps.Common;
 using System;
 using System.Collections.Generic;
@@ -199,6 +200,18 @@ namespace MadMaps.Terrains
                     continue;
                 }
                 if (collider is TerrainCollider)
+                {
+                    continue;
+                }
+                if (collider.transform.GetComponentInAncestors<WorldStamp.WorldStamp>())
+                {
+                    continue;
+                }
+                if (collider.transform.GetComponentInAncestors<RoadNetwork>())
+                {
+                    continue;
+                }
+                if (collider.transform.GetComponentInAncestors<RoadNetworkProxy>())
                 {
                     continue;
                 }

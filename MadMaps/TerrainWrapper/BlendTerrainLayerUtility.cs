@@ -307,7 +307,7 @@ namespace MadMaps.Terrains
             GC.Collect(3, GCCollectionMode.Forced);
         }
 
-        private static bool ShouldCompute<T>(Serializable2DArray<T> array)
+        private static bool ShouldCompute<T>(Serializable2DArray<T> array) where T:struct
         {
             return array.Width * array.Height >= 8 * 8;
         }

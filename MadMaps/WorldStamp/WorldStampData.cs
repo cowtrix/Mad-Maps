@@ -26,6 +26,7 @@ namespace MadMaps.WorldStamp
         private Common.Painter.GridManagerInt __gridManager;
 
         public WorldStampMask Mask = new WorldStampMask();
+
         // The physical size this snapshot was when baked
         public Vector3 Size = new Vector3(1,1,1);
 

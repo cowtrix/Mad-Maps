@@ -1,23 +1,35 @@
 using System;
+using System.IO;
+using System.IO.Compression;
+using MadMaps.Common.Serialization;
 using UnityEngine;
 
 namespace MadMaps.Common.Collections
 {
-    public class Serializable2DArray<T>
+    public abstract class Serializable2DArray<T> : ISerializationCallbackReceiver where T:struct
     {
+        [NonSerialized]
         public T[] Data;
+
+        [SerializeField]
+        private byte[] _compressedData;
+        [SerializeField]
+        private bool _dirty = false;
+
         public int Height;
         public int Width;
-
+        
         public Serializable2DArray(int width, int data)
         {
             Width = width;
             Height = data;
             Data = new T[Width*Height];
+            _dirty = true;
         }
 
         public Serializable2DArray(T[,] data)
         {
+            _dirty = true;
             if (data == null)
             {
                 Width = 0;
@@ -46,7 +58,7 @@ namespace MadMaps.Common.Collections
             }
         }
         
-        public T[,] Deserialize()
+        public T[,] Deserialize()   // Pure
         {
             var heights = new T[Width, Height];
             for (var u = 0; u < Width; u++)
@@ -78,12 +90,14 @@ namespace MadMaps.Common.Collections
                 {
                     throw new IndexOutOfRangeException("Index: " + index);
                 }
+                _dirty = true;
                 Data[index] = value;
             }
         }
 
         public void Clear()
         {
+            _dirty = true;
             for (int i = 0; i < Data.Length; i++)
             {
                 Data[i] = default(T);
@@ -92,32 +106,97 @@ namespace MadMaps.Common.Collections
 
         public void Fill(T val)
         {
+            _dirty = true;
             for (int i = 0; i < Data.Length; i++)
             {
                 Data[i] = val;
             }
         }
 
-        public bool HasData()
+        public bool HasData()   // Pure
         {
             return Data != null && Data.Length > 0;
         }
 
-        /*protected Serializable2DArray<T> Select(int x, int z, int width, int height)
+        public void ForceDirty()
         {
-            if (x + width > Width || z + height > Height)
+            _dirty = true;
+            OnBeforeSerialize();
+        }
+
+        public void OnBeforeSerialize()
+        {
+            if (!_dirty)
             {
-                throw new IndexOutOfRangeException();
+                return;
             }
-            var result = new Serializable2DArray<T>(width, height);
-            for (var u = x; u < x + width; ++u)
+
+            _dirty = false;
+            if (Data == null || Data.Length == 0)
             {
-                for (var v = z; v < z + height; ++v)
+                _compressedData = null;
+                return;
+            }
+
+            var rawData = new byte[Data.Length*SerializationUtilites.SizeOf<T>()];
+            Buffer.BlockCopy(Data, 0, rawData, 0, rawData.Length);
+
+            using (var compressedStream = new MemoryStream())
+            using (var zipStream = new GZipStream(compressedStream, CompressionMode.Compress))
+            {
+                zipStream.Write(rawData, 0, rawData.Length);
+                zipStream.Close();
+                _compressedData = compressedStream.ToArray();
+            }
+        }
+
+        public void OnAfterDeserialize()
+        {
+            if (_compressedData == null || _compressedData.Length == 0)
+            {
+                //Data = new T[Width * Height];
+                return;
+            }
+            using (var compressedMs = new MemoryStream(_compressedData))
+            {
+                using (var decompressedMs = new MemoryStream())
                 {
-                    result[u - x, v - z] = this[u, v];
+                    using (var gzs = new GZipStream(compressedMs, CompressionMode.Decompress))
+                    {
+                        gzs.CopyTo(decompressedMs);
+                    }
+                    using (var binaryStream = new BinaryReader(decompressedMs))
+                    {
+                        binaryStream.BaseStream.Position = 0;
+                        var pos = 0;
+                        var counter = 0;
+                        var length = (int)decompressedMs.Length;
+                        var typeSize = SerializationUtilites.SizeOf<T>();
+                        var arraySize = length/typeSize;
+                        if (Data == null || Data.Length != arraySize)
+                        {
+                            Data = new T[arraySize];
+                        }
+                        while (pos < length)
+                        {
+                            try
+                            {
+                                Data[counter] = ReadFromStream(binaryStream);
+                            }
+                            catch (Exception)
+                            {
+                                
+                                throw;
+                            }
+                            
+                            counter++;
+                            pos += typeSize;
+                        }
+                    }
                 }
             }
-            return result;
-        }*/
+        }
+
+        protected abstract T ReadFromStream(BinaryReader br);
     }
 }

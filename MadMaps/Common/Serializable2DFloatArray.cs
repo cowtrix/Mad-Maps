@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -71,6 +72,11 @@ namespace MadMaps.Common.Collections
                 }
             }
             return ret;
+        }
+
+        protected override float ReadFromStream(BinaryReader br)
+        {
+            return br.ReadSingle();
         }
     }
 }

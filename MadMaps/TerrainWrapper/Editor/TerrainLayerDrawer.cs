@@ -101,7 +101,7 @@ namespace MadMaps.Terrains
 
         private void OnLayerAddCallback(ReorderableList list)
         {
-            var menu = EditorGUILayoutX.GetTypeSelectionMenu(typeof (LayerBase), type =>
+            var menu = Common.EditorGUILayoutX.GetTypeSelectionMenu(typeof (LayerBase), type =>
             {
                 var newLayer = ScriptableObject.CreateInstance(type);
                 int counter = 1;
@@ -218,6 +218,11 @@ namespace MadMaps.Terrains
             {
                 DataInspector.SetData(layer.Heights);
             }
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            {
+                layer.Heights.Clear();
+                EditorUtility.SetDirty(layer);
+            }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
 
@@ -227,7 +232,7 @@ namespace MadMaps.Terrains
             {
                 DataInspector.SetData(layer.SplatData.GetValues(), layer.SplatData.GetKeys());
             }
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.SplatData.Clear();
                 EditorUtility.SetDirty(layer);
@@ -241,7 +246,7 @@ namespace MadMaps.Terrains
             {
                 DataInspector.SetData(layer.DetailData.GetValues(), layer.DetailData.GetKeys());
             }
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.DetailData.Clear();
                 EditorUtility.SetDirty(layer);
@@ -251,7 +256,7 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Trees", layer.Trees != null ? string.Format("{0}", layer.Trees.Count) : "null");
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.Trees.Clear();
                 EditorUtility.SetDirty(layer);
@@ -259,8 +264,8 @@ namespace MadMaps.Terrains
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Removals", layer.TreeRemovals != null ? string.Format("{0}", layer.TreeRemovals.Count) : "null");
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            EditorGUILayout.LabelField("➥Removals", layer.TreeRemovals != null ? string.Format("{0}", layer.TreeRemovals.Count) : "null");
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.TreeRemovals.Clear();
                 EditorUtility.SetDirty(layer);
@@ -270,15 +275,15 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", layer.Objects != null ? string.Format("{0}", layer.Objects.Count) : "null");
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.Objects.Clear();
                 EditorUtility.SetDirty(layer);
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Removals", layer.ObjectRemovals != null ? string.Format("{0}", layer.ObjectRemovals.Count) : "null");
-            if (GUILayout.Button("C", GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            EditorGUILayout.LabelField("➥Removals", layer.ObjectRemovals != null ? string.Format("{0}", layer.ObjectRemovals.Count) : "null");
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.ObjectRemovals.Clear();
                 EditorUtility.SetDirty(layer);

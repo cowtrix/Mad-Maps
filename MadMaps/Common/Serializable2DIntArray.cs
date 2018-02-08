@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -47,6 +48,11 @@ namespace MadMaps.Common.Collections
                 }
             }
             return ret;
+        }
+
+        protected override int ReadFromStream(BinaryReader br)
+        {
+            return br.ReadInt32();
         }
     }
 }

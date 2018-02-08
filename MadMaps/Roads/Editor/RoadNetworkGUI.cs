@@ -21,7 +21,7 @@ namespace MadMaps.Roads
             if (GUILayout.Button("Open Editor Window"))
             {
                 _currentWindow = EditorWindow.GetWindow<RoadNetworkWindow>();
-                _currentWindow.name = "sRoads";
+                _currentWindow.name = "Road Network";
                 _currentWindow.FocusedRoadNetwork = target as RoadNetwork;
             }
         }

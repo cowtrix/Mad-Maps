@@ -62,6 +62,27 @@ namespace MadMaps.WorldStamp
         private bool _editingMask = false;
         private Painter _painter;
 
+        [MenuItem("Tools/Compress World Stamps")]
+        public static void CompressAll()
+        {
+            var allStamps = sFinder.FindComponentInPrefabs.FindComponentsInPrefab<WorldStamp>();
+            foreach (var ws in allStamps)
+            {
+                ws.Data.Heights.ForceDirty();
+                foreach (var compressedSplatData in ws.Data.SplatData)
+                {
+                    compressedSplatData.Data.ForceDirty();
+                }
+                foreach (var compressedDetailData in ws.Data.DetailData)
+                {
+                    compressedDetailData.Data.ForceDirty();
+                }
+                EditorUtility.SetDirty(ws);
+                EditorUtility.SetDirty(ws.gameObject);
+            }
+            Debug.LogFormat("Compressed {0} stamps", allStamps.Count);
+        }
+
         void OnEnable()
         {
             _size = serializedObject.FindProperty("Size");

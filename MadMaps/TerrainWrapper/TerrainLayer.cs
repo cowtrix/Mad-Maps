@@ -1,8 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
+using MadMaps.Common.Serialization;
 using MadMaps.Terrains.Lookups;
 using MadMaps.WorldStamp;
 using UnityEngine;
@@ -29,6 +33,10 @@ namespace MadMaps.Terrains
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public List<string> TreeRemovals = new List<string>();
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
+
+        [SerializeField]
+        [HideInInspector]
+        private string _compressedBytes;
 
         /// <summary>
         /// Go and capture all of the data on a given terrain and store it in this layer.
@@ -1006,6 +1014,20 @@ namespace MadMaps.Terrains
         public override List<PrefabObjectData> GetObjects()
         {
             return Objects;
+        }
+
+        public override void ForceDirty()
+        {
+            base.ForceDirty();
+            Heights.ForceDirty();
+            foreach (var pair in SplatData)
+            {
+                pair.Value.ForceDirty();
+            }
+            foreach (var pair in DetailData)
+            {
+                pair.Value.ForceDirty();
+            }
         }
     }
 }

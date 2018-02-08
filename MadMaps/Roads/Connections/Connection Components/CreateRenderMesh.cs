@@ -206,6 +206,11 @@ namespace MadMaps.Roads.Connections
                 var startTime = i;
                 var endTime = Mathf.Clamp01(i + perMeshPercentage);
 
+                if (Math.Abs(startTime - endTime) < .001f)
+                {
+                    break;
+                }
+
                 if (config.SplineInterpolation == Config.LodLevel.ESplineInterpolation.Uniform)
                 {
                     startTime = spline.NaturalToUniformTime(startTime);
@@ -216,6 +221,7 @@ namespace MadMaps.Roads.Connections
                 if (endTime < 1 && distanceLeft <= snapDistance)
                 {
                     endTime = 1;
+                    i = 1;
                 }
 
                 if (currentResult == null)

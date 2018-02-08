@@ -55,6 +55,11 @@ namespace MadMaps.Roads
         /// <returns></returns>
         public GameObject GetDataContainer(int index = 0)
         {
+            if (!this)
+            {
+                Debug.LogError("Attempting to access DataContainer for destroyed object!");
+                return null;
+            }
             GameObject result;
             if (!__dataContainers.TryGetValue(index, out result) || !result)
             {

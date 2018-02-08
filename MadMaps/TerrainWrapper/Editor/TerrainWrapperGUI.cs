@@ -3,6 +3,7 @@ using UnityEditor;
 using Object = UnityEngine.Object;
 using MadMaps.Common.Painter;
 using MadMaps.Common;
+using UnityEditor.SceneManagement;
 
 namespace MadMaps.Terrains
 {
@@ -61,6 +62,16 @@ namespace MadMaps.Terrains
                 {
                     Wrapper.Layers.RemoveAt(i);
                 }
+            }
+
+            if (GUILayout.Button("Dirty"))
+            {
+                foreach (var layerBase in Wrapper.Layers)
+                {
+                    layerBase.ForceDirty();
+                    EditorUtility.SetDirty(layerBase);
+                }
+                EditorSceneManager.MarkAllScenesDirty();
             }
 
             if (_tabs == null)
