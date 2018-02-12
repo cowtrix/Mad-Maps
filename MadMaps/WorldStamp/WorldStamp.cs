@@ -312,7 +312,7 @@ namespace MadMaps.WorldStamp
             
             if (layer.Stencil == null)
             {
-                layer.Stencil = new Serializable2DFloatArray(tRes, tRes);
+                layer.Stencil = new Stencil(tRes, tRes);
             }
             UnityEngine.Profiling.Profiler.EndSample();
 
@@ -363,7 +363,7 @@ namespace MadMaps.WorldStamp
             var res = terrainWrapper.Terrain.terrainData.heightmapResolution;
             if (layer.Stencil == null || layer.Stencil.Width != res || layer.Stencil.Height != res)
             {
-                layer.Stencil = new Serializable2DFloatArray(res, res);
+                layer.Stencil = new Stencil(res, res);
             }
 
             var terrain = terrainWrapper.Terrain;

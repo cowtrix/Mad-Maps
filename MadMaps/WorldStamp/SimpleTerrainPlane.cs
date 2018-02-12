@@ -1,6 +1,7 @@
 ﻿using System;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
+using MadMaps.Common.GenericEditor;
 using MadMaps.Roads;
 using MadMaps.Terrains;
 using UnityEngine;
@@ -40,10 +41,13 @@ namespace MadMaps.WorldStamp
         public bool RemoveTrees = true;
         public bool RemoveGrass = true;
         public Vector2 Size;
+        [Min(1)]
         public int Priority;
 
         public void OnBake()
         {
+            Priority = Mathf.Max(1, Priority);
+
             var objectBounds = GetObjectBounds();
             var terrainWrappers = TerrainLayerUtilities.CollectWrappers(objectBounds);
             var stencilKey = GetPriority();
@@ -206,7 +210,7 @@ namespace MadMaps.WorldStamp
             
             if (layer.Stencil == null || layer.Stencil.Width != hRes || layer.Stencil.Height != hRes)
             {
-                layer.Stencil = new Serializable2DFloatArray(hRes, hRes);
+                layer.Stencil = new Stencil(hRes, hRes);
             }
             var layerHeights = layer.GetHeights(matrixMin.x, matrixMin.z, floatArraySize.x, floatArraySize.z, hRes) ??
                                new Serializable2DFloatArray(floatArraySize.x, floatArraySize.z);

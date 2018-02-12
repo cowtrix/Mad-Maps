@@ -241,6 +241,7 @@ namespace MadMaps.Common
             return v1 + v2 + v3 + v4;
         }
 
+        /*
         public static float BilinearSample(this Serializable2DIntArray array, Vector2 normalizedCoord)
         {
             if (array == null)
@@ -276,12 +277,13 @@ namespace MadMaps.Common
             float yFrac = normalizedCoord.y.Frac();
 
             v1 *= (1 - xFrac) * (1 - yFrac);
-            v2 *= (1 - xFrac) * (/*1 - */yFrac);
-            v3 *= (/*1 - */xFrac) * (1 - yFrac);
-            v4 *= (/*1 - */xFrac) * (/*1 -*/ yFrac);
+            v2 *= (1 - xFrac) * (yFrac);
+            v3 *= (xFrac) * (1 - yFrac);
+            v4 *= (xFrac) * (yFrac);
 
             return v1 + v2 + v3 + v4;
         }
+        */
 
         public static float BilinearSample(this Serializable2DByteArray array, Vector2 normalizedCoord)
         {

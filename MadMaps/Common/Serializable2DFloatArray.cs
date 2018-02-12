@@ -78,5 +78,10 @@ namespace MadMaps.Common.Collections
         {
             return br.ReadSingle();
         }
+
+        protected override Color32 ToColor(float val)
+        {
+            return Color.white*val;
+        }
     }
 }

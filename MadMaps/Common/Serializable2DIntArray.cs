@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using JetBrains.Annotations;
 using UnityEngine;
-
+/*
 namespace MadMaps.Common.Collections
 {
     [Serializable]
@@ -54,5 +54,10 @@ namespace MadMaps.Common.Collections
         {
             return br.ReadInt32();
         }
+
+        protected override Color32 ToColor(int val)
+        {
+            return 
+        }
     }
-}
+}*/

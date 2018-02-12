@@ -13,9 +13,19 @@ using UnityEditor;
 
 namespace MadMaps.Common
 {
+    public interface CanInspectInDataInspector
+    {
+        Texture2D ToTexture2D();
+    }
+
 #if UNITY_EDITOR
+    
     public class DataInspector : EditorWindow
     {
+        class DataLayer<T> where T : struct
+        {
+        }
+
         private static int _textureIndex;
         private static List<Texture2D> _textures = new List<Texture2D>();
         private static List<Object> _context = new List<Object>();
@@ -62,7 +72,7 @@ namespace MadMaps.Common
             }
         }
 
-        public static void SetData(List<Serializable2DIntArray> datas)
+        /*public static void SetData(List<Serializable2DIntArray> datas)
         {
             _context.Clear();
             var window = GetWindow<DataInspector>();
@@ -88,6 +98,7 @@ namespace MadMaps.Common
                 _textures.Add(tex);
             }
         }
+        */
 
         public static void SetData(float[,] data)
         {
@@ -311,6 +322,10 @@ namespace MadMaps.Common
                 _textureIndex = 0;
             }
             var tex = _textures[_textureIndex];
+            if (tex == null)
+            {
+                return;
+            }
 
             var aspect = tex.height / (float)tex.width;
             var windowSize = this.position.size;

@@ -64,7 +64,7 @@ namespace MadMaps.Terrains
                 }
             }
 
-            if (GUILayout.Button("Dirty"))
+            /*if (GUILayout.Button("Dirty"))
             {
                 foreach (var layerBase in Wrapper.Layers)
                 {
@@ -72,7 +72,7 @@ namespace MadMaps.Terrains
                     EditorUtility.SetDirty(layerBase);
                 }
                 EditorSceneManager.MarkAllScenesDirty();
-            }
+            }*/
 
             if (_tabs == null)
             {

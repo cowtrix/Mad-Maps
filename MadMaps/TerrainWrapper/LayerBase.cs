@@ -11,7 +11,7 @@ namespace MadMaps.Terrains
         [HideInInspector]
         public bool Enabled = true;
         [HideInInspector]
-        public Serializable2DFloatArray Stencil;
+        public Stencil Stencil;
 
         public virtual bool UserOwned
         {

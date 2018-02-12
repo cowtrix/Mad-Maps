@@ -18,7 +18,7 @@ namespace MadMaps.Roads
         public static HashSet<Node> ThinkCache = new HashSet<Node>();
 
         [Serializable]
-        public class RoadLayerMapping : CompositionDictionary<TerrainWrapper, RoadLayer> { }
+        public class RoadLayerMapping : CompositionDictionary<TerrainWrapper, TerrainLayer> { }
         
         public float NodePreviewSize = 5;
         public float SplineResolution = 1; 
@@ -225,7 +225,7 @@ namespace MadMaps.Roads
                     var sRes = wrapper.Terrain.terrainData.heightmapResolution;
                     if (layer.Stencil == null || layer.Stencil.Width != sRes || layer.Stencil.Height != sRes)
                     {
-                        layer.Stencil = new Serializable2DFloatArray(sRes, sRes);
+                        layer.Stencil = new Stencil(sRes, sRes);
                     }
                     wrapper.CopyCompoundToLayer(layer);
                     //WorldStamp.WorldStamp.ApplyAllStamps(wrapper, "sRoads");
@@ -362,12 +362,12 @@ namespace MadMaps.Roads
             _slowThink.MoveNext();
         }
 
-        public RoadLayer GetLayer(TerrainWrapper terrainWrapper, bool createIfMissing = false)
+        public TerrainLayer GetLayer(TerrainWrapper terrainWrapper, bool createIfMissing = false)
         {
-            RoadLayer snapshot;
+            TerrainLayer snapshot;
             if ((!LayerMapping.TryGetValue(terrainWrapper, out snapshot) || snapshot == null) && createIfMissing)
             {
-                snapshot = ScriptableObject.CreateInstance<RoadLayer>();
+                snapshot = ScriptableObject.CreateInstance<TerrainLayer>();
                 snapshot.name = "Road Network";
                 LayerMapping[terrainWrapper] = snapshot;
                 terrainWrapper.Layers.Insert(0, snapshot);

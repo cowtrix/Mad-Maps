@@ -114,7 +114,7 @@ namespace MadMaps.Roads.Connections
             var stencilKey = GetStencilKey();
             if (layer.Stencil == null || layer.Stencil.Width != heightRes || layer.Stencil.Height != heightRes)
             {
-                layer.Stencil = new Serializable2DFloatArray(heightRes, heightRes);
+                layer.Stencil = new Stencil(heightRes, heightRes);
             }
 
             for (var dz = 0; dz < floatArraySize.z; ++dz)

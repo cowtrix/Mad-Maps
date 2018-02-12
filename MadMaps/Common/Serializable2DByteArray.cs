@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace MadMaps.Common.Collections
 {
@@ -69,6 +70,11 @@ namespace MadMaps.Common.Collections
         protected override byte ReadFromStream(BinaryReader br)
         {
             return br.ReadByte();
+        }
+
+        protected override Color32 ToColor(byte val)
+        {
+            return new Color32(val, val, val, 255);
         }
     }
 }

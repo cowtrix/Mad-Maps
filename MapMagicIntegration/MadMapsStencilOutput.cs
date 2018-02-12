@@ -95,7 +95,7 @@ namespace MadMaps.Terrains.MapMagic
         {
             if (terrain == null || terrain.terrainData == null) yield break; //chunk removed during apply
 
-            var stencil = (Serializable2DFloatArray)dataBox;
+            var stencil = (Stencil)dataBox;
 
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);

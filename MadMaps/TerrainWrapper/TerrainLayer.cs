@@ -491,7 +491,7 @@ namespace MadMaps.Terrains
                 }
                 else
                 {
-                    Stencil = new Serializable2DFloatArray(tRes, tRes);
+                    Stencil = new Stencil(tRes, tRes);
                 }
             }
 

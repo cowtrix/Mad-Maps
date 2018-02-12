@@ -1,4 +1,6 @@
 ﻿using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace MadMaps.Common.GenericEditor
 {
@@ -30,5 +32,25 @@ namespace MadMaps.Common.GenericEditor
 
     public class InternalManagedType : Attribute
     {
+    }
+
+    public class MinAttribute : PropertyAttribute
+    {
+        public float MinValue;
+
+        public MinAttribute(float minValue)
+        {
+            MinValue = minValue;
+        }
+    }
+
+    public class MaxAttribute : Attribute
+    {
+        public float MaxValue;
+
+        public MaxAttribute(float maxValue)
+        {
+            MaxValue = maxValue;
+        }
     }
 }
