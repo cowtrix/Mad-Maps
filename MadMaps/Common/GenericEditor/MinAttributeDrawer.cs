@@ -1,9 +1,9 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
 namespace MadMaps.Common.GenericEditor
 {
-#if UNITY_EDITOR
     [CustomPropertyDrawer(typeof(MinAttribute))]
     public class MinAttributeDrawer : PropertyDrawer
     {
@@ -22,5 +22,5 @@ namespace MadMaps.Common.GenericEditor
             GUI.Label(position, string.Format("Unsupported type {0} for MinAttribute", property.type));
         }
     }
-#endif
 }
+#endif
