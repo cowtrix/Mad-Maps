@@ -141,7 +141,7 @@ namespace MadMaps.Roads
 
             var myEvent = Event.current;
             const int selectionMouseNum = 2;
-            sBehaviour createdObject = null;
+            //sBehaviour createdObject = null;
             if (myEvent.type == EventType.MouseDown && myEvent.button == selectionMouseNum && !myEvent.control && _currentHoverNode != null)
             {
                 myEvent.Use();
@@ -206,7 +206,7 @@ namespace MadMaps.Roads
             if (myEvent.control)
             {
                 var currentSelection = GetCurrentlySelectedNodes();
-                Handles.SphereCap(-1, hitPoint, Quaternion.identity, NodePreviewSize);
+                Handles.SphereHandleCap(-1, hitPoint, Quaternion.identity, NodePreviewSize, EventType.repaint);
                 if (currentSelection.Count != 1)
                 {
                     return;

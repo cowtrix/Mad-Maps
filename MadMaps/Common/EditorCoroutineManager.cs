@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace MadMaps.Common
 {
@@ -97,7 +96,7 @@ namespace MadMaps.Common
             _invokes.Add(callback, DateTime.UtcNow.ToUniversalTime() + new TimeSpan(0, 0, 0, seconds));
         }
 
-        public static void StopEditorCoroutine([NotNull]IEnumerator coroutine)
+        public static void StopEditorCoroutine(IEnumerator coroutine)
         {
             _runningCoroutines.RemoveAll(state => state.Coroutine == coroutine);
         }

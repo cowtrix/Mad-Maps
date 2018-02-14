@@ -105,7 +105,6 @@ namespace MadMaps.WorldStamp.Authoring
         protected override void PreviewInSceneInternal(WorldStampCreator parent)
         {
             Handles.color = Color.white;
-            var b = parent.Template.Bounds;
             for (int i = RoadNetworks.Count - 1; i >= 0; i--)
             {
                 var roadNetwork = RoadNetworks[i];

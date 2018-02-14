@@ -140,7 +140,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void PreviewInDataInspector()
         {
-            DataInspector.SetData(SplatData.Select(x => x.Data).ToList(), SplatData.Select(x => x.Wrapper).ToList());
+            DataInspector.SetData(SplatData.Select(x => (IDataInspectorProvider)x.Data).ToList(), SplatData.Select(x => (object)x.Wrapper).ToList());
         }
 
         public override void Clear()

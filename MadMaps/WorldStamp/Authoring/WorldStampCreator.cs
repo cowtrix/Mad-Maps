@@ -23,9 +23,9 @@ namespace MadMaps.WorldStamp.Authoring
 
         public WorldStamp TargetInjectionStamp;
         public WorldStampTemplate TargetInjectionTemplate;
-
+        /*
         private GUIContent _createStampTemplateContent = new GUIContent("Create Stamp Template", "Create an in-scene object to preserve stamp capture settings.");
-
+        */
         void OnSelectionChange()
         {
             if (!Selection.activeGameObject)

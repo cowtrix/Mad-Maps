@@ -79,9 +79,29 @@ namespace MadMaps.Common.Collections
             return br.ReadSingle();
         }
 
-        protected override Color32 ToColor(float val)
+        public override Texture2D ToTexture2D(bool normalise, Texture2D tex = null)
         {
-            return Color.white*val;
+            float min = 0;
+            float max = 1;
+            if (normalise)
+            {
+                min = Data.Min();
+                max = Data.Max();
+            }
+            if (tex == null || tex.width != Width || tex.height != Height)
+            {
+                tex = new Texture2D(Width, Height);
+            }
+            var colors = new Color32[Width * Height];
+            OnBeforeSerialize();
+            for (int i = 0; i < Data.Length; i++)
+            {
+                var val = (Data[i] - min) / (float)max;
+                colors[i] = new Color(val, val, val, 1);
+            }
+            tex.SetPixels32(colors);
+            tex.Apply();
+            return tex;
         }
     }
 }

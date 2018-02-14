@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MadMaps.Common.Collections
 {
-    public abstract class Serializable2DArray<T> : ISerializationCallbackReceiver, CanInspectInDataInspector where T : struct
+    public abstract class Serializable2DArray<T> : ISerializationCallbackReceiver, IDataInspectorProvider where T : struct
     {
         [NonSerialized]
         public T[] Data;
@@ -208,20 +208,6 @@ namespace MadMaps.Common.Collections
 
         protected abstract T ReadFromStream(BinaryReader br);
 
-        protected abstract Color32 ToColor(T val);
-
-        public virtual Texture2D ToTexture2D()
-        {
-            var tex = new Texture2D(Width, Height);
-            var colors = new Color32[Width*Height];
-            OnBeforeSerialize();
-            for (int i = 0; i < Data.Length; i++)
-            {
-                colors[i] = ToColor(Data[i]);
-            }
-            tex.SetPixels32(colors);
-            tex.Apply();
-            return tex;
-        }
+        public abstract Texture2D ToTexture2D(bool normalise, Texture2D tex = null);
     }
 }

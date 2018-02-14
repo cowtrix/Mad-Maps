@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MadMaps.Roads
 {
-    [CreateAssetMenu(menuName = "Mad Maps/Roads/Connection Configuration")]
+    [CreateAssetMenu(menuName = "Mad Maps/Road Connection Configuration")]
     [HelpURL("http://lrtw.net/madmaps/index.php?title=Connection_Configuration")]
     public class ConnectionConfiguration : ScriptableObject, ISerializationCallbackReceiver
     {

@@ -5,6 +5,7 @@ using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Terrains;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MadMaps.WorldStamp
 {
@@ -89,7 +90,7 @@ namespace MadMaps.WorldStamp
         [SerializeField]
         private Vector3 _lastSnapPosition;
 
-        public bool WriteStencil = true;
+        //public bool WriteStencil = true;
 
         // Heights
         public bool WriteHeights = true;
@@ -98,7 +99,10 @@ namespace MadMaps.WorldStamp
         public float HeightOffset = 0;
 
         public bool WriteObjects = true;
-        public bool RemoveBaseObjects = true;
+        [Tooltip("Should this stamp remove objects?")]
+        [FormerlySerializedAs("RemoveBaseObjects")]
+        public bool RemoveObjects = true;
+        [Tooltip("Remove objects in this stamp if we don't write to the stencil?")]
         public bool StencilObjects = true;
         public bool OverrideObjectRelativeMode = false;
         public EObjectRelativeMode RelativeMode = EObjectRelativeMode.RelativeToTerrain;
@@ -112,9 +116,10 @@ namespace MadMaps.WorldStamp
 
         // Trees
         public bool WriteTrees = true;
-        [Tooltip("Remove trees on layers below this stamp?")]
-        public bool RemoveBaseTrees = true;
-        public bool RemoveSameLayerTrees = true;
+        [Tooltip("Should this stamp remove trees?")]
+        [FormerlySerializedAs("RemoveBaseTrees")]
+        public bool RemoveTrees = true;
+        //public bool RemoveSameLayerTrees = true;
         [Tooltip("Remove trees in this stamp if we don't write to the stencil?")]
         public bool StencilTrees = true;   
 
@@ -356,10 +361,10 @@ namespace MadMaps.WorldStamp
 
         public void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
-            if (!WriteStencil)
+            /*if (!WriteStencil)
             {
                 return;
-            }
+            }*/
             var res = terrainWrapper.Terrain.terrainData.heightmapResolution;
             if (layer.Stencil == null || layer.Stencil.Width != res || layer.Stencil.Height != res)
             {
@@ -741,11 +746,11 @@ namespace MadMaps.WorldStamp
                 new Bounds(terrainWrapper.Terrain.GetPosition() + terrainWrapper.Terrain.terrainData.size / 2,
                     terrainWrapper.Terrain.terrainData.size);
             wrapperBounds.Expand(Vector3.up * 5000);
-            if (RemoveBaseTrees)
+            if (RemoveTrees)
             {
                 var stampBounds = new ObjectBounds(transform.position, Size / 2, transform.rotation);
                 stampBounds.Expand(Vector3.up * 5000);
-                List<MadMapsTreeInstance> compoundTrees = terrainWrapper.GetCompoundTrees(layer, RemoveSameLayerTrees);
+                List<MadMapsTreeInstance> compoundTrees = terrainWrapper.GetCompoundTrees(layer, true);
                 foreach (var hurtTreeInstance in compoundTrees)
                 {
                     if (layer.TreeRemovals.Contains(hurtTreeInstance.Guid))
@@ -822,11 +827,11 @@ namespace MadMaps.WorldStamp
             var tSize = t.terrainData.size;
             var tPos = t.transform.position;
 
-            if (RemoveBaseObjects)
+            if (RemoveObjects)
             {
                 var stampBounds = new ObjectBounds(transform.position, Size / 2, transform.rotation);
                 stampBounds.Expand(Vector3.up * 5000);
-                var compoundObjects = terrainWrapper.GetCompoundObjects(layer);
+                var compoundObjects = terrainWrapper.GetCompoundObjects(layer, true);
                 foreach (var prefabObjectData in compoundObjects)
                 {
                     var pos = prefabObjectData.Position;

@@ -1,5 +1,4 @@
 using System;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace MadMaps.Common
@@ -58,7 +57,6 @@ namespace MadMaps.Common
             return new Coord(first.x + second.x, first.z + second.z);
         }
 
-        [Pure]
         public Coord Clamp(int p1, int p2)
         {
             return new Coord(Mathf.Clamp(x, p1, p2), Mathf.Clamp(z, p1, p2));

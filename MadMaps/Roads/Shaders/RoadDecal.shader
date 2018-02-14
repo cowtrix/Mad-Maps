@@ -1,8 +1,4 @@
-﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
-
-Shader "MadMaps/Road Decal" 
+﻿Shader "MadMaps/Road Decal" 
 {
 	Properties 
 	{

@@ -13,6 +13,7 @@ namespace MadMaps.Roads
     [StripComponentOnBuild]
 #endif
     [ExecuteInEditMode]
+    [HelpURL("http://lrtw.net/madmaps/index.php?title=Road_Network")]
     public class RoadNetwork : MonoBehaviour
     {
         public static HashSet<Node> ThinkCache = new HashSet<Node>();

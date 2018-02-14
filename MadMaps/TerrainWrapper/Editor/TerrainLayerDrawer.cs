@@ -212,7 +212,7 @@ namespace MadMaps.Terrains
             }
 
             EditorGUILayout.BeginHorizontal();
-            var previewContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
+            var previewContent = new GUIContent(GUIResources.EyeOpenIcon, "Preview");
             EditorGUILayout.LabelField("Height:", layer.Heights != null ? string.Format("{0}x{1}", layer.Heights.Width, layer.Heights.Height) : "null");
             if (layer.Heights != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
@@ -230,7 +230,14 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("Splats", layer.SplatData != null ? string.Format("{0}", layer.SplatData.Count) : "null");
             if (layer.SplatData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetData(layer.SplatData.GetValues(), layer.SplatData.GetKeys());
+                List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                List<object> context = new List<object>();
+                foreach (var keyValuePair in layer.SplatData)
+                {
+                    data.Add(keyValuePair.Value);
+                    context.Add(keyValuePair.Key);
+                }
+                DataInspector.SetData(data, context);
             }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
@@ -244,7 +251,14 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("Details", layer.DetailData != null ? string.Format("{0}", layer.DetailData.Count) : "null");
             if (layer.DetailData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetData(layer.DetailData.GetValues(), layer.DetailData.GetKeys());
+                List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                List<object> context = new List<object>();
+                foreach (var keyValuePair in layer.DetailData)
+                {
+                    data.Add(keyValuePair.Value);
+                    context.Add(keyValuePair.Key);
+                }
+                DataInspector.SetData(data, context, true);
             }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
@@ -299,14 +313,23 @@ namespace MadMaps.Terrains
             }
             if (layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0 && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetDataStencil(layer.Stencil);
+                DataInspector.SetData(layer.Stencil);
+            }
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            {
+                layer.Stencil.Clear();
+                EditorUtility.SetDirty(layer);
             }
             EditorGUILayout.EndHorizontal();
 
+            EditorExtensions.Seperator();
+
+            EditorGUILayout.LabelField("Layer Commands", EditorStyles.boldLabel);
+
             EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Update"))
+            if (GUILayout.Button("Capture From Terrain"))
             {
-                if (EditorUtility.DisplayDialog(string.Format("Update Layer {0} from Terrain?", layer.name), "This will clear any existing data!",
+                if (EditorUtility.DisplayDialog(string.Format("Capture Layer {0} from current Terrain?", layer.name), "This will clear any existing data!",
                     "Yes", "No"))
                 {
                     layer.SnapshotTerrain(wrapper.Terrain);
@@ -318,7 +341,7 @@ namespace MadMaps.Terrains
                 }
             }
             EditorGUILayout.Space();
-            if (GUILayout.Button("Apply"))
+            if (GUILayout.Button("Apply To Terrain"))
             {
                 wrapper.PrepareApply();
                 layer.WriteToTerrain(wrapper);
@@ -328,7 +351,7 @@ namespace MadMaps.Terrains
                 EditorSceneManager.MarkAllScenesDirty();
             }
             EditorGUILayout.Space();
-            if (GUILayout.Button("Clear"))
+            if (GUILayout.Button("Clear Layer"))
             {
                 if (EditorUtility.DisplayDialog(string.Format("Clear Layer {0}?", layer.name), "This will clear any existing data!",
                     "Yes", "No"))

@@ -16,7 +16,6 @@ namespace MadMaps.Terrains
     public class BakedTerrainData : ScriptableObject
     {
         // Baked data
-        //public List<GameObject> OwnedInstantiatedObjects = new List<GameObject>();
         public ObjectPrefabDataLookup Objects = new ObjectPrefabDataLookup();
         public TreeLookup Trees = new TreeLookup();
         public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();

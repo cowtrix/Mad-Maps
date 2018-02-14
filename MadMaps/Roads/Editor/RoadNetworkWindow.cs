@@ -108,7 +108,7 @@ namespace MadMaps.Roads
             }
         }
 
-        [MenuItem("Tools/Mad Maps/Road Network Editor")]
+        [MenuItem("Tools/Mad Maps/Road Network Editor", false, 6)]
         public static void OpenWindow()
         {
             var w = GetWindow<RoadNetworkWindow>();
@@ -129,11 +129,12 @@ namespace MadMaps.Roads
 
             EditorGUILayout.BeginHorizontal();
             FocusedRoadNetwork = (RoadNetwork) EditorGUILayout.ObjectField(FocusedRoadNetwork, typeof (RoadNetwork), false);
-            GUI.color = FocusedRoadNetwork != null && FocusedRoadNetwork.SceneViewEnabled ? Color.black : Color.grey;
+            GUI.color = FocusedRoadNetwork != null && FocusedRoadNetwork.SceneViewEnabled ? Color.white : Color.grey;
             if (FocusedRoadNetwork != null && GUILayout.Button(new GUIContent(GUIResources.EyeOpenIcon, FocusedRoadNetwork.SceneViewEnabled ? "Disable Gizmos" : "Enable Gizmos"), 
                 EditorStyles.label, GUILayout.Width(18), GUILayout.Height(18)))
             {
                 FocusedRoadNetwork.SceneViewEnabled = !FocusedRoadNetwork.SceneViewEnabled;
+                SceneView.RepaintAll();
             }
             GUI.color = Color.white;
             EditorExtensions.HelpButton("http://lrtw.net/madmaps/index.php?title=Road_Network");

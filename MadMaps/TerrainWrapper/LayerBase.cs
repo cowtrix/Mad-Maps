@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using MadMaps.Common.Collections;
 using MadMaps.WorldStamp;
 using UnityEngine;
@@ -30,20 +29,17 @@ namespace MadMaps.Terrains
         {
         }
 
-        [CanBeNull]
         public virtual Serializable2DFloatArray GetHeights(int x, int z, int xSize, int zSize, int hRes)
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual Serializable2DByteArray GetSplatmap(SplatPrototypeWrapper prototype, int x, int z, int width,
             int height, int splatResolution)
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual Serializable2DByteArray GetDetailMap(DetailPrototypeWrapper detailWrapper, int x, int z,
             int width, int height, int detailResolution)
         {
@@ -60,37 +56,31 @@ namespace MadMaps.Terrains
             return 0;
         }
 
-        [CanBeNull]
         public virtual List<string> GetTreeRemovals()
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual List<MadMapsTreeInstance> GetTrees()
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual List<string> GetObjectRemovals()
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual List<PrefabObjectData> GetObjects()
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual List<SplatPrototypeWrapper> GetSplatPrototypeWrappers()
         {
             return null;
         }
 
-        [CanBeNull]
         public virtual List<DetailPrototypeWrapper> GetDetailPrototypeWrappers()
         {
             return null;

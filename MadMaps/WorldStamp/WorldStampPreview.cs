@@ -11,8 +11,8 @@ namespace MadMaps.WorldStamp
         private Mesh _mesh;
         private Material _material;
         private int _lastFrame;
-        private Vector3 _lastPosition;
-        private Quaternion _lastRotation;
+        //private Vector3 _lastPosition;
+        //private Quaternion _lastRotation;
         private bool _isDisposed;
 
         private Func<bool> _existenceHook;
@@ -137,15 +137,14 @@ namespace MadMaps.WorldStamp
                 return;
             }
 
-            var position = _position();
-            var rotation = _rotation();
-
-            if (_lastFrame >= Time.renderedFrameCount && !(_lastPosition == position && _lastRotation == rotation))
+            if (_lastFrame >= Time.renderedFrameCount)
             {
                 return;
             }
 
-            _lastFrame = Time.renderedFrameCount;
+            _lastFrame = Time.renderedFrameCount; 
+            var position = _position();
+            var rotation = _rotation();
 
             var dSize = _dataSize();
             dSize = new Vector3(Mathf.Max(dSize.x, float.Epsilon), Mathf.Max(dSize.y, float.Epsilon), Mathf.Max(dSize.z, float.Epsilon));

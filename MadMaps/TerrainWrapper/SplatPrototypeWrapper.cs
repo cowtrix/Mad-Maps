@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    [CreateAssetMenu(menuName = "Mad Maps/Terrain/Splat Prototype")]
+    [CreateAssetMenu(menuName = "Mad Maps/Splat Prototype")]
     public partial class SplatPrototypeWrapper : ScriptableObject
     {
         public Texture2D Texture;

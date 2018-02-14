@@ -94,16 +94,24 @@ namespace MadMaps.Terrains
             GUI.DrawTexture(previewRect, tex);
 
             var infoRect = new Rect(layerNumberRect.xMax + 4, rect.y + headerHeight, objFieldWidth, rect.height - headerHeight);
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder("Written to by: ");
+            bool any = false;
             foreach (var layer in _wrapper.Layers)
             {
                 var wrappers = layer.GetSplatPrototypeWrappers();
                 if (wrappers != null && wrappers.Contains(_wrapper.SplatPrototypes[index]))
                 {
-                    sb.AppendLine("Written By Layer " + layer.name);
+                    sb.Append(layer.name);
+                    sb.Append("    ");
+                    any = true;
                 }
             }
-            EditorGUI.LabelField(infoRect, sb.ToString());
+            if (any)
+            {
+                var style = EditorStyles.label;
+                style.wordWrap = true;
+                EditorGUI.LabelField(infoRect, sb.ToString(), style);
+            }
         }
 
         private void DrawLayerHeaderCallback(Rect rect)

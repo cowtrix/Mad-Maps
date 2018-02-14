@@ -15,14 +15,11 @@ namespace MadMaps.WorldStamp
     {
         BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle(-1);
         private SerializedProperty _size;
-        private SerializedProperty _snapRotation;
-        private SerializedProperty _snapPosition;
         private SerializedProperty _snapToTerrain;
         private SerializedProperty _snapToTerrainOffset;
         private SerializedProperty _priority;
         private SerializedProperty _layerName;
         private SerializedProperty _previewEnabled;
-        private SerializedProperty _writeStencil;
         private SerializedProperty _gizmoColor, _gizmosEnabled;
 
         [SerializeField]
@@ -33,19 +30,16 @@ namespace MadMaps.WorldStamp
         private SerializedProperty _layerHeightBlendMode;
         private SerializedProperty _heightMin;
         private SerializedProperty _heightOffset;
-        //private SerializedProperty _baseHeightBlendMode;
 
         // Splats
         private SerializedProperty _splatsEnabled;
-        //private SerializedProperty _copyBaseSplats;
         private SerializedProperty _stencilSplats;
         private SerializedProperty _splatBlendMode;
 
         // Trees
         private SerializedProperty _treesEnabled;
-        private SerializedProperty _removeTreesWithStencil;
-        private SerializedProperty _removeBaseTrees;
-        private SerializedProperty _removeSameLayerTrees;
+        private SerializedProperty _stencilTrees;
+        private SerializedProperty _removeTrees;
 
         // Details
         private SerializedProperty _detailsEnabled;
@@ -54,15 +48,15 @@ namespace MadMaps.WorldStamp
 
         // Objects
         private SerializedProperty _objectsEnabled;
-        private SerializedProperty _removeObjectsWithStencil;
-        private SerializedProperty _removeBaseObjects;
+        private SerializedProperty _stencilObjects;
+        private SerializedProperty _removeObjects;
         private SerializedProperty _overrideRelativeObjectMode;
         private SerializedProperty _relativeObjectMode;
 
         private bool _editingMask = false;
         private Painter _painter;
 
-        [MenuItem("Tools/Compress World Stamps")]
+        /*[MenuItem("Tools/Compress World Stamps")]
         public static void CompressAll()
         {
             var allStamps = sFinder.FindComponentInPrefabs.FindComponentsInPrefab<WorldStamp>();
@@ -81,14 +75,11 @@ namespace MadMaps.WorldStamp
                 EditorUtility.SetDirty(ws.gameObject);
             }
             Debug.LogFormat("Compressed {0} stamps", allStamps.Count);
-        }
+        }*/
 
         void OnEnable()
         {
             _size = serializedObject.FindProperty("Size");
-            _writeStencil = serializedObject.FindProperty("WriteStencil");
-            _snapRotation = serializedObject.FindProperty("SnapRotation");
-            _snapPosition = serializedObject.FindProperty("SnapPosition");
             _snapToTerrain = serializedObject.FindProperty("SnapToTerrainHeight");
             _snapToTerrainOffset = serializedObject.FindProperty("SnapToTerrainHeightOffset");
             _priority = serializedObject.FindProperty("Priority");
@@ -96,11 +87,10 @@ namespace MadMaps.WorldStamp
             _heightMin = serializedObject.FindProperty("MinHeight");
             _splatBlendMode = serializedObject.FindProperty("SplatBlendMode");
             _stencilSplats = serializedObject.FindProperty("StencilSplats");
-            _removeBaseTrees = serializedObject.FindProperty("RemoveBaseTrees");
-            _removeSameLayerTrees = serializedObject.FindProperty("RemoveSameLayerTrees");
-            _removeTreesWithStencil = serializedObject.FindProperty("StencilTrees");
-            _removeBaseObjects = serializedObject.FindProperty("RemoveBaseObjects");
-            _removeObjectsWithStencil = serializedObject.FindProperty("StencilObjects");
+            _removeTrees = serializedObject.FindProperty("RemoveTrees");
+            _stencilTrees = serializedObject.FindProperty("StencilTrees");
+            _removeObjects = serializedObject.FindProperty("RemoveObjects");
+            _stencilObjects = serializedObject.FindProperty("StencilObjects");
             _heightsEnabled = serializedObject.FindProperty("WriteHeights");
             _heightOffset = serializedObject.FindProperty("HeightOffset");
             _treesEnabled = serializedObject.FindProperty("WriteTrees");
@@ -158,7 +148,7 @@ namespace MadMaps.WorldStamp
                 StampAll(_layerName.stringValue);
             }
             GUI.enabled = !_editingMask;
-            if (GUILayout.Button("Stamp All"))
+            if (GUILayout.Button("Stamp All Layers"))
             {
                 StampAll();
             }
@@ -244,8 +234,6 @@ namespace MadMaps.WorldStamp
 
             EditorExtensions.Seperator();
 
-            EditorGUILayout.PropertyField(_writeStencil);
-
             DoHeightsSection();
 
             DoTreesSection();
@@ -268,7 +256,11 @@ namespace MadMaps.WorldStamp
             DoHeader("Details", ref _detailsExpanded, _detailsEnabled, canWrite);
             if (_detailsExpanded)
             {
-                EditorGUI.indentLevel++;
+                EditorGUI.indentLevel++; 
+                if (!canWrite)
+                {
+                    EditorGUILayout.HelpBox("No Details in Stamp", MessageType.Info);
+                }
 
                 EditorGUILayout.PropertyField(_detailBlendMode);
                 EditorGUILayout.PropertyField(_detailsBoost);
@@ -326,7 +318,10 @@ namespace MadMaps.WorldStamp
             if (_splatsExpanded)
             {
                 EditorGUI.indentLevel++;
-
+                if (!canWrite)
+                {
+                    EditorGUILayout.HelpBox("No Splats in Stamp", MessageType.Info);
+                }
                 GUI.enabled = canWrite;
                 EditorGUILayout.PropertyField(_stencilSplats);
                 EditorGUILayout.PropertyField(_splatBlendMode);
@@ -383,9 +378,13 @@ namespace MadMaps.WorldStamp
             if (_objectsExpanded)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(_removeBaseObjects);
+                if (!canWrite)
+                {
+                    EditorGUILayout.HelpBox("No Objects in Stamp", MessageType.Info);
+                }
+                EditorGUILayout.PropertyField(_removeObjects);
                 GUI.enabled = canWrite;
-                EditorGUILayout.PropertyField(_removeObjectsWithStencil);
+                EditorGUILayout.PropertyField(_stencilObjects);
                 EditorGUILayout.PropertyField(_overrideRelativeObjectMode);
                 if (_overrideRelativeObjectMode.boolValue)
                 {
@@ -404,10 +403,13 @@ namespace MadMaps.WorldStamp
             if (_treesExpanded)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(_removeBaseTrees);
-                EditorGUILayout.PropertyField(_removeSameLayerTrees);
+                if (!canWrite)
+                {
+                    EditorGUILayout.HelpBox("No Trees in Stamp", MessageType.Info);
+                }
+                EditorGUILayout.PropertyField(_removeTrees);
                 GUI.enabled = canWrite;
-                EditorGUILayout.PropertyField(_removeTreesWithStencil);
+                EditorGUILayout.PropertyField(_stencilTrees);
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
             }
@@ -423,6 +425,10 @@ namespace MadMaps.WorldStamp
             {
                 EditorGUI.indentLevel++;
                 GUI.enabled = canEnable;
+                if (!canEnable)
+                {
+                    EditorGUILayout.HelpBox("No Heights in Stamp", MessageType.Info);
+                }
                 EditorGUILayout.PropertyField(_layerHeightBlendMode, new GUIContent("Blend Mode"));
                 EditorGUILayout.PropertyField(_heightOffset);
                 if (_layerHeightBlendMode.enumValueIndex == 2)
@@ -548,7 +554,14 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.LabelField("Splats", stamp.Data.SplatData.Count.ToString());
             if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetData(stamp.Data.SplatData.Select(x => x.Data).ToList(), stamp.Data.SplatData.Select(x => x.Wrapper).ToList());
+                List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                List<object> context = new List<object>();
+                foreach (var splatData in stamp.Data.SplatData)
+                {
+                    data.Add(splatData.Data);
+                    context.Add(splatData.Wrapper);
+                }
+                DataInspector.SetData(data, context);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -556,7 +569,14 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.LabelField("Details", stamp.Data.DetailData.Count.ToString());
             if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetData(stamp.Data.DetailData.Select(x => x.Data).ToList(), stamp.Data.DetailData.Select(x => x.Wrapper).ToList());
+                List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                List<object> context = new List<object>();
+                foreach (var detailData in stamp.Data.DetailData)
+                {
+                    data.Add(detailData.Data);
+                    context.Add(detailData.Wrapper);
+                }
+                DataInspector.SetData(data, context, true);
             }
             EditorGUILayout.EndHorizontal();
 

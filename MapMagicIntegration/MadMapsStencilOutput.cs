@@ -54,7 +54,7 @@ namespace MadMaps.Terrains.MapMagic
             if (stop != null && stop(0)) return;
 
             int heightSize = terrainSize.resolution;
-            var stencil = new Serializable2DFloatArray(heightSize, heightSize);
+            var stencil = new Stencil(heightSize, heightSize);
             int key = 1;
             for (int x = 0; x < heightSize - 1; x++)
             {

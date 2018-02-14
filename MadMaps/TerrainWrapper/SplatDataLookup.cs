@@ -25,7 +25,7 @@ namespace MadMaps.Terrains.Lookups
         public DetailPrototypeWrapper Wrapper;
         public Serializable2DByteArray Data;
     }
-
+    
     [Serializable]
     public class CompressedSplatDataLookup : CompositionDictionary<SplatPrototypeWrapper, Serializable2DByteArray>
     {

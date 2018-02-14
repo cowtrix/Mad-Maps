@@ -13,393 +13,157 @@ using UnityEditor;
 
 namespace MadMaps.Common
 {
-    public interface CanInspectInDataInspector
+    public interface IDataInspectorProvider
     {
-        Texture2D ToTexture2D();
+        Texture2D ToTexture2D(bool normalise, Texture2D tex = null);
     }
 
 #if UNITY_EDITOR
     
     public class DataInspector : EditorWindow
     {
-        class DataLayer<T> where T : struct
+        public class DataEntry
         {
+            public IDataInspectorProvider Data;
+            public object Context;
+            public Texture2D Texture;
         }
 
-        private static int _textureIndex;
-        private static List<Texture2D> _textures = new List<Texture2D>();
-        private static List<Object> _context = new List<Object>();
+        private static List<DataEntry> _entries = new List<DataEntry>(); 
+        private static int _index;
         private Vector2 _scroll;
 
-        public static void SetData(List<Serializable2DByteArray> datas, IEnumerable context)
+        public static void SetData(IDataInspectorProvider data, object context = null, bool normalise = false)
         {
-            _context.Clear();
-            if (datas.Count == 0)
+            Dispose();
+            var texture = data.ToTexture2D(normalise);
+            _entries.Add(new DataEntry()
             {
-                return;
-            }
+                Context = context,
+                Data = data,
+                Texture = texture,
+            });
+            GetWindow<DataInspector>();
+        }
 
-            var window = GetWindow<DataInspector>();
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(datas[0].Width, 600), Mathf.Min(datas[0].Height, 600));
-
-            DisposeTextures();
-
-            foreach (var data in datas)
+        public static void SetData(List<IDataInspectorProvider> datas, List<object> contexts, bool normalise = false)
+        {
+            Dispose();
+            _entries.Clear();
+            for (int i = 0; i < datas.Count; i++)
             {
-                var tex = new Texture2D(data.Width, data.Height);
-                var colors = new Color[data.Width * data.Height];
-
-                int counter = 0;
-                foreach (var val in data.Data)
+                var canInspectInDataInspector = datas[i];
+                if (canInspectInDataInspector == null)
                 {
-                    colors[counter] = Color.Lerp(Color.black, Color.white, val / 255f);
-                    counter++;
+                    Debug.LogError("Attempted to preview null Data!");
+                    continue;
                 }
 
-                tex.SetPixels(colors);
-                tex.Apply();
-                _textures.Add(tex);
-            }
+                var texture = canInspectInDataInspector.ToTexture2D(normalise);
+                var context = contexts[i];
 
-            foreach (var item in context)
-            {
-                var obj = item as Object;
-                if (obj != null)
+                _entries.Add(new DataEntry()
                 {
-                    _context.Add(obj);
+                    Context = context,
+                    Data = canInspectInDataInspector,
+                    Texture = texture,
+                });
+            }
+            GetWindow<DataInspector>();
+        }
+
+        static void Dispose()
+        {
+            for (int i = 0; i < _entries.Count; i++)
+            {
+                var entry = _entries[i];
+                if (entry != null && entry.Texture)
+                {
+                    DestroyImmediate(entry.Texture);
                 }
             }
-        }
-
-        /*public static void SetData(List<Serializable2DIntArray> datas)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>();
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(datas[0].Width, 600), Mathf.Min(datas[0].Height, 600));
-
-            DisposeTextures();
-
-            foreach (var data in datas)
-            {
-                var tex = new Texture2D(data.Width, data.Height);
-                var colors = new Color[data.Width * data.Height];
-
-                int counter = 0;
-                foreach (var val in data.Data)
-                {
-                    colors[counter] = Color.Lerp(Color.black, Color.white, val / 16f);
-                    counter++;
-                }
-
-                tex.SetPixels(colors);
-                tex.Apply();
-                _textures.Add(tex);
-            }
-        }
-        */
-
-        public static void SetData(float[,] data)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>(true);
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(data.GetLength(0), 600), Mathf.Min(data.GetLength(1), 600) + 100);
-
-            DisposeTextures();
-
-            var tex = new Texture2D(data.GetLength(0), data.GetLength(1));
-            var colors = new Color[data.GetLength(0)*data.GetLength(1)];
-
-            int counter = 0;
-            foreach (var val in data)
-            {
-                colors[counter] = Color.Lerp(Color.black, Color.white, val);
-                counter++;
-            }
-
-            tex.SetPixels(colors);
-            tex.Apply();
-            _textures.Add(tex);
-        }
-
-        public static void SetData(Serializable2DByteArray data)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>(true);
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(data.Width, 600), Mathf.Min(data.Height, 600) + 100);
-
-            DisposeTextures();
-
-            var tex = new Texture2D(data.Width, data.Height);
-            var colors = new Color[data.Width * data.Height];
-
-            int counter = 0;
-            foreach (var val in data.Data)
-            {
-                colors[counter] = Color.Lerp(Color.black, Color.white, val);
-                counter++;
-            }
-
-            tex.SetPixels(colors);
-            tex.Apply();
-            _textures.Add(tex);
-        }
-
-        public static void SetDataStencil(Serializable2DFloatArray data)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>(true);
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(data.Width, 600), Mathf.Min(data.Height, 600) + 100);
-
-            DisposeTextures();
-
-            var tex = new Texture2D(data.Width, data.Height);
-            var colors = new Color[data.Width * data.Height];
-
-            var gtex = new Texture2D(data.Width, data.Height);
-            var gcolors = new Color[data.Width * data.Height];
-
-            int counter = 0;
-            foreach (var val in data.Data)
-            {
-                int stencilKey;
-                float frac;
-                MiscUtilities.DecompressStencil(val, out stencilKey, out frac);
-
-                if (stencilKey > 0)
-                {
-                    var t = 0;
-                }
-
-                var color = stencilKey > 0 ? ColorUtils.GetIndexColor(stencilKey) : Color.black;
-                colors[counter] = Color.Lerp(Color.black, color, frac);
-                gcolors[counter] = stencilKey > 0 ? Color.Lerp(Color.black, Color.white, frac) : Color.black;
-                counter++;
-            }
-
-            tex.filterMode = FilterMode.Point;
-            tex.SetPixels(colors);
-            tex.Apply();
-            _textures.Add(tex);
-
-            gtex.SetPixels(gcolors);
-            gtex.Apply();
-            _textures.Add(gtex);
-        }
-
-        public static void SetData(Serializable2DFloatArray data)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>(true);
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(data.Width, 600), Mathf.Min(data.Height, 600) + 100);
-
-            DisposeTextures();
-
-            var tex = new Texture2D(data.Width, data.Height);
-            var colors = new Color[data.Width * data.Height];
-
-            int counter = 0;
-
-            var min = data.Data.Min();
-            var max = data.Data.Max();
-            
-            foreach (var val in data.Data)
-            {
-                colors[counter] = Color.Lerp(Color.black, Color.white, (val - min)/(max - min));
-                /*if (val < 0)
-                {
-                    colors[counter] = Color.Lerp(Color.black, Color.magenta, -val * 10);
-                }*/
-                counter++;
-            }
-
-            tex.SetPixels(colors);
-            tex.Apply();
-            _textures.Add(tex);
-        }
-
-        public static void SetData(List<Serializable2DFloatArray> datas)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>();
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(datas[0].Width, 600), Mathf.Min(datas[0].Height, 600));
-
-            DisposeTextures();
-
-            foreach (var data in datas)
-            {
-                var tex = new Texture2D(data.Width, data.Height);
-                var colors = new Color[data.Width * data.Height];
-
-                int counter = 0;
-                foreach (var val in data.Data)
-                {
-                    colors[counter] = Color.Lerp(Color.black, Color.white, val);
-                    counter++;
-                }
-
-                tex.SetPixels(colors);
-                tex.Apply();
-                _textures.Add(tex);
-            }
-        }
-
-        public static void SetData(List<Serializable2DByteArray> datas)
-        {
-            _context.Clear();
-            var window = GetWindow<DataInspector>();
-            window.titleContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
-            window.minSize = new Vector2(Mathf.Min(datas[0].Width, 600), Mathf.Min(datas[0].Height, 600));
-
-            DisposeTextures();
-
-            foreach (var data in datas)
-            {
-                var tex = new Texture2D(data.Width, data.Height);
-                var colors = new Color[data.Width * data.Height];
-
-                int counter = 0;
-                foreach (var val in data.Data)
-                {
-                    colors[counter] = Color.Lerp(Color.black, Color.white, val / 255f);
-                    counter++;
-                }
-
-                tex.SetPixels(colors);
-                tex.Apply();
-                _textures.Add(tex);
-            }
-        }
-        
-        static void DisposeTextures()
-        {
-            for (int i = 0; i < _textures.Count; i++)
-            {
-                var texture2D = _textures[i];
-                if (texture2D)
-                {
-                    DestroyImmediate(texture2D);
-                }
-            }
-            _textures.Clear();
-            _textureIndex = 0;
+            _entries.Clear();
+            _index = 0;
         }
 
         void OnDisable()
         {
-            DisposeTextures();
+            Dispose();
         }
 
         void OnGUI()
         {
-            if (_textures.IsNullOrEmpty())
+            if (_entries.IsNullOrEmpty())
             {
                 EditorGUILayout.HelpBox("No Data", MessageType.Info);
                 return;
             }
-
-            if (_textures.Count > 1)
+            
+            var entry = _entries[_index];
+            if (entry != null && entry.Texture != null)
             {
-                EditorGUILayout.BeginHorizontal(GUILayout.Width(100));
-                EditorGUILayout.BeginVertical();
-                for (int i = 0; i < _textures.Count; i++)
+                var aspect = entry.Texture.height / (float)entry.Texture.width;
+                var windowSize = this.position.size;
+                var size = Math.Min(windowSize.x, windowSize.y);
+                var scaledSizeFactor = 1f;
+                if (entry.Texture.width > entry.Texture.height)
                 {
-                    if ((i < _context.Count && GUILayout.Button(_context[i].name, GUILayout.Width(100))) || (i >= _context.Count && GUILayout.Button(i.ToString())))
-                    {
-                        _textureIndex = i;
-                    }
+                    scaledSizeFactor = 1 / (size * (1 / aspect) / windowSize.y);
                 }
+                else
+                {
+                    scaledSizeFactor = 1 / (size * aspect / windowSize.x);
+                }
+                size *= scaledSizeFactor;
+                _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.Width(size), GUILayout.Height(windowSize.y-100));
+                EditorGUILayout.BeginVertical(GUILayout.Width(size), GUILayout.Height(size * aspect));
+
+                GUILayout.Box("", GUILayout.Width(size - 25), GUILayout.Height(size * aspect - 25));
+                var lastRect = GUILayoutUtility.GetLastRect();
+                lastRect.position += Vector2.one * 4;
+                lastRect.size -= Vector2.one * 8;
+                GUI.DrawTexture(lastRect, entry.Texture);
+
                 EditorGUILayout.EndVertical();
+                EditorGUILayout.EndScrollView();
             }
             else
             {
-                _textureIndex = 0;
+                EditorGUILayout.HelpBox("Failed to generate preview for " + entry.Context, MessageType.Error);
             }
-            var tex = _textures[_textureIndex];
-            if (tex == null)
-            {
-                return;
-            }
-
-            var aspect = tex.height / (float)tex.width;
-            var windowSize = this.position.size;
             
-            var size = Math.Min(windowSize.x, windowSize.y);
-            var scaledSizeFactor = 1f;
-            if (tex.width > tex.height)
+            EditorExtensions.Seperator();
+            if (_entries.Count > 1)
             {
-                scaledSizeFactor = 1 / (size * (1 / aspect) / windowSize.y);
-            }
-            else
-            {
-                scaledSizeFactor = 1 / (size * aspect / windowSize.x);
-            }
-            size *= scaledSizeFactor;
-            
-            _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.Width(size), GUILayout.Height(windowSize.y - 60));
-
-            EditorGUILayout.BeginVertical(GUILayout.Width(size), GUILayout.Height(size * aspect));
-
-            GUILayout.Box("", GUILayout.Width(size - 25), GUILayout.Height(size * aspect - 25));
-            var lastRect = GUILayoutUtility.GetLastRect();
-            lastRect.position += Vector2.one * 4;
-            lastRect.size -= Vector2.one * 8;
-            GUI.DrawTexture(lastRect, tex);
-
-            EditorGUILayout.EndVertical();
-            EditorGUILayout.EndScrollView();
-            if (_textures.Count > 1)
-            {
+                EditorGUILayout.BeginHorizontal();
+                if (GUILayout.Button("<", GUILayout.Width(30)))
+                {
+                    _index--;
+                }
+                GUILayout.Label(string.Format("{0}/{1}", _index+1, _entries.Count), GUILayout.ExpandWidth(true));
+                GUILayout.Label(entry.Context != null ? entry.Context.ToString() : "Null");
+                if (GUILayout.Button(">", GUILayout.Width(30)))
+                {
+                    _index++;
+                }
                 EditorGUILayout.EndHorizontal();
             }
+            _index = Mathf.Clamp(_index, 0, _entries.Count - 1);
 
-            if (GUILayout.Button("Normalize Preview"))
+            /*if (GUILayout.Button("Normalize Preview"))
             {
                 Normalise(tex);
-            }
-            if (GUILayout.Button("Save"))
+            }*/
+
+            if (GUILayout.Button("Save as Texture"))
             {
                 var path = EditorUtility.SaveFilePanel("Save Data", "", "data", "png");
                 if (!string.IsNullOrEmpty(path))
                 {
-                    File.WriteAllBytes(path, tex.EncodeToPNG());
+                    File.WriteAllBytes(path, entry.Texture.EncodeToPNG());
                 }
             }
         }
-
-        void Normalise(Texture2D tex)
-        {
-            var c = tex.GetPixels();
-            var min = float.MaxValue;
-            var max = float.MinValue;
-            foreach (var color in c)
-            {
-                //sum += color.grayscale;
-                var v = color.grayscale;
-                if (v > max)
-                {
-                    max = color.grayscale;
-                }
-                if (v < min)
-                {
-                    min = v;
-                }
-            }
-            for (int i = 0; i < c.Length; i++)
-            {
-                var factor = (c[i].grayscale - min)/(max - min);
-                c[i] = Color.Lerp(Color.black, Color.white, factor);
-            }
-            tex.SetPixels(c);
-            tex.Apply();
-        }
-        
     }
 #endif
 }

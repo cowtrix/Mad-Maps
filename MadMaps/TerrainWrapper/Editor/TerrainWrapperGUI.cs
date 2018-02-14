@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEditor;
 using Object = UnityEngine.Object;
 using MadMaps.Common.Painter;
@@ -10,6 +11,12 @@ namespace MadMaps.Terrains
     [CustomEditor(typeof(TerrainWrapper))]
     public class TerrainWrapperGUI : Editor
     {
+        [MenuItem("Tools/Mad Maps/Documentation")]
+        public static void OpenWindow()
+        {
+            Help.BrowseURL("http://lrtw.net/madmaps/");
+        }
+
         public static TerrainLayer StencilLayerDisplay
         {
             get { return __stencilLayerDisplay; }
@@ -128,11 +135,7 @@ namespace MadMaps.Terrains
             }
             else if (currentTabTitle == "Info")
             {
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField("Compute Shaders (Experimental)");
-                TerrainWrapper.ComputeShaders = EditorGUILayout.Toggle(TerrainWrapper.ComputeShaders);
-                EditorGUILayout.EndHorizontal();
-
+                TerrainWrapper.ComputeShaders = EditorGUILayout.Toggle("Compute Shaders", TerrainWrapper.ComputeShaders);
                 Wrapper.WriteHeights = EditorGUILayout.Toggle("Write Heights", Wrapper.WriteHeights);
                 Wrapper.WriteSplats = EditorGUILayout.Toggle("Write Splats", Wrapper.WriteSplats);
                 Wrapper.WriteTrees = EditorGUILayout.Toggle("Write Trees", Wrapper.WriteTrees);
@@ -141,7 +144,7 @@ namespace MadMaps.Terrains
 
                 EditorExtensions.Seperator();
 
-                var previewContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
+                var previewContent = new GUIContent(GUIResources.EyeOpenIcon, "Preview");
 
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Compound Heights", Wrapper.CompoundTerrainData.Heights != null ? string.Format("{0}", string.Format("{0}x{1}", Wrapper.CompoundTerrainData.Heights.Width, Wrapper.CompoundTerrainData.Heights.Height)) : "null");
@@ -156,7 +159,14 @@ namespace MadMaps.Terrains
                 EditorGUILayout.LabelField("Compound Splats", Wrapper.CompoundTerrainData.SplatData != null ? string.Format("{0}", Wrapper.CompoundTerrainData.SplatData.Count) : "null");
                 if (Wrapper.CompoundTerrainData.SplatData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
                 {
-                    DataInspector.SetData(Wrapper.CompoundTerrainData.SplatData.GetValues(), Wrapper.CompoundTerrainData.SplatData.GetKeys());
+                    List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                    List<object> context = new List<object>();
+                    foreach (var keyValuePair in Wrapper.CompoundTerrainData.SplatData)
+                    {
+                        data.Add(keyValuePair.Value);
+                        context.Add(keyValuePair.Key);
+                    }
+                    DataInspector.SetData(data, context);
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorExtensions.Seperator();
@@ -165,7 +175,14 @@ namespace MadMaps.Terrains
                 EditorGUILayout.LabelField("Compound Details", Wrapper.CompoundTerrainData.DetailData != null ? string.Format("{0}", Wrapper.CompoundTerrainData.DetailData.Count) : "null");
                 if (Wrapper.CompoundTerrainData.DetailData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
                 {
-                    DataInspector.SetData(Wrapper.CompoundTerrainData.DetailData.GetValues(), Wrapper.CompoundTerrainData.DetailData.GetKeys());
+                    List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
+                    List<object> context = new List<object>();
+                    foreach (var keyValuePair in Wrapper.CompoundTerrainData.DetailData)
+                    {
+                        data.Add(keyValuePair.Value);
+                        context.Add(keyValuePair.Key);
+                    }
+                    DataInspector.SetData(data, context, true);
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorExtensions.Seperator();
