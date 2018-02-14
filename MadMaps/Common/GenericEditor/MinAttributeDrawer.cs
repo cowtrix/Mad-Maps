@@ -22,5 +22,24 @@ namespace MadMaps.Common.GenericEditor
             GUI.Label(position, string.Format("Unsupported type {0} for MinAttribute", property.type));
         }
     }
+
+    [CustomPropertyDrawer(typeof(MaxAttribute))]
+    public class MaxAttributeDrawer : PropertyDrawer
+    {
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            var minAttr = attribute as MaxAttribute;
+            switch (property.type)
+            {
+                case "float":
+                    property.floatValue = Mathf.Min(EditorGUI.FloatField(position, label, property.floatValue), minAttr.MaxValue);
+                    return;
+                case "int":
+                    property.intValue = Mathf.Min(EditorGUI.IntField(position, label, property.intValue), (int)minAttr.MaxValue);
+                    return;
+            }
+            GUI.Label(position, string.Format("Unsupported type {0} for MinAttribute", property.type));
+        }
+    }
 }
 #endif

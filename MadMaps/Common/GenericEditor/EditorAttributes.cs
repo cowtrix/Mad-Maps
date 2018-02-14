@@ -17,7 +17,8 @@ namespace MadMaps.Common.GenericEditor
 		public string FieldName;
 		public bool Invert;
 
-		public ShowIfAttribute(string fieldName, bool invert = false){
+		public ShowIfAttribute(string fieldName, bool invert = false)
+        {
 			FieldName = fieldName;
 			Invert = invert;
 		}
@@ -43,7 +44,7 @@ namespace MadMaps.Common.GenericEditor
         }
     }
 
-    public class MaxAttribute : Attribute
+    public class MaxAttribute : PropertyAttribute
     {
         public float MaxValue;
 
