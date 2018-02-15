@@ -117,6 +117,7 @@ namespace MadMaps.Terrains
                 worldPos.y = wrapper.transform.position.y + prefabObjectData.Position.y;
                 if (!bounds.Contains(worldPos))
                 {
+                    DebugHelper.DrawPoint(worldPos, 20, Color.red, 20);
                     continue;
                 }
                 if (wrapper.CompoundTerrainData.Objects.ContainsKey(prefabObjectData.Guid))

@@ -74,8 +74,6 @@ namespace MadMaps.Roads
             get { return InConnections.Count + OutConnections.Count; }
         }
 
-        public bool Locked;
-
         [Seed]
         public int Seed = 0;
         public bool Dirty;
@@ -320,7 +318,7 @@ namespace MadMaps.Roads
 
         private void Snap()
         {
-            if (!Network || Locked || Configuration.SnappingMode == NodeConfiguration.ESnappingMode.None || Vector3.Distance(_lastSnapPosition, transform.position) < .01f)
+            if (!Network || Configuration.SnappingMode == NodeConfiguration.ESnappingMode.None || Vector3.Distance(_lastSnapPosition, transform.position) < .01f)
             {
                 return; // Do nothing in this case
             }

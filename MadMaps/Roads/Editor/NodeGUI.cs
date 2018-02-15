@@ -10,14 +10,12 @@ namespace MadMaps.Roads
     {
         private SerializedProperty _configuration,
             _offset,
-            _locked,
             _seed;
 
         private void OnEnable()
         {
             _configuration = serializedObject.FindProperty("Configuration");
             _offset = serializedObject.FindProperty("Offset");
-            _locked = serializedObject.FindProperty("Locked");
             _seed = serializedObject.FindProperty("Seed");
         }
 
@@ -25,7 +23,6 @@ namespace MadMaps.Roads
         {
             serializedObject.Update();
 
-            EditorGUILayout.PropertyField(_locked);
             EditorGUILayout.PropertyField(_configuration, true);
             EditorGUILayout.PropertyField(_offset);
             EditorGUILayout.PropertyField(_seed);

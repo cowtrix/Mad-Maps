@@ -58,7 +58,7 @@ namespace MadMaps.Roads
             for (int i = 0; i < selection.Count; i++)
             {
                 var node = selection[i] as Node;
-                if (node == null || node.Locked)
+                if (node == null)
                 {
                     continue;
                 }

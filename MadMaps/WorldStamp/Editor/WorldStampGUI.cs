@@ -466,12 +466,14 @@ namespace MadMaps.WorldStamp
         private void DoSingleInstanceInfo()
         {
             var stamp = target as WorldStamp;
+            
+            EditorGUILayout.BeginVertical("Box");
 
             //FIX ISSUES
             if (stamp.Data.Objects.Exists(data => data.Prefab == null))
             {
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                EditorGUILayout.LabelField("Stamp contains objects with null prefabs!");
+                EditorGUILayout.LabelField("Stamp contains objects with null prefabs");
                 if (GUILayout.Button("Fix"))
                 {
                     var prevCount = stamp.Data.Objects.Count;
@@ -489,7 +491,7 @@ namespace MadMaps.WorldStamp
             if (stamp.Data.Objects.Exists(data => data.Scale.x < 0 || data.Scale.y < 0 || data.Scale.z < 0))
             {
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                EditorGUILayout.LabelField("Stamp contains objects with negative scales!");
+                EditorGUILayout.LabelField("Stamp contains objects with negative scales");
                 if (GUILayout.Button("Fix"))
                 {
                     for (int i = 0; i < stamp.Data.Objects.Count; i++)
@@ -510,7 +512,7 @@ namespace MadMaps.WorldStamp
             if (stamp.Data.Objects.Exists(data => PrefabUtility.FindPrefabRoot(data.Prefab) != data.Prefab))
             {
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
-                EditorGUILayout.LabelField("Stamp contains references to prefab subobjects!");
+                EditorGUILayout.LabelField("Stamp contains references to prefab subobjects");
                 if (GUILayout.Button("Fix"))
                 {
                     for (int i = 0; i < stamp.Data.Objects.Count; i++)
@@ -530,8 +532,7 @@ namespace MadMaps.WorldStamp
             }
             // END FIX ISSUES
 
-            EditorGUILayout.BeginVertical("Box");
-            var previewContent = EditorGUIUtility.IconContent("ClothInspector.ViewValue");
+            var previewContent = new GUIContent(GUIResources.EyeOpenIcon, "Preview");
             
             if (stamp == null)
             {

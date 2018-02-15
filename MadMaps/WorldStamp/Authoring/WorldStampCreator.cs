@@ -54,8 +54,7 @@ namespace MadMaps.WorldStamp.Authoring
             Template.Terrain = currentTerrain;
             Template.Bounds = Template.Terrain.GetBounds();
         }
-
-
+        
         void OnDisable()
         {
             for (int i = 0; i < Template.Creators.Count; i++)
@@ -234,19 +233,21 @@ namespace MadMaps.WorldStamp.Authoring
         {
             var tb = Terrain.GetBounds();
             
-            b.min = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).Flatten();
-            b.max = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).Flatten();
+            b.min = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).xz().x0z(tb.min.y);
+            b.max = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).xz().x0z(tb.min.y);
 
             b.Encapsulate(b.center.xz().x0z(tb.max.y));
             b.Encapsulate(b.center.xz().x0z(tb.min.y));
+            
             return b;
         }
         
         private bool DoSetArea()
         {
             var b = Template.Bounds;
-            b.min = Handles.DoPositionHandle(b.min, Quaternion.identity).Flatten();
-            b.max = Handles.DoPositionHandle(b.max.xz().x0z(b.min.y), Quaternion.identity).Flatten();
+            b.min = Handles.DoPositionHandle(b.min, Quaternion.identity);
+            b.max = Handles.DoPositionHandle(b.max.xz().x0z(b.min.y), Quaternion.identity);
+            
             b = ClampBounds(Template.Terrain, b);
             if (b != Template.Bounds)
             {

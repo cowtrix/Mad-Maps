@@ -141,14 +141,14 @@ namespace MadMaps.Terrains.MapMagic
                 {
                     if (stop != null && stop(0)) return; //checking stop before reading output
                     Layer layer = gen.baseLayers[b];
-                    if (layer.prefab == null) continue;
+                    //if (layer.prefab == null) continue;
 
                     //loading objects from input
                     SpatialHash hash = (SpatialHash)gen.baseLayers[b].input.GetObject(results);
                     if (hash == null) continue;
 
                     //adding prototype
-                    if (layer.prefab == null) continue;
+                    //if (layer.prefab == null) continue;
                     TreePrototype prototype = new TreePrototype() { prefab = layer.prefab, bendFactor = 0 };
                     prototypesList.Add(prototype);
                     int prototypeNum = prototypesList.Count - 1;

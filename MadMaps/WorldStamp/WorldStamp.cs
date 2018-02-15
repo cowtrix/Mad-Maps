@@ -922,22 +922,50 @@ namespace MadMaps.WorldStamp
 
                 if (OverrideObjectRelativeMode)
                 {
-                    prefabObjectData.AbsoluteHeight = RelativeMode == EObjectRelativeMode.RelativeToStamp;
+                    
+
+                    float heightVal;
                     if (HaveHeightsBeenFlipped)
                     {
-                        prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
+                        //prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
+                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
                     }
                     else
                     {
-                        prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
+                        //prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
+                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
                     }
+                    if (RelativeMode == EObjectRelativeMode.RelativeToStamp)
+                    {
+                        if (prefabObjectData.AbsoluteHeight)
+                        {
+                            //prefabObjectData.Position.y -= heightVal;
+                        }
+                        else
+                        {
+                            prefabObjectData.Position.y += heightVal;
+                        }
+                    }
+                    else
+                    {
+                        if (prefabObjectData.AbsoluteHeight)
+                        {
+                            prefabObjectData.Position.y -= heightVal;
+                        }
+                        else
+                        {
+                            //prefabObjectData.Position.y += heightVal;
+                        }
+                    }
+
+                    prefabObjectData.AbsoluteHeight = RelativeMode == EObjectRelativeMode.RelativeToStamp;
                 }
 
                 if (prefabObjectData.AbsoluteHeight)
                 {
                     prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
                     prefabObjectData.Position.y += transform.position.y;
-                    prefabObjectData.Position.y += tPos.y;
+                    prefabObjectData.Position.y -= tPos.y;
                 }
 
                 if (prefabObjectData.Scale.x < 0 || prefabObjectData.Scale.y < 0 || prefabObjectData.Scale.z < 0)

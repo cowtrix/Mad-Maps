@@ -20,6 +20,7 @@ public class TerrainSurfaceObject : MonoBehaviour
     public List<CastConfig> CastPoints = new List<CastConfig>();
     public int RequireCasts = 1;
     public LayerMask Mask = ~0;
+    public bool IsDebug;
     public const float CastDist = 100;
 
     public void Start()
@@ -51,6 +52,10 @@ public class TerrainSurfaceObject : MonoBehaviour
             var hits = Physics.RaycastAll(castPos, Vector3.down, castDist, Mask);
             if (hits.Length == 0)
             {
+                if (IsDebug)
+                {
+                    Debug.DrawLine(castPos, castPos + Vector3.down * castDist, Color.red, 10);
+                }
                 continue;
             }
 
@@ -64,6 +69,10 @@ public class TerrainSurfaceObject : MonoBehaviour
                 }
                 if (raycastHit.distance <= acceptableDist)
                 {
+                    if (IsDebug)
+                    {
+                        Debug.DrawLine(castPos, raycastHit.point, Color.green, 10);
+                    }
                     successCount++;
                     break;
                 }
@@ -72,7 +81,11 @@ public class TerrainSurfaceObject : MonoBehaviour
                 {
                     minY = candidateMinY;
                 }
-                
+
+                if (IsDebug)
+                {
+                    Debug.DrawLine(castPos, raycastHit.point, Color.white, 10);
+                }
                 break;
             }
         }
@@ -95,7 +108,6 @@ public class TerrainSurfaceObject : MonoBehaviour
                     Debug.LogError("Hit self");
                     return;
                 }
-                //mmObjAbove.PlaceCount++;
                 mmObjAbove.Recalculate();
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using UnityEngine;
 
 namespace MadMaps.Roads
@@ -38,7 +39,8 @@ namespace MadMaps.Roads
     public abstract class ConnectionComponent : sBehaviour
     {
         public bool OverridePriority;
-        public int Priority;
+        [Min(1)]
+        public int Priority = 1;
 
         public ComponentConfigurationRef Configuration;
         public NodeConnection NodeConnection;

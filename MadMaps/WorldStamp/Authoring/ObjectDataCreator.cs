@@ -52,11 +52,12 @@ namespace MadMaps.WorldStamp.Authoring
                 {
                     continue;
                 }
-                if (transform.GetComponentInChildren<WorldStamp>())
+                var ws = transform.GetComponentInAncestors<WorldStamp>();
+                if (ws)
                 {
-                    Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);
+                    //Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);
                     ignores.Add(transform);
-                    var children = transform.GetComponentsInChildren<Transform>(true);
+                    var children = ws.transform.GetComponentsInChildren<Transform>(true);
                     foreach (var ignore in children)
                     {
                         ignores.Add(ignore);
@@ -106,7 +107,7 @@ namespace MadMaps.WorldStamp.Authoring
                     done.Add(childTransform);
                 }
 
-                var prefabAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
                 var root = PrefabUtility.FindPrefabRoot(go);
 
                 var relativePos = root.transform.position - bounds.min;
@@ -145,6 +146,13 @@ namespace MadMaps.WorldStamp.Authoring
                     {
                         BoundsMapping[newData] = r.bounds;
                     }
+                }
+
+                done.Add(root.transform);
+                var doneChildren = root.transform.GetComponentsInChildren<Transform>(true);
+                foreach (var item in doneChildren)
+                {
+                    done.Add(item);
                 }
                 Objects.Add(newData);
             }

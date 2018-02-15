@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MadMaps.Common;
+using MadMaps.Common.GenericEditor;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -142,6 +143,7 @@ namespace MadMaps.Roads
             if (FocusedRoadNetwork == null)
             {
                 EditorGUILayout.HelpBox("Select a Road Network object.", MessageType.Info);
+                GUIUtility.ExitGUI();
                 return;
             }
 
@@ -184,8 +186,8 @@ namespace MadMaps.Roads
                 FocusedRoadNetwork.RoadConfigHistory.Where(configuration => configuration).ToList();    // Remove null entries
             if (FocusedRoadNetwork.RoadConfigHistory.Count > 0)
             {
-                _roadConfigScroll = EditorGUILayout.BeginScrollView(_roadConfigScroll, GUILayout.Height(80));
-                EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
+                _roadConfigScroll = EditorGUILayout.BeginScrollView(_roadConfigScroll, GUILayout.Height(95));
+                EditorGUILayout.BeginHorizontal("Box", GUILayout.ExpandWidth(true));
                 for (int i = FocusedRoadNetwork.RoadConfigHistory.Count - 1; i >= 0; i--)
                 {
                     var config = FocusedRoadNetwork.RoadConfigHistory[i];
@@ -205,7 +207,7 @@ namespace MadMaps.Roads
 
                     if (config == _currentConfiguration)
                     {
-                        GUILayout.Label(GUIResources.RoadConfigurationIcon, "Box", GUILayout.Width(64), GUILayout.Height(64));
+                        GUILayout.Label(GUIResources.RoadConfigurationIcon, EditorStyles.helpBox, GUILayout.Width(64), GUILayout.Height(64));
                     }
                     else
                     {
@@ -217,8 +219,10 @@ namespace MadMaps.Roads
                     GUI.Label(buttonRect, configName, textStyle);
                     configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), config.Color.ToHexString());
                     buttonRect.y += 2;
-                    var deleteRect = new Rect(buttonRect.max.x - 16, buttonRect.y, 16, 16);
-                    if (GUI.Button(deleteRect, "x", EditorStyles.miniButton))
+                    var deleteRect = new Rect(buttonRect.max.x - 20, buttonRect.y+2, 24, 24);
+                    var content = GenericEditor.DeleteContent;
+                    content.tooltip = "Remove From List";
+                    if (GUI.Button(deleteRect, content, EditorStyles.label))
                     {
                         FocusedRoadNetwork.RoadConfigHistory.RemoveAt(i);
                         _currentConfiguration = null;
@@ -270,9 +274,10 @@ namespace MadMaps.Roads
 
         private void DoIntersectionsUI()
         {
+            //EditorGUILayout.HelpBox("To insert an intersection, select a node and then click \"Insert Into Node\". The Road Network will attempt to insert the node as best it can. You can alter the intersection's rotation with the Rotation field. Alternatively, you can just place intersections in the scene yourself as you would with any prefab.", MessageType.Info);
             if (FocusedRoadNetwork.IntersectionHistory.Count > 0)
             {
-                _intersectionScroll = EditorGUILayout.BeginScrollView(_intersectionScroll, GUILayout.Height(100));
+                _intersectionScroll = EditorGUILayout.BeginScrollView(_intersectionScroll, GUILayout.Height(115));
                 EditorGUILayout.BeginHorizontal("Box", GUILayout.ExpandWidth(true));
                 for (int i = FocusedRoadNetwork.IntersectionHistory.Count - 1; i >= 0; i--)
                 {
@@ -283,20 +288,27 @@ namespace MadMaps.Roads
                         continue;
                     }
                     var guiContent = new GUIContent(AssetPreview.GetAssetPreview(gameObject));
+                    /*if (gameObject == _currentIntersection)
+                    {
+                        //EditorGUILayout.BeginVertical("Box", GUILayout.Width(70));
+                        GUI.color = Color.green;
+                    }*/
                     EditorGUILayout.BeginVertical(GUILayout.Width(70));
-                    if (GUILayout.Button(guiContent, GUIStyle.none, GUILayout.Width(64), GUILayout.Height(64)))
+                    if (GUILayout.Button(guiContent, gameObject == _currentIntersection ? EditorStyles.helpBox : GUIStyle.none, GUILayout.Width(64), GUILayout.Height(64)))
                     {
                         _currentIntersection = gameObject;
                     }
-                    EditorGUILayout.BeginHorizontal();
                     GUILayout.Label(gameObject.name, EditorStyles.miniLabel, GUILayout.Width(64));
-                    if (GUILayout.Button("x", EditorStyles.miniButton))
+                    EditorGUILayout.EndVertical();
+                    var removeRect = GUILayoutUtility.GetLastRect();
+                    removeRect = new Rect(removeRect.xMax-28, removeRect.y+3, 24, 24);
+                    var content = GenericEditor.DeleteContent;
+                    content.tooltip = "Remove From List";
+                    if (GUI.Button(removeRect, content, EditorStyles.label))
                     {
                         FocusedRoadNetwork.IntersectionHistory.RemoveAt(i);
                         _currentIntersection = null;
                     }
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.EndVertical();
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndScrollView();

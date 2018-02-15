@@ -6,7 +6,8 @@ namespace MadMaps.Roads
 {
     public abstract class ConnectionConfigurationBase
     {
-        public int Priority;
+        [Min(1)]
+        public int Priority = 1;
         
         public override string ToString()
         {

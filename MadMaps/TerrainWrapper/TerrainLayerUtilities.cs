@@ -1,3 +1,5 @@
+using MadMaps.WorldStamp.Authoring;
+using System.Linq;
 using MadMaps.Roads;
 using MadMaps.Common;
 using System;
@@ -189,46 +191,68 @@ namespace MadMaps.Terrains
             var terrainBounds = new Bounds(terrainPos, Vector3.zero);
             terrainBounds.Encapsulate(terrainPos + terrainSize);
             terrainBounds.Expand(Vector3.up * 5000);
+
+            var allTransforms = UnityEngine.Object.FindObjectsOfType<Transform>();
+            var done = new HashSet<Transform>();
+            allTransforms = allTransforms.OrderBy(transform => TransformExtensions.GetHierarchyDepth(transform)).ToArray();
+            HashSet<Transform> ignores = new HashSet<Transform>();
+
             layer.Objects.Clear();
-            var overlapBox = Physics.OverlapBox(terrainBounds.center, terrainBounds.extents, Quaternion.identity, ~0,
-                QueryTriggerInteraction.Ignore);
-            for (var i = 0; i < overlapBox.Length; i++)
+            for (var i = 0; i < allTransforms.Length; i++)
             {
-                var collider = overlapBox[i];
-                if (!collider.bounds.Intersects(terrainBounds))
-                {
-                    continue;
-                }
-                if (collider is TerrainCollider)
-                {
-                    continue;
-                }
-                if (collider.transform.GetComponentInAncestors<WorldStamp.WorldStamp>())
-                {
-                    continue;
-                }
-                if (collider.transform.GetComponentInAncestors<RoadNetwork>())
-                {
-                    continue;
-                }
-                if (collider.transform.GetComponentInAncestors<RoadNetworkProxy>())
+                var transform = allTransforms[i];
+
+                if (done.Contains(transform) || ignores.Contains(transform))
                 {
                     continue;
                 }
 
-                var go = collider.gameObject;
+                var ws = transform.GetComponentInAncestors<WorldStamp.WorldStamp>();
+                if (ws)
+                {
+                    //Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);
+                    ignores.Add(transform);
+                    var children = ws.transform.GetComponentsInChildren<Transform>(true);
+                    foreach (var ignore in children)
+                    {
+                        ignores.Add(ignore);
+                    }
+                    continue;
+                }
+                var rn = transform.GetComponentInAncestors<RoadNetwork>();
+                if (rn)
+                {
+                    ignores.Add(rn.transform);
+                    var children = rn.transform.GetComponentsInChildren<Transform>(true);
+                    foreach (var ignore in children)
+                    {
+                        ignores.Add(ignore);
+                    }
+                    continue;
+                }
+                var template = transform.GetComponentInAncestors<WorldStampTemplate>();
+                if (template)
+                {
+                    ignores.Add(template.transform);
+                    var children = template.transform.GetComponentsInChildren<Transform>(true);
+                    foreach (var ignore in children)
+                    {
+                        ignores.Add(ignore);
+                    }
+                    continue;
+                }
+
+                var go = transform.gameObject;
                 var prefabRoot = PrefabUtility.GetPrefabObject(go);
                 if (prefabRoot == null)
                 {
-                    Debug.LogError("Unable to collect non-prefab object: " + go.name, go);
-                    DebugHelper.DrawCube(collider.bounds.center, collider.bounds.extents, Quaternion.identity, Color.red,
-                        30);
+                    //Debug.LogError("Unable to collect non-prefab object: " + go.name, go);
                     continue;
                 }
 
-                var prefabAsset = PrefabUtility.GetPrefabParent(go) as GameObject;
+                var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
                 var rootInScene = PrefabUtility.FindPrefabRoot(go);
-
+                
                 var relativePos = rootInScene.transform.position - terrainPos;
                 relativePos = new Vector3(relativePos.x / terrainSize.x,
                     (rootInScene.transform.position.y - terrain.SampleHeight(rootInScene.transform.position)) -
@@ -242,6 +266,13 @@ namespace MadMaps.Terrains
                     Rotation = rootInScene.transform.localRotation.eulerAngles,
                     Scale = rootInScene.transform.localScale
                 });
+
+                done.Add(rootInScene.transform);
+                var doneChildren = rootInScene.transform.GetComponentsInChildren<Transform>(true);
+                foreach (var item in doneChildren)
+                {
+                    done.Add(item);
+                }
             }
 #endif
         }
