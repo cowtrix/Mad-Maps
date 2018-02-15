@@ -296,9 +296,17 @@ namespace MadMaps.Terrains
                     continue;
                 }
 
-                var worldPos = tPos +
-                               new Vector3(prefabObjectData.Position.x*tSize.x,
-                                   transform.position.y + prefabObjectData.Position.y,
+#if UNITY_EDITOR
+                var root = UnityEditor.PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab);
+                if (root != prefabObjectData.Prefab)
+                {
+                    Debug.LogError("Layer {0} references a prefab sub object! This is not supported.");
+                    continue;
+                }
+#endif
+
+                var worldPos = tPos + new Vector3(prefabObjectData.Position.x*tSize.x,
+                                   prefabObjectData.Position.y,
                                    prefabObjectData.Position.z*tSize.z);
                 if (!prefabObjectData.AbsoluteHeight)
                 {

@@ -287,8 +287,9 @@ namespace MadMaps.Terrains.MapMagic
 
                 foreach (var transition in transitionsList)
                 {
-                    var normalisedPos = new Vector3(transition.pos.x/terrainSize.x, transition.pos.y,
-                        transition.pos.z/terrainSize.z);
+                    var terrainSpacePos = transition.pos - terrain.transform.position - terrainSize/2;
+                    var normalisedPos = new Vector3(terrainSpacePos.x / terrainSize.x, transition.pos.y,
+                        terrainSpacePos.z / terrainSize.z);
                     var prefabObj = new PrefabObjectData()
                     {
                         AbsoluteHeight = false,
