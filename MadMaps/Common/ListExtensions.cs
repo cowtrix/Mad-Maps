@@ -49,7 +49,10 @@ namespace MadMaps.Common
             {
                 count = array.Count;
             }
-            array.Clear();
+            if (!typeof(T).IsArray)
+            {
+                array.Clear();
+            }
             for (var i = 0; i < count; ++i)
             {
                 array.Add(obj);

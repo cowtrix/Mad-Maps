@@ -97,8 +97,7 @@ namespace MadMaps.Common
         // Distorts a mesh along a spline
         public static Mesh DistortAlongSpline(this Mesh sourceMesh, SplineSegment spline, Matrix4x4 meshTransform,
             float splineStartTime = 0, float splineEndTime = 1, float snapDistance = 0,
-            CreateRenderMesh.Config.LodLevel.ESplineInterpolation splineInterpolation =
-                CreateRenderMesh.Config.LodLevel.ESplineInterpolation.Natural)
+            SplineSegment.ESplineInterpolation splineInterpolation = SplineSegment.ESplineInterpolation.Natural)
         {
             var result = new Mesh();
             var verts = new List<Vector3>(sourceMesh.vertices);
@@ -149,7 +148,7 @@ namespace MadMaps.Common
                 t = Mathf.Clamp01(t);
 
                 var natT = t;
-                if (splineInterpolation == CreateRenderMesh.Config.LodLevel.ESplineInterpolation.Uniform)
+                if (splineInterpolation == SplineSegment.ESplineInterpolation.Uniform)
                 {
                     natT = spline.UniformToNaturalTime(t);
                 }

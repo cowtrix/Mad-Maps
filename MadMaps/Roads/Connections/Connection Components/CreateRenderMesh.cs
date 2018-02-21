@@ -11,16 +11,11 @@ namespace MadMaps.Roads.Connections
     [Serializable]
     public class CreateRenderMesh : ConnectionComponent, IOnBakeCallback
     {
-        [Name("Mesh/Renderer")]
+        [Name("Mesh/Create Render Mesh")]
         public class Config : ConnectionConfigurationBase
         {
             public class LodLevel
-            {
-                public enum ESplineInterpolation
-                {
-                    Natural,
-                    Uniform,
-                }
+            {               
 
                 public Mesh SourceMesh;
                 public Material[] Materials = new Material[0];
@@ -29,9 +24,9 @@ namespace MadMaps.Roads.Connections
                 public int Layer;
                 public bool CopyToCollider;
                 public float BreakDistance = 50;
-                public ESplineInterpolation SplineInterpolation = ESplineInterpolation.Natural;
+                public SplineSegment.ESplineInterpolation SplineInterpolation = SplineSegment.ESplineInterpolation.Natural;
                 [Range(0, 1)]
-                public float SnapDistance = 0.05f;
+                public float SnapDistance = 1f;
                 public MeshTools.Axis Axis;
                 public Vector3 Scale = new Vector3(1, 1, 1);
                 public Vector3 Offset = new Vector3(0, 0, 0);
@@ -175,6 +170,12 @@ namespace MadMaps.Roads.Connections
             var spline = new SplineSegment(NodeConnection.GetSpline());
             spline.ApplyMatrix(rootTarget.transform.worldToLocalMatrix);
 
+            if(config.SourceMesh == null)
+            {
+                Debug.LogError("No mesh defined for CreateRenderMesh component!");
+                return;
+            }
+
             List<CombineInstance> workingMeshes = new List<CombineInstance>(); // All the meshes that will be combined at the end
             var totalSplineLength = spline.Length;
             var scale = config.SourceMesh.bounds.size;
@@ -211,7 +212,7 @@ namespace MadMaps.Roads.Connections
                     break;
                 }
 
-                if (config.SplineInterpolation == Config.LodLevel.ESplineInterpolation.Uniform)
+                if (config.SplineInterpolation == SplineSegment.ESplineInterpolation.Uniform)
                 {
                     startTime = spline.NaturalToUniformTime(startTime);
                     endTime = spline.NaturalToUniformTime(endTime);
@@ -268,9 +269,9 @@ namespace MadMaps.Roads.Connections
 
                     if (config.OverrideNormal)
                     {
-                        var n = new Vector3[currentResult.Mesh.vertexCount];
-                        n.Fill(Vector3.up);
-                        currentResult.Mesh.normals = n;
+                        var n = new List<Vector3>();
+                        n.Fill(Vector3.up, currentResult.Mesh.vertexCount);
+                        currentResult.Mesh.SetNormals(n);
                     }
                     else
                     {

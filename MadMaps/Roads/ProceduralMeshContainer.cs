@@ -15,6 +15,7 @@ namespace MadMaps.Roads
     public class ProceduralMeshContainer : MonoBehaviour
     {
         public bool Collider;
+        public bool Renderer = true;
         public SerializedMesh Mesh = new SerializedMesh();
 
         [SerializeField]
@@ -31,30 +32,44 @@ namespace MadMaps.Roads
 
         public void Update()
         {
-            if (_meshFilter == null)
+            if(Renderer)
             {
-                _meshFilter = gameObject.GetOrAddComponent<MeshFilter>();
-            }
-            if (_meshCollider == null)
-            {
-                _meshCollider = gameObject.GetOrAddComponent<MeshCollider>();
-            }
+                if (_meshFilter == null)
+                {
+                    _meshFilter = gameObject.GetOrAddComponent<MeshFilter>();
+                }
+                
+                if (_meshFilter.sharedMesh != null && _meshFilter.sharedMesh != _lastMesh)
+                {
+                    Mesh.FromMesh(_meshFilter.sharedMesh);
+                    _lastMesh = _meshFilter.sharedMesh;
+                }
 
-            if (_meshFilter.sharedMesh != null && _meshFilter.sharedMesh != _lastMesh)
-            {
-                Mesh.FromMesh(_meshFilter.sharedMesh);
-                _lastMesh = _meshFilter.sharedMesh;
-            }
-
-            if (Mesh != null && !Mesh.IsEmpty && _meshFilter.sharedMesh == null)
-            {
-                _meshFilter.sharedMesh = Mesh.ToMesh(_meshFilter.sharedMesh);
-                _lastMesh = _meshFilter.sharedMesh;
-            }
-
+                if (Mesh != null && !Mesh.IsEmpty && _meshFilter.sharedMesh == null)
+                {
+                    _meshFilter.sharedMesh = Mesh.ToMesh(_meshFilter.sharedMesh);
+                    _lastMesh = _meshFilter.sharedMesh;
+                }
+            }          
+            
             if (Collider)
             {
-                _meshCollider.sharedMesh = _meshFilter.sharedMesh;
+                if (_meshCollider == null)
+                {
+                    _meshCollider = gameObject.GetOrAddComponent<MeshCollider>();
+                }
+                if (_meshCollider.sharedMesh != null && _meshCollider.sharedMesh != _lastMesh)
+                {
+                    Mesh.FromMesh(_meshCollider.sharedMesh);
+                    _lastMesh = _meshCollider.sharedMesh;
+                }
+
+                if (Mesh != null && !Mesh.IsEmpty && _meshCollider.sharedMesh == null)
+                {
+                    _meshCollider.sharedMesh = Mesh.ToMesh(_meshCollider.sharedMesh);
+                    _lastMesh = _meshCollider.sharedMesh;
+                }
+                _meshCollider.sharedMesh = _meshCollider.sharedMesh;
             }
         }
     }

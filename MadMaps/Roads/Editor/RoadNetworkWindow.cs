@@ -217,7 +217,7 @@ namespace MadMaps.Roads
 
                     var configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), Color.black.ToHexString());
                     GUI.Label(buttonRect, configName, textStyle);
-                    configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), config.Color.ToHexString());
+                    configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), config.PreviewColor.ToHexString());
                     buttonRect.y += 2;
                     var deleteRect = new Rect(buttonRect.max.x - 20, buttonRect.y+2, 24, 24);
                     var content = GenericEditor.DeleteContent;

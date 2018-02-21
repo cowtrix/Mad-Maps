@@ -1,11 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using MadMaps.Common;
+﻿using MadMaps.Common;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.VR.WSA.WebCam;
 
 [CustomEditor(typeof(TerrainSurfaceObject))]
 public class TerrainSurfaceObjectGUI : Editor
@@ -49,13 +45,13 @@ public class TerrainSurfaceObjectGUI : Editor
         var vec3Field = new Rect(vec3Label.xMax, vec3Rect.y, vec3Rect.width * (1 - VecLabelSize), vec3Rect.height);
 
         EditorGUI.LabelField(vec3Label, "Position");
-        EditorGUI.Vector3Field(vec3Field, GUIContent.none, cc.Position);
+        cc.Position = EditorGUI.Vector3Field(vec3Field, GUIContent.none, cc.Position);
 
         var castDistRect = new Rect(vec3Rect.xMax+4, rect.y, rect.width * (1 - VecSize) -4, rect.height);
         var castDistLabel = new Rect(castDistRect.x, castDistRect.y, castDistRect.width * (DistLabelSize), castDistRect.height);
         var castDistField = new Rect(castDistLabel.xMax, castDistRect.y+2, castDistRect.width * (1 - DistLabelSize), castDistRect.height-4);
         EditorGUI.LabelField(castDistLabel, "Distance");
-        EditorGUI.FloatField(castDistField, GUIContent.none, cc.AcceptableDistance);
+        cc.AcceptableDistance = EditorGUI.FloatField(castDistField, GUIContent.none, cc.AcceptableDistance);
 
         _list.list[index] = cc;
     }

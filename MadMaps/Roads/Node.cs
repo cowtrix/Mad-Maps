@@ -37,6 +37,7 @@ namespace MadMaps.Roads
 
     [SelectionBase]
     [ExecuteInEditMode]
+    [HelpURL("http://lrtw.net/madmaps/index.php?title=Road_Network")]
 #if HURTWORLDSDK
     [StripComponentOnBuild]
 #endif

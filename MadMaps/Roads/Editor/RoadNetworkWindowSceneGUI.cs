@@ -206,7 +206,7 @@ namespace MadMaps.Roads
             if (myEvent.control)
             {
                 var currentSelection = GetCurrentlySelectedNodes();
-                Handles.SphereHandleCap(-1, hitPoint, Quaternion.identity, NodePreviewSize, EventType.repaint);
+                Handles.SphereHandleCap(-1, hitPoint, Quaternion.identity, NodePreviewSize, EventType.Repaint);
                 if (currentSelection.Count != 1)
                 {
                     return;

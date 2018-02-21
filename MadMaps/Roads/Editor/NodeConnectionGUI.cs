@@ -32,7 +32,7 @@ namespace MadMaps.Roads
         
         public static void DrawSplineSceneGUI(Camera sceneviewCamera, NodeConnection connection)
         {
-            var startColor = connection.Configuration != null ? connection.Configuration.Color : Color.gray;
+            var startColor = connection.Configuration != null ? connection.Configuration.PreviewColor : Color.gray;
             /*
             float h, s, v;
             Color.RGBToHSV(startColor, out h, out s, out v);

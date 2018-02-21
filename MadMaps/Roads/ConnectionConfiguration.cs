@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MadMaps.Common.Serialization;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MadMaps.Roads
 {
@@ -12,7 +13,8 @@ namespace MadMaps.Roads
         public const float DefaultCurviness = 60;
 
         [Tooltip("The color this connection will show in the Scene window.")]
-        public Color Color = UnityEngine.Color.white;
+        [FormerlySerializedAs("Color")]
+        public Color PreviewColor = UnityEngine.Color.white;
         [Tooltip("The curviness of the splines with this configuration.")]
         public float Curviness = DefaultCurviness;
         

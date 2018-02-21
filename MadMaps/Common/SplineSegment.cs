@@ -8,6 +8,12 @@ namespace MadMaps.Common
     [Serializable]
     public class SplineSegment
     {
+        public enum ESplineInterpolation
+        {
+            Natural,
+            Uniform,
+        }
+
         public float Resolution = 0.1f;
         public ControlPoint FirstControlPoint;
         public ControlPoint SecondControlPoint;
