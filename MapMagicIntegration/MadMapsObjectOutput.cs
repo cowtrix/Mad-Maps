@@ -293,7 +293,7 @@ namespace MadMaps.Terrains.MapMagic
 
                     var prefabObj = new PrefabObjectData()
                     {
-                        AbsoluteHeight = false,
+                        IsRelativeToStamp = false,
                         Guid = System.Guid.NewGuid().ToString(),
                         Prefab = prefab.gameObject,
                         Rotation = transition.rotation.eulerAngles,
