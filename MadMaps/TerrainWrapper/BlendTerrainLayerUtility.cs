@@ -309,6 +309,10 @@ namespace MadMaps.Terrains
 
         private static bool ShouldCompute<T>(Serializable2DArray<T> array) where T:struct
         {
+            if(SystemInfo.graphicsShaderLevel < 45)
+            {
+                return false;
+            }
             return array.Width * array.Height >= 8 * 8;
         }
     }

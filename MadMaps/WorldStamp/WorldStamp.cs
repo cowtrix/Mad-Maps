@@ -922,8 +922,6 @@ namespace MadMaps.WorldStamp
 
                 if (OverrideObjectRelativeMode)
                 {
-                    
-
                     float heightVal;
                     if (HaveHeightsBeenFlipped)
                     {
@@ -937,7 +935,7 @@ namespace MadMaps.WorldStamp
                     }
                     if (RelativeMode == EObjectRelativeMode.RelativeToStamp)
                     {
-                        if (prefabObjectData.AbsoluteHeight)
+                        if (prefabObjectData.IsRelativeToStamp)
                         {
                             //prefabObjectData.Position.y -= heightVal;
                         }
@@ -948,7 +946,7 @@ namespace MadMaps.WorldStamp
                     }
                     else
                     {
-                        if (prefabObjectData.AbsoluteHeight)
+                        if (prefabObjectData.IsRelativeToStamp)
                         {
                             prefabObjectData.Position.y -= heightVal;
                         }
@@ -958,12 +956,13 @@ namespace MadMaps.WorldStamp
                         }
                     }
 
-                    prefabObjectData.AbsoluteHeight = RelativeMode == EObjectRelativeMode.RelativeToStamp;
+                    prefabObjectData.IsRelativeToStamp = RelativeMode == EObjectRelativeMode.RelativeToStamp;
                 }
 
-                if (prefabObjectData.AbsoluteHeight)
+                if (prefabObjectData.IsRelativeToStamp)
                 {
-                    prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
+                    if(!OverrideObjectRelativeMode)
+                        prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
                     prefabObjectData.Position.y += transform.position.y;
                     prefabObjectData.Position.y -= tPos.y;
                 }

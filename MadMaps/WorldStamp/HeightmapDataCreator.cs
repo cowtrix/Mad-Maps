@@ -45,15 +45,20 @@ namespace MadMaps.WorldStamp.Authoring
             float avgMarginHeight = 0; // If we want, we can have the stamp try to automatically find a good zero level by averaging the heights around the edge of the stamp
             int marginCount = 0;
 
-            Heights = new Serializable2DFloatArray(width + 1, height + 1);
-
-            var sampleHeights = terrain.terrainData.GetHeights(min.x, min.z, width + 1, height + 1);
-            for (var dx = 0; dx <= width; ++dx)
+            Heights = new Serializable2DFloatArray(width, height);
+            float maxHeight = float.MinValue;
+            var sampleHeights = terrain.terrainData.GetHeights(min.x, min.z, width, height);
+            for (var dx = 0; dx < width; ++dx)
             {
-                for (var dz = 0; dz <= height; ++dz)
+                for (var dz = 0; dz < height; ++dz)
                 {
                     var sample = sampleHeights[dz, dx];
                     Heights[dx, dz] = sample;
+
+                    if(sample > maxHeight)
+                    {
+                        maxHeight = sample;
+                    }
 
                     if (dx == 0 || dx == width || dz == 0 || dz == height)
                     {
@@ -66,13 +71,14 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 ZeroLevel = avgMarginHeight / marginCount;
             }
-            for (var dx = 0; dx <= width; ++dx)
+            for (var dx = 0; dx < width; ++dx)
             {
-                for (var dz = 0; dz <= height; ++dz)
+                for (var dz = 0; dz < height; ++dz)
                 {
                     Heights[dx, dz] -= ZeroLevel;
                 }
             }
+            Debug.Log(maxHeight);
             _dirty = true;
         }
 
@@ -89,12 +95,18 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
+            if(Enabled && Heights == null || Heights.IsEmpty())
+            {
+                NeedsRecapture = true;
+            }
+
             EditorGUI.BeginChangeCheck();
             AutoZeroLevel = EditorGUILayout.Toggle("Auto Zero Level", AutoZeroLevel);
             if (!AutoZeroLevel)
             {
                 EditorGUI.indentLevel++;
-                var newHeightMin = EditorGUILayout.Slider("Zero Level", ZeroLevel, 0, 1);
+                var tHeight = parent.Template.Terrain.terrainData.size.y;
+                var newHeightMin = EditorGUILayout.Slider("Zero Level", ZeroLevel * tHeight, 0, 1) / tHeight;
                 EditorGUI.indentLevel--;
                 if (newHeightMin != ZeroLevel)
                 {
@@ -119,7 +131,7 @@ namespace MadMaps.WorldStamp.Authoring
             if (_dirty)
             {
                 _preview.Invalidate(
-                    Heights, () => bounds.size, () => bounds.center.xz().x0z(bounds.min.y + 2 + ZeroLevel * bounds.size.y), () => Vector3.one,
+                    Heights, () => bounds.size, () => bounds.center.xz().x0z(bounds.min.y + ZeroLevel * bounds.size.y), () => Vector3.one,
                     () => Quaternion.identity, () => bounds.size, true, null, null,
                     () => parent.SceneGUIOwner == this, 128);
                 _dirty = false;

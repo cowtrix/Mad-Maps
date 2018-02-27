@@ -126,7 +126,7 @@ namespace MadMaps.WorldStamp.Authoring
                 
                 var newData = new PrefabObjectData()
                 {
-                    AbsoluteHeight = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
+                    IsRelativeToStamp = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
                     Prefab = prefabAsset,
                     Position = relativePos,
                     Rotation = root.transform.rotation.eulerAngles,

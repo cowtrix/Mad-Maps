@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MadMaps.WorldStamp
 {
@@ -11,6 +12,7 @@ namespace MadMaps.WorldStamp
         public Vector3 Scale;
         public GameObject Prefab;
         public string Guid;
-        public bool AbsoluteHeight;
+        [FormerlySerializedAs("AbsoluteHeight")]
+        public bool IsRelativeToStamp;
     }
 }

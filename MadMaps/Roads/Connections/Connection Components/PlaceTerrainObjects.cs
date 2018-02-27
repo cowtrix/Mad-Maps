@@ -105,7 +105,7 @@ namespace MadMaps.Roads.Connections
                 
                 var prefabObject = new PrefabObjectData()
                 {
-                    AbsoluteHeight = config.AbsoluteHeight,
+                    IsRelativeToStamp = config.AbsoluteHeight,
                     Guid = Guid.NewGuid().ToString(),
                     Position = tPos,
                     Scale = scale,

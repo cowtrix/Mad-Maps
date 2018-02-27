@@ -12,40 +12,6 @@ namespace MadMaps.Common
 {
     public static class  MiscUtilities
     {
-#if UNITY_EDITOR
-        [MenuItem("Tools/Level/Positive All Scales")]
-        public static void CullTrees(MenuCommand command)
-        {
-            var allTransforms = Object.FindObjectsOfType<Transform>();
-            int counter = 0;
-            foreach (var allTransform in allTransforms)
-            {
-                var prevScale = allTransform.localScale;
-                allTransform.localScale = new Vector3(Mathf.Abs(allTransform.localScale.x), Mathf.Abs(allTransform.localScale.y),Mathf.Abs(allTransform.localScale.z));
-                if (prevScale != allTransform.localScale) counter++;
-            }
-            Debug.Log(String.Format("Fixed up {0} objects.", counter));
-        }
-#endif
-
-        
-
-        /*public static TerrainWrapper FindWrapper(Vector3 p)
-        {
-            var allWrappers = UnityEngine.Object.FindObjectsOfType<TerrainWrapper>();
-            for (int i = 0; i < allWrappers.Length; i++)
-            {
-                var terrainWrapper = allWrappers[i];
-                var b = terrainWrapper.Terrain.GetBounds();
-                b.exp
-                if (b.Contains(p))
-                {
-                    return terrainWrapper;
-                }
-            }
-            return null;
-        }*/
-
         public static float FloorToUshort(float f)
         {
             f = Mathf.Clamp01(f);
