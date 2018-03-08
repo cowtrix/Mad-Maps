@@ -28,7 +28,7 @@ namespace MadMaps.WorldStamp
         // Heights
         private SerializedProperty _heightsEnabled;
         private SerializedProperty _layerHeightBlendMode;
-        private SerializedProperty _heightMin;
+        //private SerializedProperty _heightMin;
         private SerializedProperty _heightOffset;
 
         // Splats
@@ -56,27 +56,6 @@ namespace MadMaps.WorldStamp
         private bool _editingMask = false;
         private Painter _painter;
 
-        /*[MenuItem("Tools/Compress World Stamps")]
-        public static void CompressAll()
-        {
-            var allStamps = sFinder.FindComponentInPrefabs.FindComponentsInPrefab<WorldStamp>();
-            foreach (var ws in allStamps)
-            {
-                ws.Data.Heights.ForceDirty();
-                foreach (var compressedSplatData in ws.Data.SplatData)
-                {
-                    compressedSplatData.Data.ForceDirty();
-                }
-                foreach (var compressedDetailData in ws.Data.DetailData)
-                {
-                    compressedDetailData.Data.ForceDirty();
-                }
-                EditorUtility.SetDirty(ws);
-                EditorUtility.SetDirty(ws.gameObject);
-            }
-            Debug.LogFormat("Compressed {0} stamps", allStamps.Count);
-        }*/
-
         void OnEnable()
         {
             _size = serializedObject.FindProperty("Size");
@@ -84,7 +63,7 @@ namespace MadMaps.WorldStamp
             _snapToTerrainOffset = serializedObject.FindProperty("SnapToTerrainHeightOffset");
             _priority = serializedObject.FindProperty("Priority");
             _layerHeightBlendMode = serializedObject.FindProperty("LayerHeightBlendMode");
-            _heightMin = serializedObject.FindProperty("MinHeight");
+            //_heightMin = serializedObject.FindProperty("MinHeight");
             _splatBlendMode = serializedObject.FindProperty("SplatBlendMode");
             _stencilSplats = serializedObject.FindProperty("StencilSplats");
             _removeTrees = serializedObject.FindProperty("RemoveTrees");
@@ -431,10 +410,10 @@ namespace MadMaps.WorldStamp
                 }
                 EditorGUILayout.PropertyField(_layerHeightBlendMode, new GUIContent("Blend Mode"));
                 EditorGUILayout.PropertyField(_heightOffset);
-                if (_layerHeightBlendMode.enumValueIndex == 2)
+                /*if (_layerHeightBlendMode.enumValueIndex == 2)
                 {
                     EditorGUILayout.PropertyField(_heightMin);
-                }
+                }*/
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
             }
@@ -540,6 +519,7 @@ namespace MadMaps.WorldStamp
             }
 
             bool isPrefab = PrefabUtility.GetPrefabType(target) == PrefabType.Prefab;
+            bool hasPrefab = PrefabUtility.GetPrefabObject(target);
             //var dc = stamp.GetComponentInChildren<WorldStampDataContainer>();
             //bool isProxy = !isPrefab && dc.Redirect != null;
 
@@ -585,7 +565,8 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.LabelField("Objects", stamp.Data.Objects.Count.ToString());
             
             GUI.enabled = !isPrefab;
-            bool alreadyHasMaskInstance = stamp.Mask != null && stamp.Mask.Count > 0;
+            bool alreadyHasMaskInstance = !hasPrefab || (stamp.Mask != null && stamp.Mask.Count > 0);
+
             if (GUILayout.Button(_editingMask ? "Finish Editing" : alreadyHasMaskInstance ? "Edit Mask" : "Edit Mask (Create Instance)"))
             {
                 if (_editingMask)
@@ -599,8 +580,9 @@ namespace MadMaps.WorldStamp
                 }
                 _editingMask = !_editingMask;
             }
+            GUI.enabled = !_editingMask && hasPrefab && alreadyHasMaskInstance;
             EditorGUILayout.BeginHorizontal();
-            if (alreadyHasMaskInstance && GUILayout.Button("Revert Mask"))
+            if (GUILayout.Button("Revert Mask"))
             {
                 if (EditorUtility.DisplayDialog("Really Revert Mask?",
                     "You will lose all mask data you changed on this instance!", "Yes", "No"))
@@ -609,18 +591,18 @@ namespace MadMaps.WorldStamp
                     _editingMask = false;
                 }
             }
-            if (alreadyHasMaskInstance && !_editingMask && stamp.Mask != null)
+            if (GUILayout.Button("Write Mask To Prefab") && stamp.Mask != null)
             {
-                if (GUILayout.Button("Write Mask To Prefab"))
+                stamp.Mask.OnBeforeSerialize();
+                stamp.Data.Mask = JsonUtility.FromJson<WorldStampMask>(JsonUtility.ToJson(stamp.Mask));
+                var prefab = PrefabUtility.GetPrefabParent(stamp);
+                if (prefab != null)
                 {
-                    stamp.Data.Mask = JsonUtility.FromJson<WorldStampMask>(JsonUtility.ToJson(stamp.Mask));
-                    var prefab = PrefabUtility.GetPrefabParent(stamp);
-                    if (prefab != null)
-                    {
-                        Debug.Log("Wrote mask back to prefab");
-                        EditorUtility.SetDirty(prefab);
-                    }
-                }
+                    Debug.Log("Wrote mask back to prefab");
+                    EditorUtility.SetDirty(prefab);
+                }              
+                stamp.Mask = null;
+                _editingMask = false;  
             }
 
             EditorGUILayout.EndHorizontal();

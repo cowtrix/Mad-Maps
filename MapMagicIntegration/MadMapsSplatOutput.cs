@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MapMagic;
 using UnityEngine;
+using MadMaps.Common;
 
 namespace MadMaps.Terrains.MapMagic
 {

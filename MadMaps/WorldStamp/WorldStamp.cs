@@ -95,7 +95,7 @@ namespace MadMaps.WorldStamp
         // Heights
         public bool WriteHeights = true;
         public EHeightBlendMode LayerHeightBlendMode = EHeightBlendMode.Max;
-        public float MinHeight = -9999;
+        //public float MinHeight = -9999;
         public float HeightOffset = 0;
 
         public bool WriteObjects = true;
@@ -446,7 +446,7 @@ namespace MadMaps.WorldStamp
                                 float tolerance = .2f;
                                 if (LayerHeightBlendMode == EHeightBlendMode.Max)
                                 {
-                                    predictedOutHeight = Mathf.Max(predictedOutHeight, MinHeight);
+                                    //predictedOutHeight = Mathf.Max(predictedOutHeight, MinHeight);
                                     //predictedOutHeight = Mathf.Max(predictedOutHeight, baseHeight);
                                     if (predictedOutHeight >= layerHeight - tolerance)
                                     {

@@ -55,7 +55,10 @@ namespace MadMaps.Roads
                     lastIndex = index;
                 }
                 Handles.color = startColor;
-                Handles.DrawLine(spline.Points[lastIndex].Position, spline.Points[spline.Points.Count-1].Position);
+                if(pointCount > 0)
+                {
+                    Handles.DrawLine(spline.Points[lastIndex].Position, spline.Points[spline.Points.Count-1].Position);
+                }
             }
             else
             {

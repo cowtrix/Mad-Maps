@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using MadMaps.WorldStamp;
+using MadMaps.Common;
 #if MAPMAGIC
 using MapMagic;
 using UnityEngine;
@@ -246,6 +247,11 @@ namespace MadMaps.Terrains.MapMagic
 
         public Vector3 GetTerrainNormal(float fx, float fz, Matrix heightmap, float heightFactor, float pixelSize)
         {
+            if(heightmap == null)
+            {
+                return Vector3.up;
+            }
+
             //copy of rect's GetPos to process negative terrains properly
             int x = (int)(fx + 0.5f); if (fx < 0) x--;
             int z = (int)(fz + 0.5f); if (fz < 0) z--;
