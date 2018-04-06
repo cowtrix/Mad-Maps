@@ -156,6 +156,7 @@ namespace MadMaps.Terrains
             {
                 _wrapper.RefreshSplats();
             }
+            List.list = _wrapper.SplatPrototypes;
         }
         
     }

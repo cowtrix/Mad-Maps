@@ -138,6 +138,7 @@ namespace MadMaps.Terrains
             {
                 _wrapper.RefreshDetails();
             }
+            List.list = _wrapper.DetailPrototypes;
         }
 
     }

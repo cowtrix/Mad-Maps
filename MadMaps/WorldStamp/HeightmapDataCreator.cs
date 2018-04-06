@@ -84,6 +84,10 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void Clear()
         {
+            if(Heights == null)
+            {
+                return;
+            }
             Heights.Clear();
         }
 
@@ -95,7 +99,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
-            if(Enabled && Heights == null || Heights.IsEmpty())
+            if(Enabled && (Heights == null || Heights.IsEmpty()))
             {
                 NeedsRecapture = true;
             }

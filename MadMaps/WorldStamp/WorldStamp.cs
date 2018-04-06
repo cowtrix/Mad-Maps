@@ -39,6 +39,85 @@ namespace MadMaps.WorldStamp
             RelativeToStamp,
         }
 
+        //======================================
+        // General Configuration
+        //======================================
+        public WorldStampMask Mask;
+        public bool HaveHeightsBeenFlipped = false;     // Legacy flag (old heights used to be ZX not XZ)
+        public int Priority = 0;
+        public Vector3 Size;
+        public bool SnapPosition;
+        public bool SnapRotation;
+        public bool SnapToTerrainHeight;
+        public float SnapToTerrainHeightOffset;
+
+        public string LayerName = "StampLayer";
+
+        //======================================
+        // Heights
+        //======================================
+        public bool WriteHeights = true;
+        public EHeightBlendMode LayerHeightBlendMode = EHeightBlendMode.Max;
+        public float HeightOffset = 0;
+
+        //======================================
+        // Objects
+        //======================================
+        public bool WriteObjects = true;
+        [Tooltip("Should this stamp remove objects?")]
+        [FormerlySerializedAs("RemoveBaseObjects")]
+        public bool RemoveObjects = true;
+        [Tooltip("Remove objects in this stamp if we don't write to the stencil?")]
+        public bool StencilObjects = true;
+        public bool OverrideObjectRelativeMode = false;
+        public EObjectRelativeMode RelativeMode = EObjectRelativeMode.RelativeToTerrain;
+        
+        //======================================
+        // Splats
+        //======================================
+        public bool WriteSplats = true;
+        public bool StencilSplats = false;
+        [Tooltip("How to blend with existing splats on terrain")]
+        public ESplatBlendMode SplatBlendMode = ESplatBlendMode.Set;
+        public List<SplatPrototypeWrapper> IgnoredSplats = new List<SplatPrototypeWrapper>();
+
+        //======================================
+        // Trees
+        //======================================
+        public bool WriteTrees = true;
+        [Tooltip("Should this stamp remove trees?")]
+        [FormerlySerializedAs("RemoveBaseTrees")]
+        public bool RemoveTrees = true;
+        [Tooltip("Remove trees in this stamp if we don't write to the stencil?")]
+        public bool StencilTrees = true;
+        public List<GameObject> IgnoredTrees = new List<GameObject>();
+
+        //======================================
+        // Details
+        //======================================
+        public bool WriteDetails = true;
+        [Tooltip("Coefficient for detail strength")]
+        public float DetailBoost = 1;
+        [Tooltip("How to blend with existing details on terrain")]
+        public ESplatBlendMode DetailBlendMode = ESplatBlendMode.Set;
+        public bool RemoveExistingDetails = false;
+        public List<DetailPrototypeWrapper> IgnoredDetails = new List<DetailPrototypeWrapper>();
+
+        //======================================
+        // Gizmos
+        //======================================
+        public bool PreviewEnabled = false;
+        public bool GizmosEnabled = true;
+        public Color GizmoColor = new Color(1, 1, 1, .3f);
+
+        // Internal
+        private WorldStampPreview _preview;
+        [SerializeField]
+        private Vector3 _lastSnapPosition;
+
+
+        // So why is this here, you may ask? Well, pretty much entirely to stop Unity running OnBeforeSerialize
+        // every frame when you have a stamp selected. So, we keep the data in a subobject.
         public WorldStampData Data
         {
             get
@@ -74,68 +153,7 @@ namespace MadMaps.WorldStamp
         }
         [NonSerialized] private WorldStampDataContainer _dataContainer;
 
-        public WorldStampMask Mask;
-
-        public bool HaveHeightsBeenFlipped = false;
-
-        public int Priority = 0;
-        public Vector3 Size;
-        public bool SnapPosition;
-        public bool SnapRotation;
-        public bool SnapToTerrainHeight;
-        public float SnapToTerrainHeightOffset;
-
-        public string LayerName = "StampLayer";
-
-        [SerializeField]
-        private Vector3 _lastSnapPosition;
-
-        //public bool WriteStencil = true;
-
-        // Heights
-        public bool WriteHeights = true;
-        public EHeightBlendMode LayerHeightBlendMode = EHeightBlendMode.Max;
-        //public float MinHeight = -9999;
-        public float HeightOffset = 0;
-
-        public bool WriteObjects = true;
-        [Tooltip("Should this stamp remove objects?")]
-        [FormerlySerializedAs("RemoveBaseObjects")]
-        public bool RemoveObjects = true;
-        [Tooltip("Remove objects in this stamp if we don't write to the stencil?")]
-        public bool StencilObjects = true;
-        public bool OverrideObjectRelativeMode = false;
-        public EObjectRelativeMode RelativeMode = EObjectRelativeMode.RelativeToTerrain;
-        
-        // Splats
-        public bool WriteSplats = true;
-        public bool StencilSplats = false;
-        [Tooltip("How to blend with existing splats on terrain")]
-        public ESplatBlendMode SplatBlendMode = ESplatBlendMode.Set;
-        public List<SplatPrototypeWrapper> IgnoredSplats = new List<SplatPrototypeWrapper>();
-
-        // Trees
-        public bool WriteTrees = true;
-        [Tooltip("Should this stamp remove trees?")]
-        [FormerlySerializedAs("RemoveBaseTrees")]
-        public bool RemoveTrees = true;
-        //public bool RemoveSameLayerTrees = true;
-        [Tooltip("Remove trees in this stamp if we don't write to the stencil?")]
-        public bool StencilTrees = true;   
-
-        // Details
-        public bool WriteDetails = true;
-        [Tooltip("Coefficient for detail strength")]
-        public float DetailBoost = 1;
-        [Tooltip("How to blend with existing details on terrain")]
-        public ESplatBlendMode DetailBlendMode = ESplatBlendMode.Set;
-        public List<DetailPrototypeWrapper> IgnoredDetails = new List<DetailPrototypeWrapper>();
-
-        public bool PreviewEnabled = false;
-        public bool GizmosEnabled = true;
-        public Color GizmoColor = new Color(1, 1, 1, .3f);
-        private WorldStampPreview _preview;
-
+        // If we have an instance mask, return that. If not, return the mask of the prefab.
         public WorldStampMask GetMask()
         {
             if (Mask != null && Mask.Count > 0)
@@ -254,7 +272,6 @@ namespace MadMaps.WorldStamp
             else
             {
                 stampHeight = 0;
-                //maskValue = 0;
             }
 
             switch (LayerHeightBlendMode)
@@ -276,7 +293,6 @@ namespace MadMaps.WorldStamp
                     break;
             }
             
-            //return newHeight;
             return Mathf.Lerp(existingHeight, newHeight, maskValue);
         }
 
@@ -361,10 +377,6 @@ namespace MadMaps.WorldStamp
 
         public void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
-            /*if (!WriteStencil)
-            {
-                return;
-            }*/
             var res = terrainWrapper.Terrain.terrainData.heightmapResolution;
             if (layer.Stencil == null || layer.Stencil.Width != res || layer.Stencil.Height != res)
             {
@@ -385,18 +397,12 @@ namespace MadMaps.WorldStamp
             targetMinCoord = targetMinCoord.Clamp(0, terrain.terrainData.heightmapResolution);
             var targetMaxCoord = terrain.WorldToHeightmapCoord(axisStampBounds.max, TerrainX.RoundType.Ceil);
             targetMaxCoord = targetMaxCoord.Clamp(0, terrain.terrainData.heightmapResolution);
-
-            //var heightArraySize = new TerrainCoord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
-            //var baseHeights = terrainWrapper.GetCompoundHeights(layer, targetMinCoord.x, targetMinCoord.z, heightArraySize.x, heightArraySize.z, res);
-
             var stampHeight = (transform.position.y - terrainWrapper.transform.position.y);
 
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
-                //var arrayU = u - targetMinCoord.x;
                 for (var v = targetMinCoord.z; v < targetMaxCoord.z; ++v)
                 {
-                    //var arrayV = v - targetMinCoord.z;
                     var wPos = terrain.HeightmapCoordToWorldPos(new Common.Coord(u, v));
                     if (!stampBounds.Contains(wPos))
                     {
@@ -419,17 +425,10 @@ namespace MadMaps.WorldStamp
                     MiscUtilities.DecompressStencil(rawStencilValue, out existingStencilKey, out existingStencilStrength, false);
                     if (WriteHeights)
                     {
-                        /*if (Math.Abs(existingStencilStrength) < 0.01f)
-                        {
-                            layer.Stencil[u, v] = MiscUtilities.CompressStencil(10, 1);
-                            continue;
-                        }*/
                         if (LayerHeightBlendMode == EHeightBlendMode.Max || LayerHeightBlendMode == EHeightBlendMode.Min && existingStencilStrength > 0)
                         {
                             var normalisedPos = Quaternion.Inverse(transform.rotation) * (wPos - transform.position) + Size.xz().x0z() / 2;
                             normalisedPos = new Vector3(normalisedPos.x / Size.x, normalisedPos.y / Size.y, normalisedPos.z / Size.z);
-
-                            //var baseHeight = baseHeights != null ? baseHeights[arrayU, arrayV] * tSize.y : 0;
                             var layerHeight = layer.Heights[u, v] * tSize.y;
                             var predictedOutHeight = float.MinValue;
                             if (ShouldWriteHeights())
@@ -446,8 +445,6 @@ namespace MadMaps.WorldStamp
                                 float tolerance = .2f;
                                 if (LayerHeightBlendMode == EHeightBlendMode.Max)
                                 {
-                                    //predictedOutHeight = Mathf.Max(predictedOutHeight, MinHeight);
-                                    //predictedOutHeight = Mathf.Max(predictedOutHeight, baseHeight);
                                     if (predictedOutHeight >= layerHeight - tolerance)
                                     {
                                         layer.Stencil[u, v] = newStencilVal;
@@ -455,7 +452,6 @@ namespace MadMaps.WorldStamp
                                 }
                                 else if (LayerHeightBlendMode == EHeightBlendMode.Min)
                                 {
-                                    //predictedOutHeight = Mathf.Min(predictedOutHeight, baseHeight);
                                     if (predictedOutHeight <= layerHeight + tolerance)
                                     {
                                         layer.Stencil[u, v] = newStencilVal;
@@ -657,8 +653,34 @@ namespace MadMaps.WorldStamp
                 for (var v = targetMinCoord.z; v < targetMaxCoord.z; ++v)
                 {
                     var arrayV = v - targetMinCoord.z;
-                    var vF = v/(float) dRes;
+                    var vF = v/(float) dRes;   
 
+                    var stencilValue = layer.GetStencilStrength(new Vector2(uF, vF), stencilKey);
+                    if (stencilValue <= 0)
+                    {
+                        continue;
+                    }
+
+                    var wPos = terrain.DetailCoordToWorldPos(new Common.Coord(u, v));
+                    var normalisedStampPosition = Quaternion.Inverse(transform.rotation) * (wPos - transform.position) + Size.xz().x0z() / 2;
+                    normalisedStampPosition = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y / Size.y, normalisedStampPosition.z / Size.z);
+                    if (normalisedStampPosition.x < 0 || normalisedStampPosition.x > 1 ||
+                        normalisedStampPosition.z < 0 || normalisedStampPosition.z > 1)
+                    {
+                        continue;
+                    }
+
+                    if(RemoveExistingDetails)
+                    {
+                        foreach (var valuePair in allDetails)
+                        {
+                            float floatStrength = valuePair.Value[arrayU, arrayV];
+                            floatStrength *= (1-stencilValue);
+                            byte byteStrength = (byte)Mathf.Clamp(Mathf.RoundToInt(floatStrength), 0, 255);
+                            valuePair.Value[arrayU, arrayV] = byteStrength;
+                        }
+                    }                  
+                    
                     int sum = 0;
                     foreach (var valuePair in Data.DetailData)
                     {
@@ -672,22 +694,6 @@ namespace MadMaps.WorldStamp
                         {
                             data = new Serializable2DByteArray(arraySize.x, arraySize.z);
                             allDetails[valuePair.Wrapper] = data;
-                        }
-
-                        var wPos = terrain.DetailCoordToWorldPos(new Common.Coord(u, v));
-                        var normalisedStampPosition = Quaternion.Inverse(transform.rotation) * (wPos - transform.position) + Size.xz().x0z() / 2;
-                        normalisedStampPosition = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y / Size.y, normalisedStampPosition.z / Size.z);
-                        if (normalisedStampPosition.x < 0 || normalisedStampPosition.x > 1 ||
-                            normalisedStampPosition.z < 0 || normalisedStampPosition.z > 1)
-                        {
-                            continue;
-                        }
-
-                        //var maskPosition = new Vector3(normalisedStampPosition.x * Data.Size.x, normalisedStampPosition.y * Data.Size.y, normalisedStampPosition.z * Data.Size.z);
-                        var stencilValue = layer.GetStencilStrength(new Vector2(uF, vF), stencilKey);
-                        if (stencilValue <= 0)
-                        {
-                            continue;
                         }
 
                         var sampleDetail = valuePair.Data.BilinearSample(normalisedStampPosition.xz());
@@ -712,7 +718,7 @@ namespace MadMaps.WorldStamp
                         sum += newValByte;
                     }
 
-                    foreach (var pair in allDetails)
+                    /*foreach (var pair in allDetails)
                     {
                         if (Data.DetailData.Any(data => data.Wrapper == pair.Key))
                         {
@@ -724,7 +730,7 @@ namespace MadMaps.WorldStamp
                             continue;
                         }
                         pair.Value[arrayU, arrayV] = (byte) Mathf.Clamp(pair.Value[arrayU, arrayV] - sum, 0, 255);
-                    }
+                    }*/
                 }
             }
             foreach (var prototypeWrapper in allDetails)
@@ -784,8 +790,11 @@ namespace MadMaps.WorldStamp
 
             for (var i = 0; i < Data.Trees.Count; i++)
             {
+                if(IgnoredTrees.Contains(Data.Trees[i].Prototype))
+                {
+                    continue;
+                }
                 var tree = Data.Trees[i].Clone();
-
                 var maskPos = new Vector3(tree.Position.x*Data.Size.x, 0, tree.Position.z*Data.Size.z)/* + (Data.Size/2)*/;
                 var maskValue = GetMask().GetBilinear(Data.GridManager, maskPos);
                 if (maskValue <= 0.25f)

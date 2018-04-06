@@ -28,7 +28,6 @@ namespace MadMaps.WorldStamp
         // Heights
         private SerializedProperty _heightsEnabled;
         private SerializedProperty _layerHeightBlendMode;
-        //private SerializedProperty _heightMin;
         private SerializedProperty _heightOffset;
 
         // Splats
@@ -45,6 +44,7 @@ namespace MadMaps.WorldStamp
         private SerializedProperty _detailsEnabled;
         private SerializedProperty _detailBlendMode;
         private SerializedProperty _detailsBoost;
+        private SerializedProperty _detailsRemoveExisting;
 
         // Objects
         private SerializedProperty _objectsEnabled;
@@ -82,6 +82,7 @@ namespace MadMaps.WorldStamp
             _detailsEnabled = serializedObject.FindProperty("WriteDetails");
             _detailBlendMode = serializedObject.FindProperty("DetailBlendMode");
             _detailsBoost = serializedObject.FindProperty("DetailBoost");
+            _detailsRemoveExisting = serializedObject.FindProperty("RemoveExistingDetails");
             _overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
             _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
         }
@@ -243,6 +244,7 @@ namespace MadMaps.WorldStamp
 
                 EditorGUILayout.PropertyField(_detailBlendMode);
                 EditorGUILayout.PropertyField(_detailsBoost);
+                EditorGUILayout.PropertyField(_detailsRemoveExisting);                
 
                 if (targets.Length > 1)
                 {
@@ -374,6 +376,7 @@ namespace MadMaps.WorldStamp
             }
         }
 
+
         private void DoTreesSection()
         {
             WorldStamp singleInstance = targets.Length == 1 ? target as WorldStamp : null;
@@ -385,6 +388,63 @@ namespace MadMaps.WorldStamp
                 if (!canWrite)
                 {
                     EditorGUILayout.HelpBox("No Trees in Stamp", MessageType.Info);
+                }
+                if (targets.Length > 1)
+                {
+                    EditorGUILayout.HelpBox("Can't Edit Multiple Tree Ignores", MessageType.Info);
+                }
+                else
+                {
+                    var stamp = target as WorldStamp;
+
+                    if(stamp.Data.Trees.Count > 0 && (stamp.Data.TreePrototypeCache == null || stamp.Data.TreePrototypeCache.Count ==0))
+                    {
+                        stamp.Data.TreePrototypeCache = new List<GameObject>();
+                        foreach (var tree in stamp.Data.Trees)
+                        {
+                            if(!stamp.Data.TreePrototypeCache.Contains(tree.Prototype))
+                            {
+                                stamp.Data.TreePrototypeCache.Add(tree.Prototype);
+                            }
+                        }
+                    }
+
+                    for (var i = 0; i < stamp.Data.TreePrototypeCache.Count; ++i)
+                    {
+                        var prototype = stamp.Data.TreePrototypeCache[i];
+                        if(prototype == null)
+                        {
+                            continue;
+                        }
+
+                        var ignored = stamp.IgnoredTrees.Contains(prototype);
+                        GUILayout.BeginHorizontal();
+                        GUI.color = ignored ? Color.red : Color.green;
+                        var newPicked = (GameObject)EditorGUILayout.ObjectField(prototype, typeof(GameObject), false);
+                        if (newPicked != null && newPicked != prototype)
+                        {
+                            prototype = newPicked;
+                            EditorUtility.SetDirty(stamp);
+                            var prefab = PrefabUtility.GetPrefabObject(stamp);
+                            if (prefab)
+                            {
+                                EditorUtility.SetDirty(prefab);
+                            }
+                        }
+                        if (EditorGUILayoutX.IndentedButton(ignored ? "Unmute" : "Mute"))
+                        {
+                            if (stamp.IgnoredTrees.Contains(prototype))
+                            {
+                                stamp.IgnoredTrees.Remove(prototype);
+                            }
+                            else
+                            {
+                                stamp.IgnoredTrees.Add(prototype);
+                            }
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+                    GUI.color = Color.white;
                 }
                 EditorGUILayout.PropertyField(_removeTrees);
                 GUI.enabled = canWrite;

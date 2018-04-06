@@ -136,7 +136,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void PreviewInDataInspector()
         {
-            DataInspector.SetData(DetailData.Select(x => (IDataInspectorProvider)x.Data).ToList(), DetailData.Select(x => (object)x.Wrapper).ToList());
+            DataInspector.SetData(DetailData.Select(x => (IDataInspectorProvider)x.Data).ToList(), DetailData.Select(x => (object)x.Wrapper).ToList(), true);
         }
 
         public override void Clear()

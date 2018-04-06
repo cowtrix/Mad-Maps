@@ -36,6 +36,7 @@ namespace MadMaps.WorldStamp
         
         // TREES
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
+        public List<GameObject> TreePrototypeCache = new List<GameObject>();
 
         // OBJECTS
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
