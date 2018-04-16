@@ -160,7 +160,7 @@ namespace MadMaps.Terrains
             return ret;
         }
 
-        public virtual void PrepareApply(TerrainWrapper terrainWrapper)
+        public virtual void PrepareApply(TerrainWrapper terrainWrapper, int index)
         {
         }
 

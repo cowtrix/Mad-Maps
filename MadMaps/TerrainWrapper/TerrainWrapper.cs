@@ -166,9 +166,12 @@ namespace MadMaps.Terrains
 
             CompoundTerrainData.Clear(this);
 
-            foreach (var layerBase in Layers)
+            for (var i = 0; i < Layers.Count; ++i)
             {
-                layerBase.PrepareApply(this);
+                if(Layers[i])
+                {
+                    Layers[i].PrepareApply(this, i);
+                }
             }
         }
 
@@ -477,7 +480,7 @@ namespace MadMaps.Terrains
             if (CompoundTerrainData.SplatData.Count > 0 && SplatPrototypes.Count > 0)
             {
                 var aRes = CompoundTerrainData.SplatData.GetValues().First().Width;
-                if (ComputeShaders)
+                if (ComputeShaders && BlendTerrainLayerUtility.ShouldCompute())
                 {
                     const int maxChunkSize = 2048*2048*4;
                     var subdivisions = Mathf.CeilToInt((aRes*aRes*SplatPrototypes.Count)/(float) maxChunkSize);

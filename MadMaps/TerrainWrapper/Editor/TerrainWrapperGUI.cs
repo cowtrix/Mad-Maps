@@ -113,6 +113,10 @@ namespace MadMaps.Terrains
             var currentTabTitle = _tabs[CurrentTab].text;
             if (currentTabTitle == "Layers")
             {
+                if(Wrapper.Dirty)
+                {
+                    EditorGUILayout.HelpBox("This Wrapper has unnaplied changes. Click \"Reapply All\" to apply them.", MessageType.Info);
+                }
                 _layerDrawer.List.DoLayoutList();
                 if (_layerDrawer.List.index >= 0 && Wrapper.Layers.Count > 0 && _layerDrawer.List.index < Wrapper.Layers.Count)
                 {

@@ -75,7 +75,7 @@ namespace MadMaps.Common
                     directory = Application.dataPath + "/" + directory;
                 }
             }
-            Debug.Log("Directory was " + directory);
+            //Debug.Log("Directory was " + directory);
             var path = EditorUtility.OpenFilePanel(title, directory, extension);
             if (String.IsNullOrEmpty(path))
             {
@@ -95,7 +95,7 @@ namespace MadMaps.Common
                 directory = directory.Replace(Application.dataPath, String.Empty);
             }
             EditorPrefs.SetString("sMap_EditorExtensions_OpenFilePanel", directory);
-            Debug.Log("Set persistent OpenFilePanel to " + directory);
+            //Debug.Log("Set persistent OpenFilePanel to " + directory);
             return path;
         }
 
@@ -110,7 +110,7 @@ namespace MadMaps.Common
                     directory = Application.dataPath + "/" + directory;
                 }
             }
-            Debug.Log("Directory was " + directory);
+            //Debug.Log("Directory was " + directory);
             var path = EditorUtility.SaveFilePanel(title, directory, defaultName, extension);
             if (String.IsNullOrEmpty(path))
             {
@@ -130,7 +130,7 @@ namespace MadMaps.Common
                 directory = directory.Replace(Application.dataPath, String.Empty);
             }
             EditorPrefs.SetString("sMap_EditorExtensions_OpenFilePanel", directory);
-            Debug.Log("Set persistent OpenFilePanel to " + directory);
+            //Debug.Log("Set persistent OpenFilePanel to " + directory);
             return path;
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using System.Reflection;
 
 namespace MadMaps.Common
 {
@@ -17,6 +18,14 @@ namespace MadMaps.Common
             Round,
             Ceil,
             Floor,
+        }
+
+        public static int GetDetailResolutionPerPatch(this TerrainData data)
+        {
+            // Fuck you Unity
+            var prop = typeof(TerrainData).GetProperty("detailResolutionPerPatch", BindingFlags.Instance|BindingFlags.NonPublic);
+            var val = prop.GetValue(data, null);
+            return (int)val;
         }
 
         public static Bounds GetBounds(this Terrain terrain)

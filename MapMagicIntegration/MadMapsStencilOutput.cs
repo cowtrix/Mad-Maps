@@ -1,3 +1,4 @@
+#if MAPMAGIC
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,10 +7,10 @@ using MadMaps.Common.Collections;
 using MapMagic;
 using UnityEngine;
 
-namespace MadMaps.Terrains.MapMagic
+namespace MadMaps.Terrains.MapMagicIntegration
 {
     [System.Serializable]
-    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Stencil", disengageable = true)]
+    [GeneratorMenu(menu = "Mad Maps", name = "MadMaps Stencil", disengageable = true)]
     public class MadMapsStencilOutput : OutputGenerator
     {
         public string LayerName = "MapMagic";
@@ -126,3 +127,4 @@ namespace MadMaps.Terrains.MapMagic
         }
     }
 }
+#endif

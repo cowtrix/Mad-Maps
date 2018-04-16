@@ -60,6 +60,11 @@ namespace MadMaps.Common.Collections
             return WorkingDictionary.GetEnumerator();
         }
 
+        public virtual KeyValuePair<TKey, TValue> First()
+        {
+            return WorkingDictionary.First();
+        }
+
         public TValue this[TKey key]
         {
             get { return WorkingDictionary[key]; }

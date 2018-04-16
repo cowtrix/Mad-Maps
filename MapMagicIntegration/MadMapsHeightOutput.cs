@@ -1,182 +1,186 @@
-#if MAPMAGIC
+﻿#if MAPMAGIC
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MadMaps.Common;
 using MapMagic;
-using UnityEngine;
-
-namespace MadMaps.Terrains.MapMagic
-{
-    [System.Serializable]
-    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Height", disengageable = true)]
-    public class MadMapsHeightOutput : OutputGenerator
-    {
-        public string LayerName = "MapMagic";
-
-        public Input input = new Input(InoutType.Map);
-        public Output output = new Output(InoutType.Map);
-        public override IEnumerable<Input> Inputs() { yield return input; }
-        public override IEnumerable<Output> Outputs() { if (output == null) output = new Output(InoutType.Map); yield return output; }
-
-        public float layer { get; set; }
-
-        //get static actions using instance
-        public override Action<global::MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float, bool>> GetProces() { return Process; }
-        public override Func<global::MapMagic.CoordRect, Terrain, object, Func<float, bool>, IEnumerator> GetApply() { return Apply; }
-        public override Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
-
-        public static int scale = 1;
-
-        public void Process(global::MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float, bool> stop = null)
-        {
-            if (stop != null && stop(0)) return;
-
-            //reading height outputs
-            if (results.heights == null || results.heights.rect.size.x != rect.size.x) results.heights = new Matrix(rect);
-            results.heights.rect.offset = rect.offset;
-            results.heights.Clear();
-
-            //processing main height
-            foreach (MadMapsHeightOutput gen in gens.GeneratorsOfType<MadMapsHeightOutput>(onlyEnabled: true, checkBiomes: true))
-            {
-                //if (stop!=null && stop(0)) return; //do not break while results.heights is empty!
-
-                //loading inputs
-                Matrix heights = (Matrix)gen.input.GetObject(results);
-                if (heights == null) continue;
-
-                //loading biome matrix
-                Matrix biomeMask = null;
-                if (gen.biome != null)
-                {
-                    object biomeMaskObj = gen.biome.mask.GetObject(results);
-                    if (biomeMaskObj == null) continue; //adding nothing if biome has no mask
-                    biomeMask = (Matrix)biomeMaskObj;
-                    if (biomeMask == null) continue;
-                    if (biomeMask.IsEmpty()) continue; //optimizing empty biomes
-                }
-
-                //adding to final result
-                if (gen.biome == null) results.heights.Add(heights);
-                else if (biomeMask != null) results.heights.Add(heights, biomeMask);
-            }
-
-            //creating 2d array
-            if (stop != null && stop(0)) return;
-            int heightSize = terrainSize.resolution * scale + 1;
-            float[,] heights2D = new float[heightSize, heightSize];
-            for (int x = 0; x < heightSize - 1; x++)
-                for (int z = 0; z < heightSize - 1; z++)
-                {
-                    if (scale == 1) heights2D[z, x] += results.heights[x + results.heights.rect.offset.x, z + results.heights.rect.offset.z];
-                    else
-                    {
-                        float fx = 1f * x / scale; float fz = 1f * z / scale;
-                        heights2D[z, x] = results.heights.GetInterpolated(fx + results.heights.rect.offset.x, fz + results.heights.rect.offset.z);
-                    }
-                }
-
-            //blur only original base verts
-            if (scale == 2)
-            {
-                float blurVal = 0.2f;
-
-                for (int z = 0; z < heightSize - 1; z += 2)
-                    for (int x = 2; x < heightSize - 1; x += 2)
-                        heights2D[x, z] = (heights2D[x - 1, z] + heights2D[x + 1, z]) / 2 * blurVal + heights2D[x, z] * (1 - blurVal);
-
-                for (int x = 0; x < heightSize - 1; x += 2)
-                    for (int z = 2; z < heightSize - 1; z += 2)
-                        heights2D[x, z] = (heights2D[x, z - 1] + heights2D[x, z + 1]) / 2 * blurVal + heights2D[x, z] * (1 - blurVal);
-            }
-
-            //blur high scale values
-            if (scale == 4)
-            {
-                int blurIterations = 2;
-
-                for (int i = 0; i < blurIterations; i++)
-                {
-                    float prev = 0;
-                    float curr = 0;
-                    float next = 0;
-
-                    for (int x = 0; x < heightSize; x++)
-                    {
-                        prev = heights2D[x, 0]; curr = prev;
-                        for (int z = 1; z < heightSize - 2; z++)
-                        {
-                            next = heights2D[x, z + 1];
-                            curr = (next + prev) / 2;// * blurVal + curr*(1-blurVal);
-
-                            heights2D[x, z] = curr;
-                            prev = curr;
-                            curr = next;
-                        }
-
-                    }
-
-                    for (int z = 0; z < heightSize; z++)
-                    {
-                        prev = heights2D[0, z]; curr = prev;
-                        for (int x = 1; x < heightSize - 2; x++)
-                        {
-                            next = heights2D[x + 1, z];
-                            curr = (next + prev) / 2;// * blurVal + curr*(1-blurVal);
-
-                            heights2D[x, z] = curr;
-                            prev = curr;
-                            curr = next;
-                        }
-                    }
-                }
-            }
-
-            //processing sides
-            for (int x = 0; x < heightSize; x++)
-            {
-                float prevVal = heights2D[heightSize - 3, x]; //size-2
-                float currVal = heights2D[heightSize - 2, x]; //size-1, point on border
-                float nextVal = currVal - (prevVal - currVal);
-                heights2D[heightSize - 1, x] = nextVal;
-            }
-            for (int z = 0; z < heightSize; z++)
-            {
-                float prevVal = heights2D[z, heightSize - 3]; //size-2
-                float currVal = heights2D[z, heightSize - 2]; //size-1, point on border
-                float nextVal = currVal - (prevVal - currVal);
-                heights2D[z, heightSize - 1] = nextVal;
-            }
-            heights2D[heightSize - 1, heightSize - 1] = heights2D[heightSize - 1, heightSize - 2];
-
-
-            //pushing to apply
-            if (stop != null && stop(0)) return;
+using MadMaps.Common;
 
 #if UN_MapMagic
+using uNature.Core.Extensions.MapMagicIntegration;
+using uNature.Core.FoliageClasses;
+#endif
+
+namespace MadMaps.Terrains.MapMagicIntegration
+{
+	[System.Serializable]
+	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Height", disengageable = true, priority = -2, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Height")]
+	public class MadMapsHeightOutput : OutputGenerator
+	{
+		public string LayerName = "MapMagic";
+		public Input input = new Input(InoutType.Map);
+		public Output output = new Output(InoutType.Map);
+		public override IEnumerable<Input> Inputs() { yield return input; }
+		public override IEnumerable<Output> Outputs() { if (output == null) output = new Output(InoutType.Map); yield return output; }
+
+		public float layer { get; set; }
+
+		//get static actions using instance
+		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		
+		public static int scale = 1;
+
+		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		{
+			if (stop!=null && stop(0)) return;
+
+			//reading height outputs
+			if (results.heights == null || results.heights.rect.size.x != rect.size.x) results.heights = new Matrix(rect);
+			results.heights.rect.offset = rect.offset;
+			results.heights.Clear();
+
+			//processing main height
+			foreach (MadMapsHeightOutput gen in gens.GeneratorsOfType<MadMapsHeightOutput>(onlyEnabled: true, checkBiomes: true))
+			{
+				//if (stop!=null && stop(0)) return; //do not break while results.heights is empty!
+
+				//loading inputs
+				Matrix heights = (Matrix)gen.input.GetObject(results);
+				if (heights == null) continue;
+
+				//loading biome matrix
+				Matrix biomeMask = null;
+				if (gen.biome != null)
+				{
+					object biomeMaskObj = gen.biome.mask.GetObject(results);
+					if (biomeMaskObj == null) continue; //adding nothing if biome has no mask
+					biomeMask = (Matrix)biomeMaskObj;
+					if (biomeMask == null) continue;
+					if (biomeMask.IsEmpty()) continue; //optimizing empty biomes
+				}
+
+				//adding to final result
+				if (gen.biome == null) results.heights.Add(heights);
+				else if (biomeMask != null) results.heights.Add(heights, biomeMask);
+			}
+
+			//creating 2d array
+			if (stop!=null && stop(0)) return;
+			int heightSize = terrainSize.resolution * scale + 1;
+			float[,] heights2D = new float[heightSize, heightSize];
+			for (int x = 0; x < heightSize - 1; x++)
+				for (int z = 0; z < heightSize - 1; z++)
+				{
+					if (scale == 1) heights2D[z, x] += results.heights[x + results.heights.rect.offset.x, z + results.heights.rect.offset.z];
+					else
+					{
+						float fx = 1f * x / scale; float fz = 1f * z / scale;
+						heights2D[z, x] = results.heights.GetInterpolated(fx + results.heights.rect.offset.x, fz + results.heights.rect.offset.z);
+					}
+				}
+
+			//blur only original base verts
+			if (scale == 2)
+			{
+				float blurVal = 0.2f;
+				
+				for (int z=0; z<heightSize-1; z+=2)
+					for (int x=2; x<heightSize-1; x+=2)
+						heights2D[x,z] = (heights2D[x-1,z] + heights2D[x+1,z])/2 * blurVal  +  heights2D[x,z] * (1-blurVal);
+
+				for (int x=0; x<heightSize-1; x+=2)
+					for (int z=2; z<heightSize-1; z+=2)
+						heights2D[x,z] = (heights2D[x,z-1] + heights2D[x,z+1])/2 * blurVal  +  heights2D[x,z] * (1-blurVal);
+			}
+
+			//blur high scale values
+			if (scale == 4)
+			{
+				int blurIterations = 2;
+
+				for (int i=0; i<blurIterations; i++)
+				{
+					float prev = 0;
+					float curr = 0;
+					float next = 0;
+
+					for (int x=0; x<heightSize; x++)
+					{
+						prev = heights2D[x,0]; curr = prev;
+						for (int z=1; z<heightSize-2; z++)
+						{
+							next = heights2D[x,z+1];
+							curr = (next+prev)/2;// * blurVal + curr*(1-blurVal);
+
+							heights2D[x,z] = curr;
+							prev = curr;
+							curr = next;
+						}
+
+					}
+
+					for (int z=0; z<heightSize; z++)
+					{
+						prev = heights2D[0,z]; curr = prev;
+						for (int x=1; x<heightSize-2; x++)
+						{
+							next = heights2D[x+1,z];
+							curr = (next+prev)/2;// * blurVal + curr*(1-blurVal);
+
+							heights2D[x,z] = curr;
+							prev = curr;
+							curr = next;
+						}
+					}
+				}
+			}
+
+			//processing sides
+			for (int x = 0; x < heightSize; x++)
+			{
+				float prevVal = heights2D[heightSize - 3, x]; //size-2
+				float currVal = heights2D[heightSize - 2, x]; //size-1, point on border
+				float nextVal = currVal - (prevVal - currVal);
+				heights2D[heightSize - 1, x] = nextVal;
+			}
+			for (int z = 0; z < heightSize; z++)
+			{
+				float prevVal = heights2D[z, heightSize - 3]; //size-2
+				float currVal = heights2D[z, heightSize - 2]; //size-1, point on border
+				float nextVal = currVal - (prevVal - currVal);
+				heights2D[z, heightSize - 1] = nextVal;
+			}
+			heights2D[heightSize - 1, heightSize - 1] = heights2D[heightSize - 1, heightSize - 2];
+
+
+			//pushing to apply
+			if (stop!=null && stop(0)) return;
+
+            #if UN_MapMagic
             if (FoliageCore_MainManager.instance != null)
             {
                 float resolutionDifferences = (float)MapMagic.instance.terrainSize / terrainSize.resolution;
 
                 uNatureHeightTuple heightTuple = new uNatureHeightTuple(heights2D, new Vector3(rect.Min.x * resolutionDifferences, 0, rect.Min.z * resolutionDifferences)); // transform coords
-                results.apply.CheckAdd(typeof(HeightOutput), heightTuple, replace: true);
+                results.apply.CheckAdd(typeof(MadMapsHeightOutput), heightTuple, replace: true);
             }
             else
             {
                 //Debug.LogError("uNature_MapMagic extension is enabled but no foliage manager exists on the scene.");
                 //return;
-				results.apply.CheckAdd(typeof(HeightOutput), heights2D, replace: true);
+				results.apply.CheckAdd(typeof(MadMapsHeightOutput), heights2D, replace: true);
             }
 
-#else
-            results.apply.CheckAdd(typeof(MadMapsHeightOutput), heights2D, replace: true);
-#endif
+            #else
+			results.apply.CheckAdd(typeof(MadMapsHeightOutput), heights2D, replace: true);
+            #endif
         }
 
-        public void Purge(global::MapMagic.CoordRect rect, Terrain terrain)
-        {
-            var wrapper = terrain.GetComponent<TerrainWrapper>();
+		public void Purge(CoordRect rect, Terrain terrain)
+		{
+			var wrapper = terrain.GetComponent<TerrainWrapper>();
             if (wrapper == null)
             {
                 return;
@@ -188,66 +192,151 @@ namespace MadMaps.Terrains.MapMagic
             }
             terrainLayer.Heights.Clear();
             wrapper.Dirty = true;
-        }
 
-        public IEnumerator Apply(global::MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float, bool> stop = null)
-        {
-            if (terrain == null || terrain.terrainData == null) yield break; //chunk removed during apply
+			Debug.Log("Heights Purged");
 
-            float[,] heights2D = (float[,])dataBox;
-            heights2D = heights2D.Flip();
-            var data = terrain.terrainData;
-            Vector3 terrainSize = terrain.terrainData.size; //new Vector3(MapMagic.instance.terrainSize, MapMagic.instance.terrainHeight, MapMagic.instance.terrainSize);
-            int terrainResolution = heights2D.GetLength(0); //heights2D[0].GetLength(0);
-            if ((data.size - terrainSize).sqrMagnitude > 0.01f || data.heightmapResolution != terrainResolution)
+		}
+
+		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		{
+
+
+            //init heights
+            #if UN_MapMagic
+
+			#if WDEBUG
+			Profiler.BeginSample("UNature");
+			#endif
+
+            uNatureHeightTuple heightTuple;
+            float[,] heights2D;
+
+            if (FoliageCore_MainManager.instance != null)
             {
-                if (terrainResolution <= 64) //brute force
-                {
-                    data.heightmapResolution = terrainResolution;
-                    data.size = new Vector3(terrainSize.x, terrainSize.y, terrainSize.z);
-                }
-
-                else //setting res 64, re-scaling to 1/64, and then changing res
-                {
-                    data.heightmapResolution = 65;
-                    terrain.Flush(); //otherwise unity crushes without an error
-                    int resFactor = (terrainResolution - 1) / 64;
-                    data.size = new Vector3(terrainSize.x / resFactor, terrainSize.y, terrainSize.z / resFactor);
-                    data.heightmapResolution = terrainResolution;
-                }
+                heightTuple = (uNatureHeightTuple)dataBox; // get data
+                heights2D = heightTuple.normalizedHeights;
+                UNMapMagic_Manager.ApplyHeightOutput(heightTuple, terrain);
             }
-            yield return null;
+            else
+            {
+                //Debug.LogError("uNature_MapMagic extension is enabled but no foliage manager exists on the scene.");
+                //yield break;
+				heights2D = (float[,])dataBox;
+            }         
 
-            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
-            
-            terrainLayer.SetHeights(0, 0, heights2D, global::MapMagic.MapMagic.instance.resolution+1);
-            yield return null;
+			#if WDEBUG
+			Profiler.EndSample();
+			#endif
 
+			#else
+			float[,] heights2D = (float[,])dataBox;
+			#endif
+
+			heights2D = heights2D.Flip();
+
+			//quick lod apply
+			/*if (chunk.lod)
+			{
+				//if (chunk.lodTerrain == null) { chunk.lodTerrain = (MapMagic.instance.transform.AddChild("Terrain " + chunk.coord.x + "," + chunk.coord.z + " LOD")).gameObject.AddComponent<Terrain>(); chunk.lodTerrain.terrainData = new TerrainData(); }
+				if (chunk.lodTerrain.terrainData==null) chunk.lodTerrain.terrainData = new TerrainData();
+
+				chunk.lodTerrain.Resize(heights2D.GetLength(0), new Vector3(MapMagic.instance.terrainSize, MapMagic.instance.terrainHeight, MapMagic.instance.terrainSize));
+				chunk.lodTerrain.terrainData.SetHeightsDelayLOD(0,0,heights2D);
+				
+				yield break;
+			}*/
+
+			//determining data
+			if (terrain==null || terrain.terrainData==null) yield break; //chunk removed during apply
+			TerrainData data = terrain.terrainData;
+
+			//resizing terrain (standard terrain resize is extremely slow. Even when creating a new terrain)
+			Vector3 terrainSize = terrain.terrainData.size; //new Vector3(MapMagic.instance.terrainSize, MapMagic.instance.terrainHeight, MapMagic.instance.terrainSize);
+			int terrainResolution = heights2D.GetLength(0); //heights2D[0].GetLength(0);
+			if ((data.size - terrainSize).sqrMagnitude > 0.01f || data.heightmapResolution != terrainResolution)
+			{
+				if (terrainResolution <= 64) //brute force
+				{
+					data.heightmapResolution = terrainResolution;
+					data.size = new Vector3(terrainSize.x, terrainSize.y, terrainSize.z);
+				}
+
+				else //setting res 64, re-scaling to 1/64, and then changing res
+				{
+					data.heightmapResolution = 65;
+					terrain.Flush(); //otherwise unity crushes without an error
+					int resFactor = (terrainResolution - 1) / 64;
+					data.size = new Vector3(terrainSize.x / resFactor, terrainSize.y, terrainSize.z / resFactor);
+					data.heightmapResolution = terrainResolution;
+				}
+			}
+			yield return null;
+
+			//welding
+			if (MapMagic.MapMagic.instance != null && MapMagic.MapMagic.instance.heightWeldMargins!=0)
+			{
+				MapMagic.Coord coord = MapMagic.Coord.PickCell(rect.offset, MapMagic.MapMagic.instance.resolution);
+				Chunk chunk = MapMagic.MapMagic.instance.chunks[coord.x, coord.z];
+				
+				Chunk neigPrevX = MapMagic.MapMagic.instance.chunks[coord.x-1, coord.z];
+				if (neigPrevX!=null && neigPrevX.terrain.terrainData.heightmapResolution==terrainResolution)
+				{
+					if (neigPrevX.worker.ready) WeldTerrains.WeldToPrevX(ref heights2D, neigPrevX.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					Chunk.SetNeigsX(neigPrevX, chunk);
+				}
+
+				Chunk neigNextX = MapMagic.MapMagic.instance.chunks[coord.x+1, coord.z];
+				if (neigNextX!=null && neigNextX.terrain.terrainData.heightmapResolution==terrainResolution)
+				{
+					if (neigNextX.worker.ready) WeldTerrains.WeldToNextX(ref heights2D, neigNextX.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					Chunk.SetNeigsX(chunk, neigNextX);
+				}
+
+				Chunk neigPrevZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z-1];
+				if (neigPrevZ!=null  && neigPrevZ.terrain.terrainData.heightmapResolution==terrainResolution)
+				{
+					if (neigPrevZ.worker.ready) WeldTerrains.WeldToPrevZ(ref heights2D, neigPrevZ.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					Chunk.SetNeigsZ(neigPrevZ, chunk);
+				}
+
+				Chunk neigNextZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z+1];
+				if (neigNextZ!=null  && neigNextZ.terrain.terrainData.heightmapResolution==terrainResolution)
+				{
+					if (neigNextZ.worker.ready) WeldTerrains.WeldToNextZ(ref heights2D, neigNextZ.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					Chunk.SetNeigsZ(chunk, neigNextZ);
+				}
+			}
+			yield return null;
+
+			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
+            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);            
+            terrainLayer.SetHeights(0, 0, heights2D, MapMagic.MapMagic.instance.resolution+1);
+			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
-        }
+			yield return null;
+		}
 
-        private void MapMagicOnOnApplyCompleted(Terrain terrain)
+		private void MapMagicOnOnApplyCompleted(Terrain terrain)
         {
             global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            wrapper.Dirty = true;
+            wrapper.Dirty = true;		
         }
 
-        public override void OnGUI(GeneratorsAsset gens)
-        {
-            layout.fieldSize = .6f;
+		public override void OnGUI(GeneratorsAsset gens)
+		{
+			layout.fieldSize = .6f;
             layout.Field(ref LayerName, "Layer");
             layout.fieldSize = .5f;
 
-            layout.Par(20); input.DrawIcon(layout, "Height");
-            layout.Par(5);
+			layout.Par(20); input.DrawIcon(layout, "Height");
+			layout.Par(5);
 
-            if (output == null) output = new Output(InoutType.Map);
+			if (output == null) output = new Output(InoutType.Map);
 
-            layout.Field(ref scale, "Scale", min: 1, max: 4f);
-            scale = Mathf.NextPowerOfTwo(scale);
-        }
-    }
+			layout.Field(ref scale, "Scale", min:1, max:4f);
+			scale = Mathf.NextPowerOfTwo(scale);
+		}
+	}
 }
 #endif

@@ -307,13 +307,22 @@ namespace MadMaps.Terrains
             GC.Collect(3, GCCollectionMode.Forced);
         }
 
-        private static bool ShouldCompute<T>(Serializable2DArray<T> array) where T:struct
+        public static bool ShouldCompute<T>(Serializable2DArray<T> array) where T:struct
         {
             if(SystemInfo.graphicsShaderLevel < 45)
             {
                 return false;
             }
             return array.Width * array.Height >= 8 * 8;
+        }
+
+        public static bool ShouldCompute()
+        {
+            if(SystemInfo.graphicsShaderLevel < 45)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

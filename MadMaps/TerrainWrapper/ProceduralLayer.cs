@@ -60,7 +60,7 @@ namespace MadMaps.Terrains
         [Seed]
         public int Seed;
 
-        public override void PrepareApply(TerrainWrapper terrainWrapper)
+        public override void PrepareApply(TerrainWrapper terrainWrapper, int index)
         {
             if (Seed == 0)
             {

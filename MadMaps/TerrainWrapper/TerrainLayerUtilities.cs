@@ -76,10 +76,10 @@ namespace MadMaps.Terrains
                 SplatPrototypeWrapper wrapper;
                 if (!splatWrapperLookup.TryGetValue(prototype, out wrapper))
                 {
-                    /*if (
-                        EditorUtility.DisplayDialog(
-                            String.Format("Unable to find wrapper for {0}", prototype.texture),
-                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
+                    var promptResult = EditorUtility.DisplayDialogComplex(
+                            String.Format("Unable to find SplatPrototypeWrapper for {0}", prototype.texture),
+                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper", "Skip For Now");
+                    if (promptResult == 0)                       
                     {
                         var path = EditorExtensions.SaveFilePanel("Create New SplatPrototype Wrapper",
                             prototype.texture.name + "Wrapper", "asset");
@@ -98,7 +98,7 @@ namespace MadMaps.Terrains
                             continue;
                         }
                     }
-                    else
+                    else if (promptResult == 1)
                     {
                         var wrapperPath = EditorExtensions.OpenFilePanel("Get SplatPrototypeWrapper for " + prototype.texture, "asset");
                         if (!string.IsNullOrEmpty(wrapperPath))
@@ -106,7 +106,7 @@ namespace MadMaps.Terrains
                             wrapper = AssetDatabase.LoadAssetAtPath<SplatPrototypeWrapper>(wrapperPath);
                             ret.Add(wrapper.GetPrototype(), wrapper);
                         }
-                    }*/
+                    }
                 }
                 else
                 {
@@ -142,13 +142,13 @@ namespace MadMaps.Terrains
                 DetailPrototypeWrapper wrapper;
                 if (!detailWrapperLookup.TryGetValue(prototype, out wrapper))
                 {
-                    /*if (
-                        EditorUtility.DisplayDialog(
-                            String.Format("Unable to find wrapper for {0}", prototype.prototypeTexture),
-                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper"))
+                    var promptResult = EditorUtility.DisplayDialogComplex(
+                            String.Format("Unable to find DetailPrototype for {0}", prototype.prototypeTexture),
+                            "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper", "Skip For Now");
+                    if (promptResult == 0)
                     {
                         var path = EditorExtensions.SaveFilePanel("Create New DetailPrototype Wrapper", 
-                            (((Object)prototype.prototypeTexture ?? prototype.prototype)).name + "Wrapper", "asset");
+                            (((UnityEngine.Object)prototype.prototypeTexture ?? prototype.prototype)).name + "Wrapper", "asset");
                         if (!String.IsNullOrEmpty(path))
                         {
                             wrapper = ScriptableObject.CreateInstance<DetailPrototypeWrapper>();
@@ -164,7 +164,7 @@ namespace MadMaps.Terrains
                             continue;
                         }
                     }
-                    else
+                    else if (promptResult == 1)
                     {
                         var wrapperPath = EditorExtensions.OpenFilePanel("Get DetailPrototypeWrapper for " + prototype.prototypeTexture, "asset");
                         if (!string.IsNullOrEmpty(wrapperPath))
@@ -172,7 +172,7 @@ namespace MadMaps.Terrains
                             wrapper = AssetDatabase.LoadAssetAtPath<DetailPrototypeWrapper>(wrapperPath);
                             ret.Add(wrapper.GetPrototype(), wrapper);
                         }
-                    }*/
+                    }
                 }
                 else
                 {

@@ -69,10 +69,17 @@ namespace MadMaps.Terrains
                 }
             }
             Rect reapplyRect = new Rect(rect.xMax - 50 - buttonWidth, rect.y - 3f, buttonWidth, 16f);
+            if(!EditorGUIUtility.isProSkin)
+            {
+                GUI.color = Color.black;
+            }
             if (GUI.Button(reapplyRect, new GUIContent("Reapply All", "Reapply all layers"), "RL FooterButton"))
             {
                 _wrapper.ApplyAllLayers();
+                EditorGUIUtility.ExitGUI();
+                return;
             }
+            GUI.color = Color.white;
         }
 
         private void OnLayerRemoveCallback(ReorderableList list)
@@ -306,19 +313,25 @@ namespace MadMaps.Terrains
             EditorExtensions.Seperator();
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Stencil", layer.Stencil != null ? string.Format("{0}", string.Format("{0}x{1}", layer.Stencil.Width, layer.Stencil.Height)) : "null");
-            if (layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0 && GUILayout.Button(EditorGUIUtility.IconContent("Terrain Icon"), EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            bool hasStencil = layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0;;
+            EditorGUILayout.LabelField("Stencil" + (hasStencil ? "" : " (null)"), layer.Stencil != null ? string.Format("{0}", string.Format("{0}x{1}", layer.Stencil.Width, layer.Stencil.Height)) : "null");
+            
+            GUI.enabled = hasStencil;
+            if (GUILayout.Button(EditorGUIUtility.IconContent("Terrain Icon"), EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
                 TerrainWrapperGUI.StencilLayerDisplay = layer;
             }
-            if (layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0 && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
                 DataInspector.SetData(layer.Stencil);
             }
+            GUI.enabled = true;
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.Stencil.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
 
@@ -338,6 +351,8 @@ namespace MadMaps.Terrains
                     EditorSceneManager.MarkAllScenesDirty();
                     AssetDatabase.SaveAssets();
                     EditorUtility.SetDirty(layer);
+                    EditorGUIUtility.ExitGUI();
+                    return layer;
                 }
             }
             EditorGUILayout.Space();
@@ -349,6 +364,9 @@ namespace MadMaps.Terrains
 
                 EditorUtility.SetDirty(layer);
                 EditorSceneManager.MarkAllScenesDirty();
+
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.Space();
             if (GUILayout.Button("Clear Layer"))
@@ -360,6 +378,8 @@ namespace MadMaps.Terrains
                     EditorUtility.SetDirty(wrapper.Terrain);
                     EditorUtility.SetDirty(layer);
                     EditorSceneManager.MarkAllScenesDirty();
+                    EditorGUIUtility.ExitGUI();
+                    return layer;
                 }
                 
             }

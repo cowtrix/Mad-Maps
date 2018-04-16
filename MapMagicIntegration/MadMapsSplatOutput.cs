@@ -1,247 +1,278 @@
-#if MAPMAGIC
+﻿#if MAPMAGIC
+using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using MapMagic;
-using UnityEngine;
 using MadMaps.Common;
+using MadMaps.Terrains;
 
-namespace MadMaps.Terrains.MapMagic
+#if UN_MapMagic
+using uNature.Core.Extensions.MapMagicIntegration;
+using uNature.Core.FoliageClasses;
+#endif
+
+namespace MadMaps.Terrains.MapMagicIntegration
 {
+	[System.Serializable]
+	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Textures", disengageable = true, priority = -1, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Textures")]
+	public class MadMapsSplatOutput : OutputGenerator
+	{
+		public string LayerName = "MapMagic";
 
-    [System.Serializable]
-    [GeneratorMenu(menu = "MadMaps", name = "MadMaps Textures", disengageable = true)]
-    public class MadMapsSplatOutput : OutputGenerator, Layout.ILayered
-    {
-        public string LayerName = "MapMagic";
+		//layer
+		public class Layer
+		{
+			public Input input = new Input(InoutType.Map);
+			public Output output = new Output(InoutType.Map);
+			public string name = "Layer";
+			public float opacity = 1;
+			public SplatPrototypeWrapper Wrapper;
 
-        //layer
-        public class Layer : Layout.ILayer
-        {
-            public Input input = new Input(InoutType.Map);
-            public Output output = new Output(InoutType.Map);
-            public string name = "Layer";
-            public float opacity = 1;
-            public SplatPrototypeWrapper Wrapper;
+			public void OnGUI (Layout layout, bool selected, int num) 
+			{
+				layout.margin = 20; layout.rightMargin = 20;
+				layout.Par(20);
 
-            public bool pinned { get; set; }
-            public int guiHeight { get; set; }
+				if (num != 0) input.DrawIcon(layout);
+				if (selected) layout.Field(ref name, rect: layout.Inset());
+				else layout.Label(name, rect: layout.Inset());
+				output.DrawIcon(layout);
 
-            public void OnCollapsedGUI(Layout layout)
-            {
-                layout.margin = 20; layout.rightMargin = 20; layout.fieldSize = 1f;
-                layout.Par(20);
-                if (!pinned) input.DrawIcon(layout);
-                layout.Label(name, rect: layout.Inset());
-                output.DrawIcon(layout);
-            }
+				layout.Field(ref Wrapper);
 
-            public void OnExtendedGUI(Layout layout)
-            {
-                layout.margin = 20; layout.rightMargin = 20;
-                layout.Par(20);
+				if (Wrapper && selected)
+				{
+					layout.Par(2);
+					layout.Par(60); //not 65
+					Wrapper.Texture = layout.Field(Wrapper.Texture, rect: layout.Inset(60));
+					Wrapper.NormalMap = layout.Field(Wrapper.NormalMap, rect: layout.Inset(60));
+					layout.Par(2);
 
-                if (!pinned) input.DrawIcon(layout);
-                layout.Field(ref name, rect: layout.Inset());
-                output.DrawIcon(layout);
+					layout.margin = 5; layout.rightMargin = 5; layout.fieldSize = 0.6f;
+					//layout.SmartField(ref downscale, "Downscale", min:1, max:8); downscale = Mathf.ClosestPowerOfTwo(downscale);
+					opacity = layout.Field(opacity, "Opacity", min: 0);
+					Wrapper.TileSize = layout.Field(Wrapper.TileSize, "Size");
+					Wrapper.TileOffset = layout.Field(Wrapper.TileOffset, "Offset");
+					Wrapper.SpecularColor = layout.Field(Wrapper.SpecularColor, "Specular");
+					Wrapper.Smoothness = layout.Field(Wrapper.Smoothness, "Smooth", max: 1);
+					Wrapper.Metallic = layout.Field(Wrapper.Metallic, "Metallic", max: 1);
+				}
+			}
+		}
 
-                layout.Field(ref Wrapper);
-                if (!Wrapper)
-                {
-                    return;
-                }
-
-                layout.Par(2);
-                layout.Par(60); //not 65
-                Wrapper.Texture = layout.Field(Wrapper.Texture, rect: layout.Inset(60));
-                Wrapper.NormalMap = layout.Field(Wrapper.NormalMap, rect: layout.Inset(60));
-                layout.Par(2);
-
-                layout.margin = 5; layout.rightMargin = 5; layout.fieldSize = 0.6f;
-                //layout.SmartField(ref downscale, "Downscale", min:1, max:8); downscale = Mathf.ClosestPowerOfTwo(downscale);
-                opacity = layout.Field(opacity, "Opacity", min: 0);
-                Wrapper.TileSize = layout.Field(Wrapper.TileSize, "Size");
-                Wrapper.TileOffset = layout.Field(Wrapper.TileOffset, "Offset");
-                Wrapper.SpecularColor = layout.Field(Wrapper.SpecularColor, "Specular");
-                Wrapper.Smoothness = layout.Field(Wrapper.Smoothness, "Smooth", max: 1);
-                Wrapper.Metallic = layout.Field(Wrapper.Metallic, "Metallic", max: 1);
-            }
-
-            public void OnAdd(int n) { }
-            public void OnRemove(int n)
-            {
-                input.Link(null, null);
-                Input connectedInput = output.GetConnectedInput(global::MapMagic.MapMagic.instance.gens.list);
-                if (connectedInput != null) connectedInput.Link(null, null);
-            }
-            public void OnSwitch(int o, int n) { }
-        }
-        public Layer[] baseLayers = new Layer[] { new Layer() { pinned = true, name = "Background" } };
-        public virtual Layout.ILayer[] layers
-        {
-            get { return baseLayers; }
-            set { baseLayers = ArrayTools.Convert<Layer, Layout.ILayer>(value); }
-        }
-
-        public int selected { get; set; }
-        public int collapsedHeight { get; set; }
-        public int extendedHeight { get; set; }
-
-        public Layout.ILayer def
-        {
-            get { return new Layer(); }
-        }
-
-        //generator
-        public override IEnumerable<Input> Inputs()
-        {
-            if (baseLayers == null) baseLayers = new Layer[0];
-            for (int i = 0; i < baseLayers.Length; i++)
-                if (baseLayers[i].input != null)
-                    yield return baseLayers[i].input;
-        }
-        public override IEnumerable<Output> Outputs()
-        {
-            if (baseLayers == null) baseLayers = new Layer[0];
-            for (int i = 0; i < baseLayers.Length; i++)
-                if (baseLayers[i].output != null)
-                    yield return baseLayers[i].output;
-        }
-
-        //get static actions using instance
-        public override Action<global::MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float, bool>> GetProces() { return Process; }
-        public override Func<global::MapMagic.CoordRect, Terrain, object, Func<float, bool>, IEnumerator> GetApply() { return Apply; }
-        public override Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
+		//layer
+		public Layer[] baseLayers = new Layer[] { new Layer() { name = "Background" } };
+		public int selected;
+		
+		public void UnlinkBaseLayer (int p, int n)
+		{
+			if (baseLayers.Length == 0) return; //no base layer
+			if (baseLayers[0].input.link != null) 
+				baseLayers[0].input.Link(null, null);
+		}
+		public void UnlinkBaseLayer (int n) { UnlinkBaseLayer(0,0); }
+		
+		public void UnlinkLayer (int num)
+		{
+			baseLayers[num].input.Link(null,null); //unlink input
+			baseLayers[num].output.UnlinkInActiveGens(); //try to unlink output
+		}
 
 
-        public override void Generate(global::MapMagic.CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float, bool> stop = null)
-        {
-            if ((stop != null && stop(0)) || !enabled) return;
+		public static Texture2D _defaultTex;
+		public static Texture2D defaultTex { get { if (_defaultTex == null) _defaultTex = Extensions.ColorTexture(2, 2, new Color(0.75f, 0.75f, 0.75f, 0f)); return _defaultTex; } }
 
-            //loading inputs
-            Matrix[] matrices = new Matrix[baseLayers.Length];
-            for (int i = 0; i < baseLayers.Length; i++)
-            {
-                if (baseLayers[i].input != null)
-                {
-                    matrices[i] = (Matrix)baseLayers[i].input.GetObject(results);
-                    if (matrices[i] != null) matrices[i] = matrices[i].Copy(null);
-                }
-                if (matrices[i] == null) matrices[i] = new Matrix(rect);
-            }
+		//public class SplatsTuple { public float[,,] array; public SplatPrototype[] prototypes; }
 
-            //background matrix
-            //matrices[0] = terrain.defaultMatrix; //already created
-            matrices[0].Fill(1);
+		//generator
+		public override IEnumerable<Input> Inputs()
+		{
+			if (baseLayers == null) baseLayers = new Layer[0];
+			for (int i = 0; i < baseLayers.Length; i++)
+				if (baseLayers[i].input != null)
+					yield return baseLayers[i].input;
+		}
+		public override IEnumerable<Output> Outputs()
+		{
+			if (baseLayers == null) baseLayers = new Layer[0];
+			for (int i = 0; i < baseLayers.Length; i++)
+				if (baseLayers[i].output != null)
+					yield return baseLayers[i].output;
+		}
 
-            //populating opacity array
-            float[] opacities = new float[matrices.Length];
-            for (int i = 0; i < baseLayers.Length; i++)
-                opacities[i] = baseLayers[i].opacity;
-            opacities[0] = 1;
+		//get static actions using instance
+		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
 
-            //blending layers
-            Matrix.BlendLayers(matrices, opacities);
 
-            //saving changed matrix results
-            for (int i = 0; i < baseLayers.Length; i++)
-            {
-                if (stop != null && stop(0)) return; //do not write object is generating is stopped
-                baseLayers[i].output.SetObject(results, matrices[i]);
-            }
-        }
+		public override void Generate (CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float,bool> stop = null)
+		{
+			if ((stop!=null && stop(0)) || !enabled) return;
 
-        public static void Process(global::MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float, bool> stop = null)
-        {
-            if (stop != null && stop(0)) return;
+			//loading inputs
+			Matrix[] matrices = new Matrix[baseLayers.Length];
+			for (int i = 0; i < baseLayers.Length; i++)
+			{
+				if (baseLayers[i].input != null)
+				{
+					matrices[i] = (Matrix)baseLayers[i].input.GetObject(results);
+					if (matrices[i] != null) matrices[i] = matrices[i].Copy(null);
+				}
+				if (matrices[i] == null) matrices[i] = new Matrix(rect);
+			}
 
-            //gathering prototypes and matrices lists
-            List<SplatPrototypeWrapper> prototypesList = new List<SplatPrototypeWrapper>();
-            List<float> opacities = new List<float>();
-            List<Matrix> matrices = new List<Matrix>();
-            List<Matrix> biomeMasks = new List<Matrix>();
+			//background matrix
+			//matrices[0] = terrain.defaultMatrix; //already created
+			matrices[0].Fill(1);
 
-            foreach (MadMapsSplatOutput gen in gens.GeneratorsOfType<MadMapsSplatOutput>(onlyEnabled: true, checkBiomes: true))
-            {
-                //loading biome matrix
-                Matrix biomeMask = null;
-                if (gen.biome != null)
-                {
-                    object biomeMaskObj = gen.biome.mask.GetObject(results);
-                    if (biomeMaskObj == null) continue; //adding nothing if biome has no mask
-                    biomeMask = (Matrix)biomeMaskObj;
-                    if (biomeMask == null) continue;
-                    if (biomeMask.IsEmpty()) continue; //optimizing empty biomes
-                }
+			//populating opacity array
+			float[] opacities = new float[matrices.Length];
+			for (int i = 0; i < baseLayers.Length; i++)
+				opacities[i] = baseLayers[i].opacity;
+			opacities[0] = 1;
 
-                for (int i = 0; i < gen.baseLayers.Length; i++)
-                {
-                    //reading output directly
-                    Output output = gen.baseLayers[i].output;
-                    if (stop != null && stop(0)) return; //checking stop before reading output
-                    if (!results.results.ContainsKey(output)) continue;
-                    Matrix matrix = (Matrix)results.results[output];
-                    matrix.Clamp01();
+			//blending layers
+			Matrix.BlendLayers(matrices, opacities);
 
-                    //adding to lists
-                    matrices.Add(matrix);
-                    biomeMasks.Add(gen.biome == null ? null : biomeMask);
-                    prototypesList.Add(gen.baseLayers[i].Wrapper);
-                    opacities.Add(gen.baseLayers[i].opacity);
-                }
-            }
+			//saving changed matrix results
+			for (int i = 0; i < baseLayers.Length; i++)
+			{
+				if (stop!=null && stop(0)) return; //do not write object is generating is stopped
+				baseLayers[i].output.SetObject(results, matrices[i]);
+			}
+		}
 
-            //optimizing matrices list if they are not used
-            for (int i = matrices.Count - 1; i >= 0; i--)
-                if (opacities[i] < 0.001f || matrices[i].IsEmpty() || (biomeMasks[i] != null && biomeMasks[i].IsEmpty()))
-                { prototypesList.RemoveAt(i); opacities.RemoveAt(i); matrices.RemoveAt(i); biomeMasks.RemoveAt(i); }
+		public static void Process (CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		{
+			if (stop!=null && stop(0)) return;
 
-            //creating array
-            float[, ,] splats3D = new float[terrainSize.resolution, terrainSize.resolution, prototypesList.Count];
-            if (matrices.Count == 0) { results.apply.CheckAdd(typeof(MadMapsSplatOutput), new TupleSet<float[, ,], SplatPrototype[]>(splats3D, new SplatPrototype[0]), replace: true); return; }
+			//gathering prototypes and matrices lists
+			List<SplatPrototypeWrapper> prototypesList = new List<SplatPrototypeWrapper>();
+			List<float> opacities = new List<float>();
+			List<Matrix> matrices = new List<Matrix>();
+			List<Matrix> biomeMasks = new List<Matrix>();
 
-            //filling array
-            if (stop != null && stop(0)) return;
+			foreach (MadMapsSplatOutput gen in gens.GeneratorsOfType<MadMapsSplatOutput>(onlyEnabled: true, checkBiomes: true))
+			{
+				//loading biome matrix
+				Matrix biomeMask = null;
+				if (gen.biome != null)
+				{
+					object biomeMaskObj = gen.biome.mask.GetObject(results);
+					if (biomeMaskObj == null) continue; //adding nothing if biome has no mask
+					biomeMask = (Matrix)biomeMaskObj;
+					if (biomeMask == null) continue;
+					if (biomeMask.IsEmpty()) continue; //optimizing empty biomes
+				}
 
-            int numLayers = matrices.Count;
-            int maxX = splats3D.GetLength(0); int maxZ = splats3D.GetLength(1); //MapMagic.instance.resolution should not be used because of possible lods
-            //global::MapMagic.CoordRect rect =  matrices[0].rect;
+				for (int i = 0; i < gen.baseLayers.Length; i++)
+				{
+				    if(!gen.baseLayers[i].Wrapper)
+					{
+						continue;
+					}
 
-            float[] values = new float[numLayers]; //row, to avoid reading/writing 3d array (it is too slow)
+					//reading output directly
+					Output output = gen.baseLayers[i].output;
+					if (stop!=null && stop(0)) return; //checking stop before reading output
+					if (!results.results.ContainsKey(output)) continue;
+					Matrix matrix = (Matrix)results.results[output];
+					matrix.Clamp01();
 
-            for (int x = 0; x < maxX; x++)
-                for (int z = 0; z < maxZ; z++)
-                {
-                    int pos = rect.GetPos(x + rect.offset.x, z + rect.offset.z);
-                    float sum = 0;
+					//adding to lists
+					matrices.Add(matrix);
+					biomeMasks.Add(gen.biome == null ? null : biomeMask);
+					prototypesList.Add(gen.baseLayers[i].Wrapper);
+					opacities.Add(gen.baseLayers[i].opacity);
+				}
+			}
 
-                    //getting values
-                    for (int i = 0; i < numLayers; i++)
-                    {
-                        float val = matrices[i].array[pos];
-                        if (biomeMasks[i] != null) val *= biomeMasks[i].array[pos]; //if mask is not assigned biome was ignored, so only main outs with mask==null left here
-                        if (val < 0) val = 0; if (val > 1) val = 1;
-                        sum += val; //normalizing: calculating sum
-                        values[i] = val;
-                    }
+			//optimizing matrices list if they are not used
+//			for (int i = matrices.Count - 1; i >= 0; i--)
+//				if (opacities[i] < 0.001f || matrices[i].IsEmpty() || (biomeMasks[i] != null && biomeMasks[i].IsEmpty()))
+//				{ prototypesList.RemoveAt(i); opacities.RemoveAt(i); matrices.RemoveAt(i); biomeMasks.RemoveAt(i); }
 
-                    //setting color
-                    for (int i = 0; i < numLayers; i++) splats3D[z, x, i] = values[i] / sum;
-                }
+			//creating array
+			float[,,] splats3D = new float[terrainSize.resolution, terrainSize.resolution, prototypesList.Count];
+			if (matrices.Count == 0) { results.apply.CheckAdd(typeof(MadMapsSplatOutput), new TupleSet<float[,,], SplatPrototypeWrapper[]>(splats3D, new SplatPrototypeWrapper[0]), replace: true); return; }
 
-            //pushing to apply
-            if (stop != null && stop(0)) return;
-            TupleSet<float[, ,], SplatPrototypeWrapper[]> splatsTuple = new TupleSet<float[, ,], SplatPrototypeWrapper[]>(splats3D, prototypesList.ToArray());
-            results.apply.CheckAdd(typeof(MadMapsSplatOutput), splatsTuple, replace: true);
-        }
+			//filling array
+			if (stop!=null && stop(0)) return;
 
-        public IEnumerator Apply(global::MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float, bool> stop = null)
-        {
-            TupleSet<float[, ,], SplatPrototypeWrapper[]> splatsTuple = (TupleSet<float[, ,], SplatPrototypeWrapper[]>)dataBox;
-            float[, ,] splats3D = splatsTuple.item1;
-            SplatPrototypeWrapper[] prototypes = splatsTuple.item2;
+			int numLayers = matrices.Count;
+			int maxX = splats3D.GetLength(0); int maxZ = splats3D.GetLength(1); //MapMagic.instance.resolution should not be used because of possible lods
+																				//CoordRect rect =  matrices[0].rect;
 
-            terrain.terrainData.splatPrototypes = new[] {new SplatPrototype()};    // To stop MapMagic purging what we're doing here alter on...
+			float[] values = new float[numLayers]; //row, to avoid reading/writing 3d array (it is too slow)
+
+			for (int x = 0; x < maxX; x++)
+				for (int z = 0; z < maxZ; z++)
+				{
+					int pos = rect.GetPos(x + rect.offset.x, z + rect.offset.z);
+					float sum = 0;
+
+					//getting values
+					for (int i = 0; i < numLayers; i++)
+					{
+						float val = matrices[i].array[pos];
+						if (biomeMasks[i] != null) val *= biomeMasks[i].array[pos]; //if mask is not assigned biome was ignored, so only main outs with mask==null left here
+						if (val < 0) val = 0; if (val > 1) val = 1;
+						sum += val; //normalizing: calculating sum
+						values[i] = val;
+					}
+
+					//setting color
+					for (int i = 0; i < numLayers; i++) splats3D[z, x, i] = values[i] / sum;
+				}
+
+			//pushing to apply
+			if (stop!=null && stop(0)) return;
+			TupleSet<float[,,], SplatPrototypeWrapper[]> splatsTuple = new TupleSet<float[,,], SplatPrototypeWrapper[]>(splats3D, prototypesList.ToArray());
+			results.apply.CheckAdd(typeof(MadMapsSplatOutput), splatsTuple, replace: true);
+		}
+
+		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		{
+			TupleSet<float[,,], SplatPrototypeWrapper[]> splatsTuple = (TupleSet<float[,,], SplatPrototypeWrapper[]>)dataBox;
+			float[,,] splats3D = splatsTuple.item1;
+			SplatPrototypeWrapper[] prototypes = splatsTuple.item2;
+
+			if (splats3D.GetLength(2) == 0) { Purge(rect,terrain); yield break; }
+
+			//TerrainData data = terrain.terrainData;
+
+			//setting resolution
+			//int size = splats3D.GetLength(0);
+			//if (data.alphamapResolution != size) data.alphamapResolution = size;
+
+			//checking prototypes texture
+			for (int i = 0; i < prototypes.Length; i++)
+				if (prototypes[i].Texture == null) prototypes[i].Texture = defaultTex;
+			yield return null;
+
+			//welding
+			if (MapMagic.MapMagic.instance != null && MapMagic.MapMagic.instance.splatsWeldMargins!=0)
+			{
+				MapMagic.Coord coord = MapMagic.Coord.PickCell(rect.offset, MapMagic.MapMagic.instance.resolution);
+				//Chunk chunk = MapMagic.MapMagic.instance.chunks[coord.x, coord.z];
+				
+				Chunk neigPrevX = MapMagic.MapMagic.instance.chunks[coord.x-1, coord.z];
+				if (neigPrevX!=null && neigPrevX.worker.ready) WeldTerrains.WeldSplatToPrevX(ref splats3D, neigPrevX.terrain, MapMagic.MapMagic.instance.splatsWeldMargins);
+
+				Chunk neigNextX = MapMagic.MapMagic.instance.chunks[coord.x+1, coord.z];
+				if (neigNextX!=null && neigNextX.worker.ready) WeldTerrains.WeldSplatToNextX(ref splats3D, neigNextX.terrain, MapMagic.MapMagic.instance.splatsWeldMargins);
+
+				Chunk neigPrevZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z-1];
+				if (neigPrevZ!=null && neigPrevZ.worker.ready) WeldTerrains.WeldSplatToPrevZ(ref splats3D, neigPrevZ.terrain, MapMagic.MapMagic.instance.splatsWeldMargins);
+
+				Chunk neigNextZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z+1];
+				if (neigNextZ!=null && neigNextZ.worker.ready) WeldTerrains.WeldSplatToNextZ(ref splats3D, neigNextZ.terrain, MapMagic.MapMagic.instance.splatsWeldMargins);
+			}
+			yield return null;
+
+			terrain.terrainData.splatPrototypes = new[] {new SplatPrototype(){texture = defaultTex}};    // To stop MapMagic purging what we're doing here alter on...
 
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
@@ -270,42 +301,57 @@ namespace MadMaps.Terrains.MapMagic
                 terrainLayer.SetSplatmap(splatPrototypeWrapper, 0, 0, data, splatWidth);
             }
 
+			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
-            global::MapMagic.MapMagic.OnApplyCompleted += terrain1 => terrain1.GetComponent<TerrainWrapper>().Update();
-            yield break;
-        }
+			yield return null;
+		}
 
-        private void MapMagicOnOnApplyCompleted(Terrain terrain)
+		private void MapMagicOnOnApplyCompleted(Terrain terrain)
         {
             global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
             var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             wrapper.Dirty = true;
+			wrapper.Update();	
         }
 
-        public void Purge(global::MapMagic.CoordRect rect, Terrain terrain)
-        {
-            var wrapper = terrain.GetComponent<TerrainWrapper>();
-            if (wrapper == null)
-            {
-                return;
-            }
-            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName);
-            if (terrainLayer == null || terrainLayer.Heights == null)
-            {
-                return;
-            }
-            terrainLayer.SplatData.Clear();
-            wrapper.Dirty = true;
-        }
+		public static void Purge(CoordRect rect, Terrain terrain)
+		{
+			//skipping if already purged
+			if (terrain.terrainData.alphamapResolution<=16) return; //using 8 will return resolution to 16
 
-        public override void OnGUI(GeneratorsAsset gens)
-        {
-            layout.fieldSize = .6f;
+			SplatPrototype[] prototypes = new SplatPrototype[1];
+			if (prototypes[0] == null) prototypes[0] = new SplatPrototype();
+			if (prototypes[0].texture == null) prototypes[0].texture = defaultTex;
+			terrain.terrainData.splatPrototypes = prototypes;
+
+			float[,,] emptySplats = new float[16, 16, 1];
+			for (int x = 0; x < 16; x++)
+				for (int z = 0; z < 16; z++)
+					emptySplats[z, x, 0] = 1;
+
+			terrain.terrainData.alphamapResolution = 16;
+			terrain.terrainData.SetAlphamaps(0, 0, emptySplats);
+		}
+
+		public override void OnGUI(GeneratorsAsset gens)
+		{
+			layout.fieldSize = .6f;
             layout.Field(ref LayerName, "Layer");
             layout.fieldSize = .5f;
+			//Layer buttons
+			layout.Par();
+			layout.Label("Layers:", layout.Inset(0.4f));
 
-            layout.DrawLayered(this, "Layers:");
-        }
-    }
+			layout.DrawArrayAdd(ref baseLayers, ref selected, rect:layout.Inset(0.15f), reverse:true, createElement:() => new Layer(), onAdded:UnlinkBaseLayer );
+			layout.DrawArrayRemove(ref baseLayers, ref selected, rect:layout.Inset(0.15f), reverse:true, onBeforeRemove:UnlinkLayer, onRemoved:UnlinkBaseLayer);
+			layout.DrawArrayDown(ref baseLayers, ref selected, rect:layout.Inset(0.15f), dispUp:true, onSwitch:UnlinkBaseLayer);
+			layout.DrawArrayUp(ref baseLayers, ref selected, rect:layout.Inset(0.15f), dispDown:true, onSwitch:UnlinkBaseLayer);
+
+			//layers
+			layout.Par(3);
+			for (int num=baseLayers.Length-1; num>=0; num--)
+				layout.DrawLayer(baseLayers[num].OnGUI, ref selected, num);
+		}
+	}
 }
 #endif

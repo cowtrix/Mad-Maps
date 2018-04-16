@@ -10,6 +10,7 @@ using MadMaps.Common.Serialization;
 using MadMaps.Terrains.Lookups;
 using MadMaps.WorldStamp;
 using UnityEngine;
+using System.Linq;
 #if UNITY_EDITOR
 #endif
 
@@ -62,6 +63,24 @@ namespace MadMaps.Terrains
             var bounds = new Bounds(terrain.GetPosition() + terrain.terrainData.size/2, terrain.terrainData.size);
             // TerrainCollider bounds is unreliable as it can be slow to update
             WriteToTerrain(wrapper, bounds);
+        }
+
+        public override void PrepareApply(TerrainWrapper terrainWrapper, int index)
+        {
+            if(index == 0)
+            {
+                terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
+                if(DetailData.Count > 0)
+                {
+                    var firstMap = DetailData.First();
+                    terrainWrapper.Terrain.terrainData.SetDetailResolution (firstMap.Value.Width, 
+                        terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
+                }
+                if(SplatData.Count > 0)
+                {
+                    terrainWrapper.Terrain.terrainData.alphamapResolution = SplatData.First().Value.Width;
+                }
+            }
         }
 
         public void WriteToTerrain(TerrainWrapper wrapper, Bounds bounds)
