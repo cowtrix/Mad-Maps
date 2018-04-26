@@ -58,7 +58,6 @@ namespace MadMaps.Terrains
                 hashCode = (hashCode * 397) ^ obj.minWidth.GetHashCode();
                 hashCode = (hashCode * 397) ^ obj.noiseSpread.GetHashCode();
                 hashCode = (hashCode * 397) ^ obj.renderMode.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.usePrototypeMesh.GetHashCode();
                 return hashCode;
             }
         }

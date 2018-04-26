@@ -11,7 +11,7 @@ namespace MadMaps.WorldStamp
 {
     [CustomEditor(typeof (WorldStamp))]
     [CanEditMultipleObjects]
-    public class WorldStampGUI : Editor
+    public partial class WorldStampGUI : Editor
     {
         BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle(-1);
         private SerializedProperty _size;
@@ -53,11 +53,19 @@ namespace MadMaps.WorldStamp
         private SerializedProperty _overrideRelativeObjectMode;
         private SerializedProperty _relativeObjectMode;
 
+        
+
         private bool _editingMask = false;
         private Painter _painter;
 
         void OnEnable()
         {
+            #if VEGETATION_STUDIO
+            _vegetationStudioEnabled = serializedObject.FindProperty("VegetationStudioEnabled");
+            _stencilVSData = serializedObject.FindProperty("StencilVSData");
+            _removeExistingVSData = serializedObject.FindProperty("RemoveExistingVSData");
+            #endif
+
             _size = serializedObject.FindProperty("Size");
             _snapToTerrain = serializedObject.FindProperty("SnapToTerrainHeight");
             _snapToTerrainOffset = serializedObject.FindProperty("SnapToTerrainHeightOffset");
@@ -223,6 +231,10 @@ namespace MadMaps.WorldStamp
             DoSplatsSection();
 
             DoDetailsSection();
+
+            #if VEGETATION_STUDIO
+            DoVegetationStudioSection();
+            #endif
 
             serializedObject.ApplyModifiedProperties();
             GUI.enabled = true;
@@ -622,6 +634,11 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.LabelField("Trees", stamp.Data.Trees.Count.ToString());
+
+            #if VEGETATION_STUDIO
+            EditorGUILayout.LabelField("Vegetation Studio Instances", stamp.Data.VSData.Count.ToString());
+            #endif
+
             EditorGUILayout.LabelField("Objects", stamp.Data.Objects.Count.ToString());
             
             GUI.enabled = !isPrefab;

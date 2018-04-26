@@ -15,7 +15,7 @@ namespace MadMaps.Terrains
 #endif
     [ExecuteInEditMode]
     [HelpURL("http://lrtw.net/madmaps/index.php?title=Terrain_Wrapper")]
-    public class TerrainWrapper : MonoBehaviour
+    public partial class TerrainWrapper : MonoBehaviour
 #if HURTWORLDSDK
         , ILevelPreBuildStepCallback
 #endif
@@ -32,6 +32,10 @@ namespace MadMaps.Terrains
         public bool WriteTrees = true;
         public bool WriteDetails = true;
         public bool WriteObjects = true;
+
+        #if VEGETATION_STUDIO
+        public bool WriteVegetationStudio = true;
+        #endif
 
         public List<LayerBase> Layers = new List<LayerBase>();
 

@@ -158,6 +158,11 @@ namespace MadMaps.WorldStamp
 
                     MiscUtilities.ProgressBar(String.Format("Applying Details for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
                     worldStamp.StampDetails(wrapper, layer, stencilKey);
+
+                    #if VEGETATION_STUDIO
+                    MiscUtilities.ProgressBar(String.Format("Applying Details for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
+                    worldStamp.StampVegetationStudio(wrapper, layer, stencilKey);
+                    #endif
                 }
 
                 MiscUtilities.ColoriseStencil(layer.Stencil);

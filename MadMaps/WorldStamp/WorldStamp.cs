@@ -14,7 +14,7 @@ namespace MadMaps.WorldStamp
     #if HURTWORLDSDK
     [StripComponentOnBuild()]
     #endif
-    public class WorldStamp : MonoBehaviour
+    public partial class WorldStamp : MonoBehaviour
     {
         public enum EHeightBlendMode
         {

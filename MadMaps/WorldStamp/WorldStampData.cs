@@ -6,6 +6,10 @@ using MadMaps.Terrains;
 using MadMaps.Terrains.Lookups;
 using UnityEngine;
 
+#if VEGETATION_STUDIO
+using AwesomeTechnologies;
+#endif
+
 namespace MadMaps.WorldStamp
 {
     [Serializable]
@@ -37,6 +41,11 @@ namespace MadMaps.WorldStamp
         // TREES
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
         public List<GameObject> TreePrototypeCache = new List<GameObject>();
+
+        #if VEGETATION_STUDIO
+        public VegetationPackage Package;
+        public List<VegetationStudioInstance> VSData = new List<VegetationStudioInstance>();
+        #endif
 
         // OBJECTS
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();

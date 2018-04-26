@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    public abstract class LayerBase : ScriptableObject
+    public abstract partial class LayerBase : ScriptableObject
     {
         [HideInInspector]
         public bool Enabled = true;

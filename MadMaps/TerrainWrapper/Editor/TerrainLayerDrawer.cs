@@ -294,6 +294,27 @@ namespace MadMaps.Terrains
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
 
+            #if VEGETATION_STUDIO
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Vegetation Studio", layer.VSInstances != null ? string.Format("{0}", layer.VSInstances.Count) : "null");
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            {
+                layer.VSInstances.Clear();
+                EditorUtility.SetDirty(layer);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("➥Removals", layer.VSRemovals != null ? string.Format("{0}", layer.VSRemovals.Count) : "null");
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            {
+                layer.VSRemovals.Clear();
+                EditorUtility.SetDirty(layer);
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorExtensions.Seperator();
+            #endif
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", layer.Objects != null ? string.Format("{0}", layer.Objects.Count) : "null");
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))

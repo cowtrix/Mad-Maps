@@ -78,7 +78,7 @@ namespace MadMaps.WorldStamp.Authoring
                     Heights[dx, dz] -= ZeroLevel;
                 }
             }
-            Debug.Log(maxHeight);
+            //Debug.Log(maxHeight);
             _dirty = true;
         }
 

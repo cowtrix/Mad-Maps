@@ -19,6 +19,9 @@ namespace MadMaps.WorldStamp.Authoring
         public RoadDataCreator RoadDataCreator = new RoadDataCreator();
         public SplatDataCreator SplatDataCreator = new SplatDataCreator();
         public TreeDataCreator TreeDataCreator = new TreeDataCreator();
+        #if VEGETATION_STUDIO
+        public VegetationStudioDataCreator VegetationStudioDataCreator = new VegetationStudioDataCreator();
+        #endif
 
         public List<WorldStampCreatorLayer> Creators
         {
@@ -34,7 +37,10 @@ namespace MadMaps.WorldStamp.Authoring
                         TreeDataCreator,
                         ObjectDataCreator,
                         RoadDataCreator,
-                        MaskDataCreator
+                        #if VEGETATION_STUDIO
+                        VegetationStudioDataCreator,
+                        #endif
+                        MaskDataCreator,                        
                     };
                 }
                 return __creators;

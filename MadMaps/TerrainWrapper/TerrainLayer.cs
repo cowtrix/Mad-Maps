@@ -17,7 +17,7 @@ using System.Linq;
 namespace MadMaps.Terrains
 {
     [Name("Terrain Layer")]
-    public class TerrainLayer : LayerBase
+    public partial class TerrainLayer : LayerBase
     {
         public enum ETerrainLayerBlendMode
         {
@@ -33,11 +33,7 @@ namespace MadMaps.Terrains
         public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public List<string> TreeRemovals = new List<string>();
-        public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
-
-        [SerializeField]
-        [HideInInspector]
-        private string _compressedBytes;
+        public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();     
 
         /// <summary>
         /// Go and capture all of the data on a given terrain and store it in this layer.
@@ -51,6 +47,10 @@ namespace MadMaps.Terrains
             this.SnapshotDetails(terrain);
             this.SnapshotTrees(terrain);
             this.SnapshotObjects(terrain);
+
+            #if VEGETATION_STUDIO
+            this.SnapshotVegetationStudioData(terrain);
+            #endif
         }
 
         /// <summary>
@@ -114,6 +114,16 @@ namespace MadMaps.Terrains
                 MiscUtilities.ProgressBar("Writing Objects for layer " + name, "", 0);
                 WriteObjectsToTerrain(wrapper, bounds);
             }
+
+            #if VEGETATION_STUDIO
+
+            if (wrapper.WriteVegetationStudio)
+            {
+                MiscUtilities.ProgressBar("Writing Vegetation Studio for layer " + name, "", 0);
+                WriteVegetationStudioToTerrain(wrapper, bounds);
+            }
+
+            #endif
 
             GC.Collect();
         }

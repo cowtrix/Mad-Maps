@@ -21,6 +21,10 @@ namespace MadMaps.Terrains
         public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public Serializable2DFloatArray Heights;
+        
+        #if VEGETATION_STUDIO
+        public VegetationStudioLookup VegetationStudio = new VegetationStudioLookup();
+        #endif
 
         public void Clear(TerrainWrapper terrainWrapper)
         {
@@ -44,6 +48,13 @@ namespace MadMaps.Terrains
             {
                 Heights.Clear();
             }
+
+            #if VEGETATION_STUDIO
+            if(terrainWrapper.WriteVegetationStudio)
+            {
+                VegetationStudio.Clear();
+            }
+            #endif
         }
     }
 
@@ -54,5 +65,8 @@ namespace MadMaps.Terrains
         public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> SplatData = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
         public Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> DetailData = new Dictionary<DetailPrototypeWrapper, Serializable2DByteArray>();
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
+         #if VEGETATION_STUDIO
+        public List<VegetationStudioInstance> VegetationStudio = new List<VegetationStudioInstance>();
+        #endif
     }
 }
