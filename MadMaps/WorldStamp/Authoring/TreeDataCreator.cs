@@ -65,6 +65,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void PreviewInDataInspector()
         {
+            #if UNITY_EDITOR
             Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
             foreach (var obj in Trees)
             {
@@ -79,6 +80,7 @@ namespace MadMaps.WorldStamp.Authoring
                 (data[obj.Prototype] as PositionList).Add(obj.Position);
             }
             DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            #endif
         }
 
         public override void Clear()

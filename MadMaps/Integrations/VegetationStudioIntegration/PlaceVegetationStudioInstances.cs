@@ -9,9 +9,9 @@ using UnityEngine;
 using Random = System.Random;
 using AwesomeTechnologies.Vegetation.PersistentStorage;
 using System.Reflection;
+using MadMaps.Common.GenericEditor;
 #if UNITY_EDITOR
 using UnityEditor;
-using MadMaps.Common.GenericEditor;
 #endif
 
 namespace MadMaps.Roads

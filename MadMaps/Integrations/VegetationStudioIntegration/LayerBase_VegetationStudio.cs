@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using MadMaps.Common.Collections;
 using MadMaps.WorldStamp;
 using UnityEngine;
+
+#if VEGETATION_STUDIO
 using AwesomeTechnologies;
 
 namespace MadMaps.Terrains
@@ -24,3 +26,4 @@ namespace MadMaps.Terrains
         }
     }
 }
+#endif

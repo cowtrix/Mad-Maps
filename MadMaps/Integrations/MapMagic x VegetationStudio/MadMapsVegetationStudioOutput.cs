@@ -1,13 +1,15 @@
 ﻿// Taken with some small modifications from Map Magic (https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762)
 // All rights reserved by the original creator.
 
-#if MAPMAGIC && VEGETATION_STUDIO
+#if MAPMAGIC && VEGETATION_STUDIO && false
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
 using UnityEngine;
 using MapMagic;
+using MadMaps.Integration;
+using MadMaps.Terrains;
 
 #if VEGETATION_STUDIO
 using AwesomeTechnologies.Vegetation.PersistentStorage;
@@ -20,13 +22,12 @@ using AwesomeTechnologies.Billboards;
 namespace MadMaps.Integration
 {
 	[System.Serializable]
-	[GeneratorMenu(menu = "Mad Maps", name = "Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
+	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
 	public class MadMapsVSOutput : OutputGenerator
 	{
 		#if VEGETATION_STUDIO
 		public VegetationPackage package;
 		[NonSerialized] private static VegetationPackage packageShared; //to make sure all vs outputs use the same package
-		[NonSerialized] private static Dictionary<CoordRect,PersistentVegetationStorage> vetStorComponents = new Dictionary<CoordRect, PersistentVegetationStorage>();  //using component instead of packege since it can auto-locate cell
 		private static float cellSize;
 		//[NonSerialized] private static Dictionary<CoordRect,BillboardSystem> billboardComponents = new Dictionary<CoordRect, BillboardSystem>();
 
@@ -82,41 +83,6 @@ namespace MadMaps.Integration
 		//Prepare
 		public void CheckAddComponent(Chunk chunk)
 		{
-			#if VEGETATION_STUDIO
-			Profiler.BeginSample("VS Prepare");
-			
-			//adding the main vegetation object
-			VegetationStudioManager.AddVegetationStudioManagerToScene();
-
-			//checking if all packs for all of the generators are the same
-			if (packageShared == null) packageShared = package;
-			else package = packageShared;
-
-			//finding/creating vegetation system component
-			VegetationSystem vetSys = chunk.terrain.gameObject.GetComponentInChildren<VegetationSystem>();
-			if (vetSys == null) 
-			{
-				vetSys = VegetationStudioManager.AddVegetationSystemToTerrain(chunk.terrain, package, createPersistentVegetationStoragePackage:true);
-			}
-			if (vetSys.VegetationPackageList.Count == 0) vetSys.VegetationPackageList.Add(package);
-			if (vetSys.VegetationPackageList.Count == 1 && vetSys.VegetationPackageList[0] == null) vetSys.VegetationPackageList[0] = package;
-			if (!vetSys.VegetationPackageList.Contains(package)) vetSys.VegetationPackageList.Add(package);
-
-			if (!vetSys.InitDone) 
-			{
-				vetSys.SetupVegetationSystem();
-				vetSys.RefreshVegetationPackage();
-			}
-			cellSize = vetSys.CellSize;
-			
-
-			//saving per-chunk storage (to access it from thread)
-			PersistentVegetationStorage storage = vetSys.gameObject.GetComponent<PersistentVegetationStorage>();
-			if (!vetStorComponents.ContainsKey(chunk.rect)) vetStorComponents.Add(chunk.rect,null);
-			vetStorComponents[chunk.rect] = storage;
-
-			Profiler.EndSample();
-			#endif
 		}
 
 		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
@@ -124,26 +90,12 @@ namespace MadMaps.Integration
 			#if VEGETATION_STUDIO
 			if (stop!=null && stop(0)) return;
 
-			//preparing and clearing storage
-			if (vetStorComponents == null || vetStorComponents.Count == 0) return; //vs not used (process runs anyway)
-			PersistentVegetationStorage storage = vetStorComponents[rect];
+			List<VegetationStudioInstance> instances = new List<VegetationStudioInstance>();
 			
 			int cellXCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
 			int cellZCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
 
 			Noise noise = new Noise(12345, permutationCount:128); //to pick objects based on biome
-
-			
-			//clearing all of the items
-			foreach (MadMapsVSOutput gen in gens.GeneratorsOfType<MadMapsVSOutput>(onlyEnabled:true, checkBiomes:true))
-			{
-				for (int b = 0; b < gen.layers.Length; b++)
-				{
-					string id = gen.package.VegetationInfoList[b].VegetationItemID;
-					storage.RemoveVegetationItemInstances(id, VS_MM_id);
-				}
-				break; //iterating in one generator only - they use the same layers
-			}
 
 			if (stop!=null && stop(0)) return;
 
