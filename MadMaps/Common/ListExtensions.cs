@@ -43,13 +43,26 @@ namespace MadMaps.Common
             return source.OrderBy((item) => rnd.Next());
         }
 
+        public static void Fill<T>(this Array array, T obj, int count = -1)
+        {
+            if (count == -1)
+            {
+                count = array.Length;
+            }
+            for (var i = 0; i < count; ++i)
+            {
+                array.SetValue(obj, i);
+            }
+        }
+
         public static void Fill<T>(this IList<T> array, T obj, int count = -1)
         {
             if (count == -1)
             {
                 count = array.Count;
             }
-            if (!typeof(T).IsArray)
+            var arrayType = array.GetType();
+            if (!arrayType.IsArray)
             {
                 array.Clear();
             }

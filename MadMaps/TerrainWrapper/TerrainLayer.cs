@@ -411,7 +411,7 @@ namespace MadMaps.Terrains
                     var hz = v - z;
                     try
                     {
-                        var heightsSample = heights[hx, hz];
+                        var heightsSample = heights[hx, hz];                        
                         if (stencil == null)
                         {
                             Heights[u, v] = heightsSample;
@@ -458,6 +458,7 @@ namespace MadMaps.Terrains
                     try
                     {
                         var heightsSample = heights[hx, hz];
+                        heightsSample = Mathf.Clamp01(heightsSample);
                         if (stencil == null)
                         {
                             Heights[u, v] = heightsSample;
@@ -524,6 +525,11 @@ namespace MadMaps.Terrains
                     Stencil = new Stencil(tRes, tRes);
                 }
             }
+
+#if VEGETATION_STUDIO
+            VSInstances.Clear();
+            VSRemovals.Clear();
+#endif
 
             GC.Collect();
             

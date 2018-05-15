@@ -104,14 +104,8 @@ namespace MadMaps.Terrains.MapMagicIntegration
             terrainLayer.Stencil = stencil;
             yield return null;
 
-            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
-        }
-
-        private void MapMagicOnOnApplyCompleted(Terrain terrain)
-        {
-            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            wrapper.Dirty = true;
+            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
         }
 
         public override void OnGUI(GeneratorsAsset gens)

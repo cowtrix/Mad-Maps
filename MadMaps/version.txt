@@ -1,1 +1,11 @@
-0.1.0
+Current Version: 0.1.1
+
+- Map Magic Integration: Fixed terrain heightmap welding.
+- Vegetation Studio Integration: Added VegetationStudio data layers to the TerrainWrapper and World Stamps. 
+- Vegetation Studio Integration: Added VegetationStudio modifiers to the road tool.
+- Data Inspector: Added the ability to preview object/position data such as trees, objects and more.
+- TerrainWrapper: Fixed making an object container when it doesn't need to.
+- Road Network: Fixed bug where nodes could share their configuration, causing unexpected behaviour.
+
+== History ==
+v 0.1.0 Initial Release 

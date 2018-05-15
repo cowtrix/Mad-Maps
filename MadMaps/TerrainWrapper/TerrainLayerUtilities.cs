@@ -280,11 +280,16 @@ namespace MadMaps.Terrains
         public static void SnapshotTrees(this TerrainLayer layer, Terrain terrain)
         {
             layer.Trees.Clear();
+            var tSize = terrain.terrainData.size;
             var trees = terrain.terrainData.treeInstances;
             var prototypes = new List<TreePrototype>(terrain.terrainData.treePrototypes);
             for (var i = 0; i < trees.Length; i++)
             {
-                layer.Trees.Add(new MadMapsTreeInstance(trees[i], prototypes));
+                var wPos = terrain.TreeToWorldPos(trees[i].position);
+                var h = terrain.SampleHeight(wPos);
+                var newInstance = new MadMapsTreeInstance(trees[i], prototypes);
+                newInstance.Position.y = (newInstance.Position.y * tSize.y) - h;
+                layer.Trees.Add(newInstance);
             }
         }
 

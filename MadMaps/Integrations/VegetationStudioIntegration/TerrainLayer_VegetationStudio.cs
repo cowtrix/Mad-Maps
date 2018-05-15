@@ -25,6 +25,7 @@ namespace MadMaps.Terrains
     {
         public string Guid;
         public string VSID;
+        public VegetationPackage Package;
         public Vector3 Position;
         public Vector3 Scale = Vector3.one;
         public Vector3 Rotation;
@@ -38,6 +39,7 @@ namespace MadMaps.Terrains
                 Position = this.Position,
                 Scale = this.Scale,
                 Rotation = this.Rotation,
+                Package = this.Package,
             };
         }
     }
@@ -141,32 +143,97 @@ namespace MadMaps.Terrains
                 {
                     continue;
                 }
+                if(vegSys.CurrentVegetationPackage == null)
+                {
+                    Debug.LogWarning(string.Format("Couldn't capture from system {0} as it doesn't have a Vegetation Package assigned.", vegSys), vegSys);
+                    continue;
+                }
                 foreach(var cell in vegStorage.PersistentVegetationStoragePackage.PersistentVegetationCellList)
                 {
                     foreach(var info in cell.PersistentVegetationInfoList)
                     {
                         foreach(var item in info.VegetationItemList)
                         {
+                            var wPos = terrain.GetPosition() + item.Position;
+                            var pos = terrain.WorldToTreePos(wPos);
+                            pos.y = wPos.y - terrain.SampleHeight(wPos) - terrain.GetPosition().y;
                             layer.VSInstances.Add(new VegetationStudioInstance()
                             {
                                 Guid = System.Guid.NewGuid().ToString(),
-                                Position = terrain.WorldToTreePos(terrain.GetPosition() + item.Position),
+                                Position = pos,
                                 Rotation = item.Rotation.eulerAngles,
                                 Scale = item.Scale,
                                 VSID = info.VegetationItemID,
+                                Package = vegSys.CurrentVegetationPackage,
                             });
                         }
                     }
                 }
             }
         }
+
+        public static void SetupTerrain(Terrain terrain, ref VegetationPackage package, out VegetationSystem system, out PersistentVegetationStorage storage)
+        {
+            var vetSystems = GetVegetationSystemsForTerrain(terrain);
+            VegetationSystem vetSys = null;
+            for(var i = 0; i < vetSystems.Count; ++i)
+            {
+                var candidate = vetSystems[i];
+                if(candidate.CurrentVegetationPackage == package)
+                {
+                    vetSys = candidate;
+                    break;
+                }
+            }
+            
+			if (vetSys == null) 
+			{
+				vetSys = VegetationStudioManager.AddVegetationSystemToTerrain(terrain, package, createPersistentVegetationStoragePackage:true);
+			}
+            if(package != null)
+            {
+                if (vetSys.VegetationPackageList.Count == 0) 
+                {
+                    vetSys.VegetationPackageList.Add(package);
+                }
+                if (vetSys.VegetationPackageList.Count == 1 && vetSys.VegetationPackageList[0] == null) 
+                {
+                    vetSys.VegetationPackageList[0] = package;
+                }
+                if (!vetSys.VegetationPackageList.Contains(package)) 
+                {
+                    vetSys.VegetationPackageList.Add(package);
+                }
+            }			
+			if (!vetSys.InitDone) 
+			{
+				vetSys.SetupVegetationSystem();
+				vetSys.RefreshVegetationPackage();
+			}
+            vetSys.SetSleepMode(false);
+            package = vetSys.CurrentVegetationPackage;
+            system = vetSys;
+            storage = vetSys.GetComponent<PersistentVegetationStorage>();
+        }
     }
   
     public partial class TerrainLayer : LayerBase
     {
-        const byte VS_ID = 123;
+        
         public List<VegetationStudioInstance> VSInstances = new List<VegetationStudioInstance>();
         public List<string> VSRemovals = new List<string>();
+        public override List<VegetationPackage> GetPackages()
+        {
+            List<VegetationPackage> result = new List<VegetationPackage>();
+            foreach(var instance in VSInstances)
+            {
+                if(instance.Package != null && !result.Contains(instance.Package))
+                {
+                    result.Add(instance.Package);
+                }
+            }
+            return result;
+        }
 
         private void WriteVegetationStudioToTerrain(TerrainWrapper wrapper, Bounds bounds)
         {
@@ -179,9 +246,12 @@ namespace MadMaps.Terrains
             {
                 existingVSData.Add(VSInstances[i].Guid, VSInstances[i]);
             }
-            foreach (var treeRemoval in TreeRemovals)
+            foreach (var treeRemoval in VSRemovals)
             {
-                existingVSData.Remove(treeRemoval);
+                if(!existingVSData.Remove(treeRemoval))
+                {
+                    //Debug.LogWarning(string.Format("Layer {0}: Unable to remove tree {1}", this, treeRemoval));
+                }
             }
         }
 

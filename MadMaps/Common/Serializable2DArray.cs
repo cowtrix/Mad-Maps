@@ -80,6 +80,10 @@ namespace MadMaps.Common.Collections
                 {
                     return default(T);
                 }
+                if(u < 0 || u >= Width || v < 0 || v >= Height)
+                {
+                    throw new IndexOutOfRangeException(string.Format("Coord: ({0}, {1})", u, v));
+                }
                 var index = v * Width + u;
                 if (index >= Data.Length || index < 0)
                 {
@@ -209,5 +213,7 @@ namespace MadMaps.Common.Collections
         protected abstract T ReadFromStream(BinaryReader br);
 
         public abstract Texture2D ToTexture2D(bool normalise, Texture2D tex = null);
+
+        public virtual string AuxData {get{return string.Empty;}}
     }
 }

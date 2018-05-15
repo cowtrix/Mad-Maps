@@ -59,7 +59,7 @@ namespace MadMaps.WorldStamp
                 UnityEngine.Profiling.Profiler.EndSample();
                 return;
             }
-
+            
             for (var i = 0; i < Data.VSData.Count; i++)
             {                
                 var vsInstance = Data.VSData[i].Clone();
@@ -87,8 +87,10 @@ namespace MadMaps.WorldStamp
                 }
 
                 vsInstance.Guid = Guid.NewGuid().ToString();
+                //var height = terrainWrapper.GetCompoundHeight(layer, wPos, true) * tSize.y * Vector3.up;
                 vsInstance.Position = wPos - terrainWrapper.transform.position;
-                vsInstance.Position = new Vector3(vsInstance.Position.x / tSize.x, vsInstance.Position.y / tSize.y - .5f, vsInstance.Position.z / tSize.z);
+                vsInstance.Position.y = Data.VSData[i].Position.y;
+                vsInstance.Position = new Vector3(vsInstance.Position.x / tSize.x, vsInstance.Position.y, vsInstance.Position.z / tSize.z);
 
                 layer.VSInstances.Add(vsInstance);
             }

@@ -188,7 +188,16 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void PreviewInDataInspector()
         {
-            throw new System.NotImplementedException();
+            Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+            foreach (var obj in Objects)
+            {
+                if(!data.ContainsKey(obj.Prefab))
+                {
+                    data[obj.Prefab] = new PositionList();
+                }
+                (data[obj.Prefab] as PositionList).Add(obj.Position);
+            }
+            DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
         }
 
         public override void Clear()
@@ -212,7 +221,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override bool HasDataPreview
         {
-            get { return false; }
+            get { return true; }
         }
     }
 }

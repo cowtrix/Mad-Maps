@@ -127,6 +127,9 @@ namespace MadMaps.Terrains
             CompoundTerrainData.Trees.Clear();
             CompoundTerrainData.SplatData.Clear();
             CompoundTerrainData.DetailData.Clear();
+            #if VEGETATION_STUDIO
+            CompoundTerrainData.VegetationStudio.Clear();
+            #endif
             
             PrepareApply();
 
@@ -177,6 +180,10 @@ namespace MadMaps.Terrains
                     Layers[i].PrepareApply(this, i);
                 }
             }
+
+#if VEGETATION_STUDIO
+            PrepareVegetationStudio();
+#endif
         }
 
         public void FinaliseApply()
@@ -190,6 +197,10 @@ namespace MadMaps.Terrains
             FinaliseTrees();
 
             FinaliseObjects();
+
+#if VEGETATION_STUDIO
+            FinaliseVegetationStudio();
+#endif
 
 #if UNITY_EDITOR
             Terrain.Flush();
@@ -249,9 +260,13 @@ namespace MadMaps.Terrains
                 return;
             }
 
-            if (CompoundTerrainData.Objects.Count == 0 && ObjectContainer)
+            if (CompoundTerrainData.Objects.Count == 0)
             {
-                UnityEngine.Object.DestroyImmediate(ObjectContainer);
+                if(ObjectContainer)
+                {
+                    UnityEngine.Object.DestroyImmediate(ObjectContainer);
+                }                
+                return;
             }
 
             if (ObjectContainer == null)
@@ -764,7 +779,7 @@ namespace MadMaps.Terrains
         public Serializable2DFloatArray GetCompoundHeights(LayerBase terminatingLayer, int x, int z, int width,
             int height, int heightRes)
         {
-            if (_compoundDataCache != null && _compoundDataCache.ContainsKey(terminatingLayer))
+            if (terminatingLayer != null && _compoundDataCache != null && _compoundDataCache.ContainsKey(terminatingLayer))
             {
                 var compoundData = _compoundDataCache[terminatingLayer];
                 if (compoundData.Heights != null)
@@ -1023,7 +1038,7 @@ namespace MadMaps.Terrains
 
         public List<MadMapsTreeInstance> GetCompoundTrees(LayerBase terminatingLayer, bool includeTerminatingLayer = false, Bounds? bounds = null)
         {
-            if (!includeTerminatingLayer && _compoundDataCache.ContainsKey(terminatingLayer))
+            if (terminatingLayer != null && !includeTerminatingLayer && _compoundDataCache.ContainsKey(terminatingLayer))
             {
                 var data = _compoundDataCache[terminatingLayer].Trees;
                 return data; 

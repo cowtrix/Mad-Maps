@@ -217,6 +217,15 @@ namespace MadMaps.Common
             return result;
         }
 
+        public static bool IndentedButton(Texture2D text, params GUILayoutOption[] options )
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(EditorGUI.indentLevel * 16 + 6);
+            var result = GUILayout.Button(text, options);
+            GUILayout.EndHorizontal();
+            return result;
+        }
+
         ///Get a selection menu of types deriving base type
         public static GenericMenu GetTypeSelectionMenu(Type baseType, Action<Type> callback)
         {

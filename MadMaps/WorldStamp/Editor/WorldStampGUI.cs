@@ -581,6 +581,26 @@ namespace MadMaps.WorldStamp
                 }
                 EditorGUILayout.EndHorizontal();
             }
+            #if VEGETATION_STUDIO
+            if (stamp.Data.VSData.Exists(data => data.Package == null))
+            {
+                EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                EditorGUILayout.LabelField("Stamp contains Vegetation Studio with no package!");
+                if (GUILayout.Button("Remove"))
+                {
+                    var prevCount = stamp.Data.VSData.Count;
+                    stamp.Data.VSData.RemoveAll(data => data.Package == null);
+                    Debug.Log(string.Format("Removed {0} invalid instances from stamp {1}", (prevCount - stamp.Data.VSData.Count), stamp.name), stamp);
+                    EditorUtility.SetDirty(stamp);
+                    var prefab = PrefabUtility.GetPrefabParent(stamp);
+                    if (prefab != null)
+                    {
+                        EditorUtility.SetDirty(prefab);
+                    }
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            #endif
             // END FIX ISSUES
 
             var previewContent = new GUIContent(GUIResources.EyeOpenIcon, "Preview");
@@ -633,13 +653,58 @@ namespace MadMaps.WorldStamp
             }
             EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Trees", stamp.Data.Trees.Count.ToString());
+            if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var tree in stamp.Data.Trees)
+                {
+                    if(!data.ContainsKey(tree.Prototype))
+                    {
+                        data[tree.Prototype] = new PositionList();
+                    }
+                    (data[tree.Prototype] as PositionList).Add(tree.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
+            EditorGUILayout.EndHorizontal();
 
             #if VEGETATION_STUDIO
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Vegetation Studio Instances", stamp.Data.VSData.Count.ToString());
+            if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var tree in stamp.Data.VSData)
+                {
+                    if(!data.ContainsKey(tree.VSID))
+                    {
+                        data[tree.VSID] = new PositionList();
+                    }
+                    (data[tree.VSID] as PositionList).Add(tree.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
+            EditorGUILayout.EndHorizontal();
             #endif
 
+            EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", stamp.Data.Objects.Count.ToString());
+            if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var obj in stamp.Data.Objects)
+                {
+                    if(!data.ContainsKey(obj.Prefab))
+                    {
+                        data[obj.Prefab] = new PositionList();
+                    }
+                    (data[obj.Prefab] as PositionList).Add(obj.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
+            EditorGUILayout.EndHorizontal();
             
             GUI.enabled = !isPrefab;
             bool alreadyHasMaskInstance = !hasPrefab || (stamp.Mask != null && stamp.Mask.Count > 0);

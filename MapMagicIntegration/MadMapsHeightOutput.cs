@@ -1,4 +1,7 @@
-﻿#if MAPMAGIC
+﻿// Taken with some small modifications from Map Magic (https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762)
+// All rights reserved by the original creator.
+
+#if MAPMAGIC
 using UnityEngine;
 using System;
 using System.Collections;
@@ -13,6 +16,20 @@ using uNature.Core.FoliageClasses;
 
 namespace MadMaps.Terrains.MapMagicIntegration
 {
+	public static class MapMagicIntegrationUtilities
+	{
+		public static void MapMagicOnOnApplyCompleted(Terrain terrain)
+        {
+            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
+            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
+			#if UNITY_EDITOR
+			UnityEditor.EditorApplication.update -= wrapper.Update;
+			UnityEditor.EditorApplication.update += wrapper.Update;
+			#endif
+            wrapper.Dirty = true;		
+        }
+	}
+
 	[System.Serializable]
 	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Height", disengageable = true, priority = -2, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Height")]
 	public class MadMapsHeightOutput : OutputGenerator
@@ -29,6 +46,8 @@ namespace MadMaps.Terrains.MapMagicIntegration
 		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
 		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
 		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+
+		static HashSet<CoordRect> _pendingWrappers = new HashSet<CoordRect>();
 		
 		public static int scale = 1;
 
@@ -40,6 +59,8 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			if (results.heights == null || results.heights.rect.size.x != rect.size.x) results.heights = new Matrix(rect);
 			results.heights.rect.offset = rect.offset;
 			results.heights.Clear();
+
+			_pendingWrappers.Add(rect);
 
 			//processing main height
 			foreach (MadMapsHeightOutput gen in gens.GeneratorsOfType<MadMapsHeightOutput>(onlyEnabled: true, checkBiomes: true))
@@ -154,6 +175,13 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			}
 			heights2D[heightSize - 1, heightSize - 1] = heights2D[heightSize - 1, heightSize - 2];
 
+			for (int x = 0; x < heightSize - 1; x++)
+			{
+				for (int z = 0; z < heightSize - 1; z++)
+				{
+					heights2D[z, x] = Mathf.Clamp01(heights2D[z, x]);
+				}
+			}
 
 			//pushing to apply
 			if (stop!=null && stop(0)) return;
@@ -272,6 +300,20 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			}
 			yield return null;
 
+			var heightSize = heights2D.GetLength(0);
+			for (int x = 0; x < heightSize - 1; x++)
+			{
+				for (int z = 0; z < heightSize - 1; z++)
+				{
+					heights2D[z, x] = Mathf.Clamp01(heights2D[z, x]);
+				}
+			}
+			
+			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
+            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);            
+            terrainLayer.SetHeights(0, 0, heights2D, MapMagic.MapMagic.instance.resolution+1);
+			_pendingWrappers.Remove(rect);
+
 			//welding
 			if (MapMagic.MapMagic.instance != null && MapMagic.MapMagic.instance.heightWeldMargins!=0)
 			{
@@ -279,49 +321,54 @@ namespace MadMaps.Terrains.MapMagicIntegration
 				Chunk chunk = MapMagic.MapMagic.instance.chunks[coord.x, coord.z];
 				
 				Chunk neigPrevX = MapMagic.MapMagic.instance.chunks[coord.x-1, coord.z];
-				if (neigPrevX!=null && neigPrevX.terrain.terrainData.heightmapResolution==terrainResolution)
+				if (neigPrevX!=null && !_pendingWrappers.Contains(neigPrevX.rect) && neigPrevX.terrain && neigPrevX.terrain.terrainData.heightmapResolution==terrainResolution)
 				{
-					if (neigPrevX.worker.ready) WeldTerrains.WeldToPrevX(ref heights2D, neigPrevX.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					var neighbourWrapper = neigPrevX.terrain.GetComponent<TerrainWrapper>();
+					if (neigPrevX.worker.ready && neighbourWrapper) 
+						WeldTerrains.WeldToPrevZ(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
+						//WeldTerrains.WeldToPrevX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
 					Chunk.SetNeigsX(neigPrevX, chunk);
 				}
 
 				Chunk neigNextX = MapMagic.MapMagic.instance.chunks[coord.x+1, coord.z];
-				if (neigNextX!=null && neigNextX.terrain.terrainData.heightmapResolution==terrainResolution)
+				if (neigNextX!=null && !_pendingWrappers.Contains(neigNextX.rect) && neigNextX.terrain.terrainData.heightmapResolution==terrainResolution)
 				{
-					if (neigNextX.worker.ready) WeldTerrains.WeldToNextX(ref heights2D, neigNextX.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					var neighbourWrapper = neigNextX.terrain.GetComponent<TerrainWrapper>();
+					if (neigNextX.worker.ready && neighbourWrapper) 
+						WeldTerrains.WeldToNextZ(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
+						//WeldTerrains.WeldToNextX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
 					Chunk.SetNeigsX(chunk, neigNextX);
 				}
 
 				Chunk neigPrevZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z-1];
-				if (neigPrevZ!=null  && neigPrevZ.terrain.terrainData.heightmapResolution==terrainResolution)
+				if (neigPrevZ!=null  &&!_pendingWrappers.Contains(neigPrevZ.rect) && neigPrevZ.terrain.terrainData.heightmapResolution==terrainResolution)
 				{
-					if (neigPrevZ.worker.ready) WeldTerrains.WeldToPrevZ(ref heights2D, neigPrevZ.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					var neighbourWrapper = neigPrevZ.terrain.GetComponent<TerrainWrapper>();
+					if (neigPrevZ.worker.ready && neighbourWrapper) 
+						//WeldTerrains.WeldToNextX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);						
+						WeldTerrains.WeldToPrevX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
 					Chunk.SetNeigsZ(neigPrevZ, chunk);
 				}
 
 				Chunk neigNextZ = MapMagic.MapMagic.instance.chunks[coord.x, coord.z+1];
-				if (neigNextZ!=null  && neigNextZ.terrain.terrainData.heightmapResolution==terrainResolution)
+				if (neigNextZ!=null  && !_pendingWrappers.Contains(neigNextZ.rect) && neigNextZ.terrain.terrainData.heightmapResolution==terrainResolution)
 				{
-					if (neigNextZ.worker.ready) WeldTerrains.WeldToNextZ(ref heights2D, neigNextZ.terrain, MapMagic.MapMagic.instance.heightWeldMargins);
+					var neighbourWrapper = neigNextZ.terrain.GetComponent<TerrainWrapper>();
+					if (neigNextZ.worker.ready && neighbourWrapper) 
+						//WeldTerrains.WeldToPrevX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
+						WeldTerrains.WeldToNextX(ref heights2D, neighbourWrapper, MapMagic.MapMagic.instance.heightWeldMargins);
 					Chunk.SetNeigsZ(chunk, neigNextZ);
 				}
 			}
 			yield return null;
 
-			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);            
-            terrainLayer.SetHeights(0, 0, heights2D, MapMagic.MapMagic.instance.resolution+1);
-			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
+			terrainLayer.SetHeights(0, 0, heights2D, MapMagic.MapMagic.instance.resolution+1);
+			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
 			yield return null;
 		}
 
-		private void MapMagicOnOnApplyCompleted(Terrain terrain)
-        {
-            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            wrapper.Dirty = true;		
-        }
+		
 
 		public override void OnGUI(GeneratorsAsset gens)
 		{

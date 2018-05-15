@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using MadMaps.Common;
 using UnityEngine;
+using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -26,7 +27,7 @@ namespace MadMaps.WorldStamp.Authoring
 
         protected override bool HasDataPreview
         {
-            get { return false; }
+            get { return true; }
         }
 
         protected override void CaptureInternal(Terrain terrain, Bounds bounds)
@@ -64,7 +65,20 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void PreviewInDataInspector()
         {
-            throw new System.NotImplementedException();
+            Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+            foreach (var obj in Trees)
+            {
+                if(IgnoredTrees.Contains(obj.Prototype))
+                {
+                    continue;
+                }
+                if(!data.ContainsKey(obj.Prototype))
+                {
+                    data[obj.Prototype] = new PositionList();
+                }
+                (data[obj.Prototype] as PositionList).Add(obj.Position);
+            }
+            DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
         }
 
         public override void Clear()

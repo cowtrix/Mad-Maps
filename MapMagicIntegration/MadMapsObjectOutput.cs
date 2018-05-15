@@ -1,3 +1,6 @@
+// Taken with some small modifications from Map Magic (https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762)
+// All rights reserved by the original creator.
+
 #if MAPMAGIC
 using System;
 using System.Collections;
@@ -336,15 +339,9 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
                     terrainLayer.Objects.Add(prefabObj);
                 }
             }
-            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             yield break;
-        }
-
-        private void MapMagicOnOnApplyCompleted(Terrain terrain)
-        {
-            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            wrapper.Dirty = true;
         }
 
 		public void Purge(global::MapMagic.CoordRect rect, Terrain terrain)

@@ -295,6 +295,7 @@ namespace MadMaps.Terrains
                                 var zF = (dz + offset.z) / (float)originalSize.z;
                                 float strength;
                                 stencil.StencilBilinearSample(new Vector2(xF, zF), out strength);
+                                //strength  = 1;
                                 if (strength > 0)
                                 {
                                     baseData[dx, dz] = Mathf.Lerp(baseValue, blendingVal, strength);

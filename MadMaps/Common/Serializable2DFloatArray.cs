@@ -103,5 +103,13 @@ namespace MadMaps.Common.Collections
             tex.Apply();
             return tex;
         }
+
+        public override string AuxData
+        {
+            get
+            {
+                return string.Format("Min: {0}\tMax:{1}", Data.Min(), Data.Max());
+            }            
+        }
     }
 }

@@ -33,6 +33,21 @@ namespace MadMaps.Roads
         public bool OverrideCurviness = false;
         public float Curviness = 30;
         public LayerMask SnapMask = ~0;
+
+        public NodeConfiguration Clone()
+        {
+            return new NodeConfiguration()
+            {
+                SnappingMode = this.SnappingMode,
+                SnapDistance = this.SnapDistance,
+                SnapOffset = this.SnapOffset,
+                IsExplicitControl = this.IsExplicitControl,
+                ExplicitControl = this.ExplicitControl,
+                OverrideCurviness = this.OverrideCurviness,
+                Curviness = this.Curviness,
+                SnapMask = this.SnapMask,                
+            };
+        }
     }
 
     [SelectionBase]

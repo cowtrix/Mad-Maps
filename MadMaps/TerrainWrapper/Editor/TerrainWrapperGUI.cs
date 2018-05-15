@@ -5,6 +5,7 @@ using Object = UnityEngine.Object;
 using MadMaps.Common.Painter;
 using MadMaps.Common;
 using UnityEditor.SceneManagement;
+using System.Linq;
 
 namespace MadMaps.Terrains
 {
@@ -145,6 +146,9 @@ namespace MadMaps.Terrains
                 Wrapper.WriteTrees = EditorGUILayout.Toggle("Write Trees", Wrapper.WriteTrees);
                 Wrapper.WriteDetails = EditorGUILayout.Toggle("Write Details", Wrapper.WriteDetails);
                 Wrapper.WriteObjects = EditorGUILayout.Toggle("Write Objects", Wrapper.WriteObjects);
+                #if VEGETATION_STUDIO
+                Wrapper.WriteVegetationStudio = EditorGUILayout.Toggle("Write Vegetation Studio", Wrapper.WriteVegetationStudio);
+                #endif
 
                 EditorExtensions.Seperator();
 
@@ -191,11 +195,61 @@ namespace MadMaps.Terrains
                 EditorGUILayout.EndHorizontal();
                 EditorExtensions.Seperator();
 
+                EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Compound Objects: ", Wrapper.CompoundTerrainData.Objects.Count.ToString());
+                if (Wrapper.CompoundTerrainData.DetailData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+                {
+                    Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                    foreach (var obj in Wrapper.CompoundTerrainData.Objects)
+                    {
+                        if(!data.ContainsKey(obj.Value.Data.Prefab))
+                        {
+                            data[obj.Value.Data.Prefab] = new PositionList();
+                        }
+                        (data[obj.Value.Data.Prefab] as PositionList).Add(obj.Value.Data.Position);
+                    }
+                    DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+                }
+                EditorGUILayout.EndHorizontal();
                 EditorExtensions.Seperator();
 
+                EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Compound Trees: ", Wrapper.CompoundTerrainData.Trees.Count.ToString());
+                if (Wrapper.CompoundTerrainData.Trees != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+                {
+                    Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                    foreach (var obj in Wrapper.CompoundTerrainData.Trees)
+                    {
+                        if(!data.ContainsKey(obj.Value.Prototype))
+                        {
+                            data[obj.Value.Prototype] = new PositionList();
+                        }
+                        (data[obj.Value.Prototype] as PositionList).Add(obj.Value.Position);
+                    }
+                    DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+                }
+                EditorGUILayout.EndHorizontal();
                 EditorExtensions.Seperator();
+
+                #if VEGETATION_STUDIO
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Compound Vegetation Studio Data: ", Wrapper.CompoundTerrainData.VegetationStudio.Count.ToString());
+                if (Wrapper.CompoundTerrainData.VegetationStudio != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+                {
+                    Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                    foreach (var obj in Wrapper.CompoundTerrainData.VegetationStudio)
+                    {
+                        if(!data.ContainsKey(obj.Value.VSID))
+                        {
+                            data[obj.Value.VSID] = new PositionList();
+                        }
+                        (data[obj.Value.VSID] as PositionList).Add(obj.Value.Position);
+                    }
+                    DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorExtensions.Seperator();
+                #endif
             }
         }
         

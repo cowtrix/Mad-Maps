@@ -48,7 +48,7 @@ namespace MadMaps.Roads
                 previous.ConnectTo(newNode, connectionConfig);
             }
 
-            newNode.Configuration = nodeConfig ?? new NodeConfiguration();
+            newNode.Configuration = nodeConfig.Clone() ?? new NodeConfiguration();
             Nodes.Add(newNode);
             return newNode;
         }

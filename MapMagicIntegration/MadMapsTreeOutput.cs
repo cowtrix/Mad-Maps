@@ -1,3 +1,6 @@
+// Taken with some small modifications from Map Magic (https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762)
+// All rights reserved by the original creator.
+
 #if MAPMAGIC
 using System;
 using System.Collections;
@@ -267,17 +270,10 @@ namespace MadMaps.Terrains.MapMagicIntegration
                 var newTree = new MadMapsTreeInstance(treeInstance, prototypeList);
                 terrainLayer.Trees.Add(newTree);
             }
-            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
 			yield return null;
 		}
-
-		private void MapMagicOnOnApplyCompleted(Terrain terrain)
-        {
-            global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicOnOnApplyCompleted;
-            var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            wrapper.Dirty = true;
-        }
 
 		public void Purge(CoordRect rect, Terrain terrain)
 		{

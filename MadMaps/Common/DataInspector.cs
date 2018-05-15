@@ -16,6 +16,42 @@ namespace MadMaps.Common
     public interface IDataInspectorProvider
     {
         Texture2D ToTexture2D(bool normalise, Texture2D tex = null);
+        string AuxData { get; }
+    }
+
+    public class PositionList : List<Vector3>, IDataInspectorProvider
+    {
+        public Texture2D ToTexture2D(bool normalise, Texture2D tex = null)
+        {
+            const int size = 1024;
+            /*if(tex == null)
+            {*/
+            tex = new Texture2D(size, size);
+            var c = new Color[size * size];
+            ListExtensions.Fill((Array)c, Color.black);
+            tex.SetPixels(c);
+            /*}
+            else if(tex.width != size || tex.height != size)
+            {
+                tex.Resize(size, size);
+            }
+            tex.();*/
+            
+            foreach(var vec3 in this)
+            {
+                int x = 1 + Mathf.RoundToInt(vec3.x * 1022f);
+                int z = 1 + Mathf.RoundToInt(vec3.z * 1022f);
+
+                tex.SetPixel(x, z, Color.white);                
+                tex.SetPixel(x - 1, z, Color.white);
+                tex.SetPixel(x + 1, z, Color.white);
+                tex.SetPixel(x, z - 1, Color.white);
+                tex.SetPixel(x, z + 1, Color.white);
+            }
+            return tex;
+        }
+
+        public string AuxData {get{return string.Empty;}}
     }
 
 #if UNITY_EDITOR
@@ -27,6 +63,7 @@ namespace MadMaps.Common
             public IDataInspectorProvider Data;
             public object Context;
             public Texture2D Texture;
+            public string Aux;
         }
 
         private static List<DataEntry> _entries = new List<DataEntry>(); 
@@ -60,6 +97,8 @@ namespace MadMaps.Common
                 }
 
                 var texture = canInspectInDataInspector.ToTexture2D(normalise);
+                texture.wrapMode = TextureWrapMode.Clamp;
+                texture.Apply();
                 var context = contexts[i];
 
                 _entries.Add(new DataEntry()
@@ -67,6 +106,7 @@ namespace MadMaps.Common
                     Context = context,
                     Data = canInspectInDataInspector,
                     Texture = texture,
+                    Aux = canInspectInDataInspector.AuxData,
                 });
             }
             GetWindow<DataInspector>();
@@ -126,6 +166,8 @@ namespace MadMaps.Common
 
                 EditorGUILayout.EndVertical();
                 EditorGUILayout.EndScrollView();
+
+                EditorGUILayout.LabelField(entry.Aux);
             }
             else
             {

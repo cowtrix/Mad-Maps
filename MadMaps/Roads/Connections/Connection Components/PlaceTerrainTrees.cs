@@ -36,6 +36,7 @@ namespace MadMaps.Roads
             public float ProbabilityMultiplier = 1;
             public FloatMinMax StepDistance = new FloatMinMax(1, 1);
             public float OffsetMultiplier = 5f;
+            public float YOffset = 0;
 
             public override Type GetMonoType()
             {
@@ -88,7 +89,9 @@ namespace MadMaps.Roads
                 var randIndex = Mathf.FloorToInt((float)rand.NextDouble() * config.Trees.Count);
                 var prefab = config.Trees[randIndex];
                 var wPos = spline.GetUniformPointOnSpline(uniformT) + offset;
-                wPos.y = wrapper.GetCompoundHeight(layer, wPos)*tSize.y;
+                //var h -
+                //wPos.y = wrapper.GetCompoundHeight(layer, wPos)*tSize.y;
+                wPos.y = config.YOffset;
 
                 //Debug.DrawLine(wPos, wPos + Vector3.up *10, Color.red, 10);
                 var tPos = wrapper.Terrain.WorldToTreePos(wPos);

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MadMaps.Common.Collections;
 using MadMaps.WorldStamp;
 using UnityEngine;
+using AwesomeTechnologies;
 
 namespace MadMaps.Terrains
 {
@@ -13,6 +14,11 @@ namespace MadMaps.Terrains
         }
 
         public virtual List<string> GetVegetationStudioRemovals()
+        {
+            return null;
+        }
+
+        public virtual List<VegetationPackage> GetPackages()
         {
             return null;
         }

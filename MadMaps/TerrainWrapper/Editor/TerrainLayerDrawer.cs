@@ -277,6 +277,19 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Trees", layer.Trees != null ? string.Format("{0}", layer.Trees.Count) : "null");
+            if (layer.Trees != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var tree in layer.Trees)
+                {
+                    if(!data.ContainsKey(tree.Prototype))
+                    {
+                        data[tree.Prototype] = new PositionList();
+                    }
+                    (data[tree.Prototype] as PositionList).Add(tree.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.Trees.Clear();
@@ -297,6 +310,19 @@ namespace MadMaps.Terrains
             #if VEGETATION_STUDIO
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Vegetation Studio", layer.VSInstances != null ? string.Format("{0}", layer.VSInstances.Count) : "null");
+            if (layer.VSInstances != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var tree in layer.VSInstances)
+                {
+                    if(!data.ContainsKey(tree.VSID))
+                    {
+                        data[tree.VSID] = new PositionList();
+                    }
+                    (data[tree.VSID] as PositionList).Add(tree.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.VSInstances.Clear();
@@ -317,6 +343,19 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", layer.Objects != null ? string.Format("{0}", layer.Objects.Count) : "null");
+            if (layer.Objects != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                foreach (var obj in layer.Objects)
+                {
+                    if(!data.ContainsKey(obj.Prefab))
+                    {
+                        data[obj.Prefab] = new PositionList();
+                    }
+                    (data[obj.Prefab] as PositionList).Add(obj.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.Objects.Clear();
