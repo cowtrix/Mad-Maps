@@ -1,3 +1,5 @@
+#if VEGETATION_STUDIO
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,7 +78,7 @@ namespace MadMaps.WorldStamp
                     continue;
                 }
 
-                if (StencilTrees)
+                if (StencilVSData)
                 {
                     var stencilPos = new Vector2((wPos.x - tPos.x) / tSize.x, (wPos.z - tPos.z) / tSize.z);
                     var stencilVal = layer.GetStencilStrength(stencilPos, stencilKey);
@@ -99,3 +101,4 @@ namespace MadMaps.WorldStamp
         }
     }
 }
+#endif

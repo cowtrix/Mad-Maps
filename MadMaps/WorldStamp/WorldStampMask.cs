@@ -7,7 +7,7 @@ using UnityEngine;
 namespace MadMaps.WorldStamp
 {
     [Serializable]
-    public class WorldStampMask : CompositionDictionary<int, float>, Common.Painter.IPaintable
+    public class WorldStampMask : MadMaps.Common.Collections.CompositionDictionary<int, float>, Common.Painter.IPaintable
     {
         public bool Dirty { get; set; }
 

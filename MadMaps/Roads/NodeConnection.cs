@@ -41,7 +41,7 @@ namespace MadMaps.Roads
         }
 
         [Serializable]
-        public class IntGameObjectMapping : CompositionDictionary<int, GameObject> { }
+        public class IntGameObjectMapping : MadMaps.Common.Collections.CompositionDictionary<int, GameObject> { }
 
         [SerializeField]
         [HideInInspector]

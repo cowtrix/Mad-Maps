@@ -27,7 +27,7 @@ namespace MadMaps.Terrains.Lookups
     }
     
     [Serializable]
-    public class CompressedSplatDataLookup : CompositionDictionary<SplatPrototypeWrapper, Serializable2DByteArray>
+    public class CompressedSplatDataLookup : MadMaps.Common.Collections.CompositionDictionary<SplatPrototypeWrapper, Serializable2DByteArray>
     {
         public CompressedSplatDataLookup() : base() { }
 
@@ -46,7 +46,7 @@ namespace MadMaps.Terrains.Lookups
     }*/
 
     [Serializable]
-    public class CompressedDetailDataLookup : CompositionDictionary<DetailPrototypeWrapper, Serializable2DByteArray>
+    public class CompressedDetailDataLookup : MadMaps.Common.Collections.CompositionDictionary<DetailPrototypeWrapper, Serializable2DByteArray>
     {
         public CompressedDetailDataLookup() : base() { }
 
@@ -60,12 +60,12 @@ namespace MadMaps.Terrains.Lookups
     }
 
     [Serializable]
-    public class TreeLookup : CompositionDictionary<string, MadMapsTreeInstance>
+    public class TreeLookup : MadMaps.Common.Collections.CompositionDictionary<string, MadMapsTreeInstance>
     {
         private const int Partitioning = 256;
 
         [Serializable]
-        public class SpatialMapping : CompositionDictionary<Coord, List<string>>{}
+        public class SpatialMapping : MadMaps.Common.Collections.CompositionDictionary<Coord, List<string>>{}
 
         [SerializeField]
         private SpatialMapping _mapping = new SpatialMapping();
@@ -149,7 +149,7 @@ namespace MadMaps.Terrains.Lookups
     }
     
     [Serializable]
-    public class ObjectPrefabDataLookup : CompositionDictionary<string, InstantiatedObjectData>
+    public class ObjectPrefabDataLookup : MadMaps.Common.Collections.CompositionDictionary<string, InstantiatedObjectData>
     {
     }
 }

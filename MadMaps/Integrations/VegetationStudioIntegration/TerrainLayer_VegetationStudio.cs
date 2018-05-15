@@ -45,12 +45,12 @@ namespace MadMaps.Terrains
     }
 
     [Serializable]
-    public class VegetationStudioLookup : CompositionDictionary<string, VegetationStudioInstance>
+    public class VegetationStudioLookup : MadMaps.Common.Collections.CompositionDictionary<string, VegetationStudioInstance>
     {
         private const int Partitioning = 256;
 
         [Serializable]
-        public class SpatialMapping : CompositionDictionary<Coord, List<string>>{}
+        public class SpatialMapping : MadMaps.Common.Collections.CompositionDictionary<Coord, List<string>>{}
 
         [SerializeField]
         private SpatialMapping _mapping = new SpatialMapping();

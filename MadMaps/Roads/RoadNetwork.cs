@@ -19,7 +19,7 @@ namespace MadMaps.Roads
         public static HashSet<Node> ThinkCache = new HashSet<Node>();
 
         [Serializable]
-        public class RoadLayerMapping : CompositionDictionary<TerrainWrapper, TerrainLayer> { }
+        public class RoadLayerMapping : MadMaps.Common.Collections.CompositionDictionary<TerrainWrapper, TerrainLayer> { }
         
         public float NodePreviewSize = 5;
         public float SplineResolution = 1; 

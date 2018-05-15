@@ -1,3 +1,4 @@
+#if VEGETATION_STUDIO
 using System;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
@@ -105,3 +106,4 @@ namespace MadMaps.Roads.Connections
         }
     }
 }
+#endif
