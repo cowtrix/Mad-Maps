@@ -105,12 +105,12 @@ namespace MadMaps.Terrains.MapMagicIntegration
 		}
 
 		//get static actions using instance
-		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
-		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
-		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		public override Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<MapMagic.CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<MapMagic.CoordRect, Terrain> GetPurge () { return Purge; }
 
 
-		public override void Generate (CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float,bool> stop = null)
+		public override void Generate (MapMagic.CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float,bool> stop = null)
 		{
 			if ((stop!=null && stop(0)) || !enabled) return;
 
@@ -147,7 +147,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			}
 		}
 
-		public static void Process (CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		public static void Process (MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			if (stop!=null && stop(0)) return;
 
@@ -206,7 +206,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 
 			int numLayers = matrices.Count;
 			int maxX = splats3D.GetLength(0); int maxZ = splats3D.GetLength(1); //MapMagic.instance.resolution should not be used because of possible lods
-																				//CoordRect rect =  matrices[0].rect;
+																				//MapMagic.CoordRect rect =  matrices[0].rect;
 
 			float[] values = new float[numLayers]; //row, to avoid reading/writing 3d array (it is too slow)
 
@@ -236,7 +236,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			results.apply.CheckAdd(typeof(MadMapsSplatOutput), splatsTuple, replace: true);
 		}
 
-		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		public IEnumerator Apply(MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
 		{
 			TupleSet<float[,,], SplatPrototypeWrapper[]> splatsTuple = (TupleSet<float[,,], SplatPrototypeWrapper[]>)dataBox;
 			float[,,] splats3D = splatsTuple.item1;
@@ -309,7 +309,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			yield return null;
 		}
 
-		public static void Purge(CoordRect rect, Terrain terrain)
+		public static void Purge(MapMagic.CoordRect rect, Terrain terrain)
 		{
 			//skipping if already purged
 			if (terrain.terrainData.alphamapResolution<=16) return; //using 8 will return resolution to 16

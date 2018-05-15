@@ -155,12 +155,12 @@ namespace MadMaps.Terrains.MapMagicIntegration
 		}
 
 		//get static actions using instance
-		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
-		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
-		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		public override Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<MapMagic.CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<MapMagic.CoordRect, Terrain> GetPurge () { return Purge; }
 
 
-		public override void Generate(CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float,bool> stop= null)
+		public override void Generate(MapMagic.CoordRect rect, Chunk.Results results, Chunk.Size terrainSize, int seed, Func<float,bool> stop= null)
 		{
 			//loading inputs
 			Matrix[] matrices = new Matrix[baseLayers.Length];
@@ -191,7 +191,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			}
 		}
 
-		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		public static void Process(MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			if (stop!=null && stop(0)) return;
 
@@ -269,7 +269,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
         }
 
 
-        public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+        public IEnumerator Apply(MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
 		{
 			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
@@ -289,7 +289,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			yield return null;
 		}
 
-		public void Purge(CoordRect rect, Terrain terrain)
+		public void Purge(MapMagic.CoordRect rect, Terrain terrain)
 		{
 			//skipping if already purged
 			if (terrain.terrainData.detailPrototypes.Length==0) return;

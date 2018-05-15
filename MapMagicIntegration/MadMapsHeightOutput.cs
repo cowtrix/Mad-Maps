@@ -43,15 +43,15 @@ namespace MadMaps.Terrains.MapMagicIntegration
 		public float layer { get; set; }
 
 		//get static actions using instance
-		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
-		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
-		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		public override Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<MapMagic.CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<MapMagic.CoordRect, Terrain> GetPurge () { return Purge; }
 
-		static HashSet<CoordRect> _pendingWrappers = new HashSet<CoordRect>();
+		static HashSet<MapMagic.CoordRect> _pendingWrappers = new HashSet<MapMagic.CoordRect>();
 		
 		public static int scale = 1;
 
-		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		public static void Process(MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			if (stop!=null && stop(0)) return;
 
@@ -206,7 +206,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
             #endif
         }
 
-		public void Purge(CoordRect rect, Terrain terrain)
+		public void Purge(MapMagic.CoordRect rect, Terrain terrain)
 		{
 			var wrapper = terrain.GetComponent<TerrainWrapper>();
             if (wrapper == null)
@@ -225,7 +225,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 
 		}
 
-		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		public IEnumerator Apply(MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
 		{
 
 

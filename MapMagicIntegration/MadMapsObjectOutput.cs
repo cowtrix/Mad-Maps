@@ -112,13 +112,13 @@ namespace MadMaps.Terrains.MapMagicIntegration
 		}
 
 		//get static actions using instance
-		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
-		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
-		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		public override Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override Func<MapMagic.CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
+		public override Action<MapMagic.CoordRect, Terrain> GetPurge () { return Purge; }
 
 
 
-		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		public static void Process(MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			if (stop!=null && stop(0)) return;
 
@@ -146,7 +146,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			int allGensMasksCount = allGensMasks.Count;
 
 			//biome rect to find array pos faster
-			CoordRect biomeRect = new CoordRect();
+			MapMagic.CoordRect biomeRect = new MapMagic.CoordRect();
 			for (int g=0; g<allGensMasksCount; g++)
 				if (allGensMasks[g].item2 != null) { biomeRect = allGensMasks[g].item2.rect; break; }
 
@@ -304,7 +304,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 			return new Vector3((prevXHeight-nextXHeight)*heightFactor, pixelSize*2, (prevZHeight-nextZHeight)*heightFactor).normalized;
 		}
 
-		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		public IEnumerator Apply(MapMagic.CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
 		{
 			Dictionary<Transform, List<ObjectPool.Transition>> transitions = (Dictionary<Transform, List<ObjectPool.Transition>>)dataBox;
 var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
