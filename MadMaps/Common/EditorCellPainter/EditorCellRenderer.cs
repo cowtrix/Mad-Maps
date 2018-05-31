@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace MadMaps.Common.Painter
 {
@@ -20,6 +21,20 @@ namespace MadMaps.Common.Painter
         private List<Vector3> _verts = new List<Vector3>();
         private List<int> _tris = new List<int>();
         private List<Color> _colors = new List<Color>();
+        private List<Vector2> _uvs = new List<Vector2>();
+
+        private bool UseCPU()
+        {
+            if(EditorCellHelper.ForceCPU)
+            {
+                return true;
+            }
+            if(SystemInfo.graphicsShaderLevel < 45)
+            {
+                return true;
+            }
+            return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
+        }
 
         public void Initialise()
         {
@@ -44,11 +59,37 @@ namespace MadMaps.Common.Painter
 
         public void QueueCell(EditorCellHelper.Cell cell)
         {
-            _verts.Add(cell.Center);
-            _tris.Add(_verts.Count - 1);
-            _tris.Add(_verts.Count - 1);
-            _tris.Add(_verts.Count - 1);
-            _colors.Add(cell.Color);
+            if(UseCPU())
+            {
+                var cellSize = EditorCellHelper.CellSize;
+                int index = _verts.Count;
+                _verts.Add(cell.Center + new Vector3(cellSize/2, 0, cellSize/2));
+                _verts.Add(cell.Center + new Vector3(-cellSize/2, 0, cellSize/2));
+                _verts.Add(cell.Center + new Vector3(cellSize/2, 0, -cellSize/2));
+                _verts.Add(cell.Center + new Vector3(-cellSize/2, 0, -cellSize/2));
+                _uvs.Add(new Vector2(1, 1));
+                _uvs.Add(new Vector2(0, 1));
+                _uvs.Add(new Vector2(1, 0));
+                _uvs.Add(new Vector2(0, 0));
+                _colors.Add(cell.Color);
+                _colors.Add(cell.Color);
+                _colors.Add(cell.Color);
+                _colors.Add(cell.Color);
+                _tris.Add(index + 0);
+                _tris.Add(index + 1);
+                _tris.Add(index + 2);
+                _tris.Add(index + 1);
+                _tris.Add(index + 2);
+                _tris.Add(index + 3);
+            }
+            else
+            {
+                _verts.Add(cell.Center);
+                _tris.Add(_verts.Count - 1);
+                _tris.Add(_verts.Count - 1);
+                _tris.Add(_verts.Count - 1);
+                _colors.Add(cell.Color);
+            }            
         }
 
         public void Clear()
@@ -60,6 +101,7 @@ namespace MadMaps.Common.Painter
             _verts.Clear();
             _tris.Clear();
             _colors.Clear();
+            _uvs.Clear();
         }
 
         public void Finalise()
@@ -69,6 +111,10 @@ namespace MadMaps.Common.Painter
             Mesh.SetVertices(_verts);
             Mesh.SetTriangles(_tris, 0);
             Mesh.SetColors(_colors);
+            if(UseCPU())
+            {
+                Mesh.SetUVs(0, _uvs);
+            }            
         }
 
         public void SetData(Matrix4x4 trs, Material material)

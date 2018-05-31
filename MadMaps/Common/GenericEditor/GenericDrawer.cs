@@ -31,6 +31,14 @@ namespace MadMaps.Common.GenericEditor
         protected override float DrawGUIInternal(float target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
             object context = null)
         {
+            if(fieldInfo != null)
+            {
+                var rangeAttr = fieldInfo.GetAttribute<RangeAttribute>();
+                if(rangeAttr != null)
+                {
+                    return EditorGUILayout.Slider(label, target, rangeAttr.min, rangeAttr.max);
+                }
+            }
             return EditorGUILayout.FloatField(label, target);
         }
     }
@@ -40,6 +48,10 @@ namespace MadMaps.Common.GenericEditor
         protected override AnimationCurve DrawGUIInternal(AnimationCurve target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
             object context = null)
         {
+            if(target == null)
+            {
+                target = AnimationCurve.Linear(0, 0, 1, 1);
+            }
             return EditorGUILayout.CurveField(label, target);
         }
     }
@@ -58,7 +70,58 @@ namespace MadMaps.Common.GenericEditor
         protected override int DrawGUIInternal(int target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
             object context = null)
         {
+            if(fieldInfo != null)
+            {
+                var rangeAttr = fieldInfo.GetAttribute<RangeAttribute>();
+                if(rangeAttr != null)
+                {
+                    return EditorGUILayout.IntSlider(label, target, Mathf.RoundToInt(rangeAttr.min), Mathf.RoundToInt(rangeAttr.max));
+                }
+            }
             return EditorGUILayout.IntField(label, target);
+        }
+    }
+
+    public class ByteDrawer : GenericDrawer<byte>
+    {
+        protected override byte DrawGUIInternal(byte target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
+            object context = null)
+        {
+            if(fieldInfo != null)
+            {
+                var rangeAttr = fieldInfo.GetAttribute<RangeAttribute>();
+                if(rangeAttr != null)
+                {
+                    return (byte)EditorGUILayout.IntSlider(label, target, Mathf.RoundToInt(rangeAttr.min), Mathf.RoundToInt(rangeAttr.max));
+                }
+            }
+            return (byte)EditorGUILayout.IntField(label, target);
+        }
+    }
+
+    public class DoubleDrawer : GenericDrawer<double>
+    {
+        protected override double DrawGUIInternal(double target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
+            object context = null)
+        {
+            if(fieldInfo != null)
+            {
+                var rangeAttr = fieldInfo.GetAttribute<RangeAttribute>();
+                if(rangeAttr != null)
+                {
+                    return (double)EditorGUILayout.Slider(label, (float)target, rangeAttr.min, rangeAttr.max);
+                }
+            }
+            return EditorGUILayout.DoubleField(label, target);
+        }
+    }
+
+    public class LongDrawer : GenericDrawer<long>
+    {
+        protected override long DrawGUIInternal(long target, string label = "", Type targetType = null, FieldInfo fieldInfo = null,
+            object context = null)
+        {
+            return (long)EditorGUILayout.LongField(label, target);
         }
     }
 
@@ -192,7 +255,7 @@ namespace MadMaps.Common.GenericEditor
             FieldInfo fieldInfo = null,
             object context = null)
         {
-            var expandedKey = fieldInfo != null ? context + fieldInfo.Name : context + "list";
+            var expandedKey = fieldInfo != null ? fieldInfo.Name : context + "list";
             var listType = targetType.IsArray ? targetType.GetElementType() : targetType.GetGenericArguments()[0];
             ListGenericUIAttribute listAttribute = fieldInfo != null ? fieldInfo.GetAttribute<ListGenericUIAttribute>() : null;
             if (!GenericEditor.ExpandedFieldCache.ContainsKey(expandedKey))
@@ -243,7 +306,6 @@ namespace MadMaps.Common.GenericEditor
                         {
                             objectLabel = o.ToString();
                         }
-
                         EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(true));
                         GenericEditor.ExpandedFieldCache[expandedKey + i] = 
                             EditorGUILayout.Foldout(GenericEditor.ExpandedFieldCache[expandedKey + i], objectLabel);
@@ -279,7 +341,7 @@ namespace MadMaps.Common.GenericEditor
                         {
                             if (o != null)
                             {
-                                o = GenericEditor.DrawGUI(o, o.ToString(), o.GetType(), fieldInfo, target);
+                                o = GenericEditor.DrawGUI(o, "", o.GetType(), fieldInfo, target);
                             }
                             else
                             {
@@ -292,7 +354,7 @@ namespace MadMaps.Common.GenericEditor
                     EditorExtensions.Seperator();
                 }
                 
-                if (listType.IsAbstract || listType.IsInterface || (fieldInfo != null && listAttribute != null && listAttribute.AllowDerived))
+                if (!typeof(UnityEngine.Object).IsAssignableFrom(listType) && (listType.IsAbstract || listType.IsInterface || (fieldInfo != null && listAttribute != null && listAttribute.AllowDerived)))
                 {
                     EditorGUILayoutX.DerivedTypeSelectButton(listType, (o) => target.Add(o));
                 }

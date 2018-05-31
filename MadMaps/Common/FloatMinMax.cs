@@ -17,7 +17,9 @@ namespace MadMaps.Common
 
         public float GetRand(Random rand)
         {
-            return Mathf.Lerp(Min, Max, (float)rand.NextDouble());
+            var randomVal = (float)rand.NextDouble();
+            var val = Mathf.Lerp(Min, Max, randomVal);
+            return val;
         }
     }
 }

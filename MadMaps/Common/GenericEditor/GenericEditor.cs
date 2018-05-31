@@ -1,5 +1,7 @@
-﻿using Object = UnityEngine.Object;
+﻿
+using Object = UnityEngine.Object;
 using System.Collections.Generic;
+using System.Collections;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -7,6 +9,7 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endif
 
 namespace MadMaps.Common.GenericEditor
@@ -59,6 +62,11 @@ namespace MadMaps.Common.GenericEditor
                 content.text = null;
                 return content;
             }
+        }
+
+        public static bool HasDrawer(Type t)
+        {
+            return GetDrawer(t) != null;
         }
         
         private static IGenericDrawer GetDrawer(Type type)
@@ -180,27 +188,68 @@ namespace MadMaps.Common.GenericEditor
             }
             else
             {
-                if (fieldInfo != null)
+                if(target != null)
                 {
-                    EditorGUI.indentLevel++;
+                    var isInList = context != null && typeof(IList).IsAssignableFrom(context.GetType());
+                    var isUnityObject = typeof(UnityEngine.Object).IsAssignableFrom(targetType);
+                    if(!isInList && !isUnityObject && !targetType.IsAssignableFrom(typeof(IList)) && !targetType.IsArray)
+                    {
+                        EditorGUILayout.BeginHorizontal();
+                        if(string.IsNullOrEmpty(label) && fieldInfo != null)
+                        {
+                            label = fieldInfo.Name;
+                        }
+                        EditorGUILayout.LabelField(string.Format("{0} [{1}]", label, targetType));
+                        if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)))
+                        {
+                            return null;
+                        }
+                        EditorGUILayout.EndHorizontal();
+                    }
+                    
+                    if (fieldInfo != null)
+                    {
+                        //Debug.Log(string.Format("FieldInfo for {0} wasn't null, so increased IndentLevel from {1} to {2}", fieldInfo.Name, EditorGUI.indentLevel, EditorGUI.indentLevel +1));
+                        EditorGUI.indentLevel++;
+                    }
+                    var fields = GetFields(targetType);
+                    foreach (var field in fields)
+                    {
+                        var subObj = field.GetValue(target);
+                        subObj = DrawGUI(subObj, GetFriendlyName(field), subObj != null ? subObj.GetType() : field.FieldType, field, target);
+                        field.SetValue(target, subObj);
+                    }
+                    if (fieldInfo != null)
+                    {
+                        //Debug.Log(string.Format("FieldInfo for {0} wasn't null, so decreased IndentLevel from {1} to {2}", fieldInfo.Name, EditorGUI.indentLevel, EditorGUI.indentLevel -1));
+                        EditorGUI.indentLevel--;
+                    }
                 }
-                var fields = GetFields(targetType);
-                foreach (var field in fields)
+                else
                 {
-                    var subObj = field.GetValue(target);
-                    subObj = DrawGUI(subObj, GetFriendlyName(field), subObj != null ? subObj.GetType() : field.FieldType, field, target);
-                    field.SetValue(target, subObj);
-                }
-                if (fieldInfo != null)
-                {
-                    EditorGUI.indentLevel--;
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(label);
+                    if (targetType.IsAbstract || targetType.IsInterface)
+                    {
+                        EditorGUILayoutX.DerivedTypeSelectButton(targetType, (o) => 
+                            {
+                            fieldInfo.SetValue(context, o);
+                            }
+                        );
+                    }
+                    else if(EditorGUILayoutX.IndentedButton("Add " + targetType.Name))
+                    {
+                        target = Activator.CreateInstance(targetType);
+                    }
+                    EditorGUILayout.EndHorizontal();
                 }
             }
 
             var unityObj = target as Object;
-            if (unityObj)
+            if (!Application.isPlaying && unityObj)
             {
                 EditorUtility.SetDirty(unityObj);
+                EditorSceneManager.MarkAllScenesDirty();
             }
 #endif
             return target;

@@ -10,7 +10,17 @@ namespace MadMaps.Common.Painter
         private const string ShaderName = "Hidden/EditorCellShader";
 
         private const int MAX_VERTS = 65534;
-
+        private const string ForceCPUKey = "MadMaps_PainteForceGPU";
+        public static bool ForceCPU {
+            get
+            {
+                return EditorPrefs.GetBool(ForceCPUKey, false);
+            }
+            set
+            {
+                EditorPrefs.SetBool(ForceCPUKey, value);
+            }
+        }
         public static float CellSize
         {
             get { return __cellSize; }
@@ -22,6 +32,12 @@ namespace MadMaps.Common.Painter
                     Invalidate();
                 }
             }
+        }
+        
+        [MenuItem("Tools/Mad Maps/Utilities/Force CPU Painting")]
+        public static void ToggleForceCPU()
+        {
+            ForceCPU = !ForceCPU;
         }
 
         private static float __cellSize = 1;

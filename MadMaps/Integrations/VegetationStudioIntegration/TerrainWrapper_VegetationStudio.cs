@@ -78,7 +78,7 @@ namespace MadMaps.Terrains
                 var worldPos = Terrain.TreeToWorldPos(instance.Position);
                 var height = GetCompoundHeight(null, worldPos);
                 worldPos.y = instance.Position.y + height * tSize.y;
-                //DebugHelper.DrawPoint(worldPos, .5f, Color.red, 10);
+                //DebugHelper.DrawPoint(worldPos, .2f, Color.red, 10);
                 data.Storage.AddVegetationItemInstance(instance.VSID, worldPos, instance.Scale, 
                     Quaternion.Euler(instance.Rotation), true, VegetationStudio_ID);
             }

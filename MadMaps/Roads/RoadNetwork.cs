@@ -245,7 +245,7 @@ namespace MadMaps.Roads
                         i/(float) onPrebakeCallbacks.Count);
                     rebakeCallback.OnPrebake();
                 }
-                Debug.LogFormat("Processed {0} PreBake components", onPrebakeCallbacks.Count);
+                //Debug.LogFormat("Processed {0} PreBake components", onPrebakeCallbacks.Count);
             }
 
             {
@@ -260,7 +260,7 @@ namespace MadMaps.Roads
                         i / (float)onBakeCallbacks.Count);
                     rebakeCallback.OnBake();
                 }
-                Debug.LogFormat("Processed {0} Bake components", onBakeCallbacks.Count);
+                //Debug.LogFormat("Processed {0} Bake components", onBakeCallbacks.Count);
             }
 
             {
@@ -275,14 +275,14 @@ namespace MadMaps.Roads
                         i / (float)onPostBakeCallbacks.Count);
                     rebakeCallback.OnPostBake();
                 }
-                Debug.LogFormat("Processed {0} Postbake components", onPostBakeCallbacks.Count);
+                //Debug.LogFormat("Processed {0} Postbake components", onPostBakeCallbacks.Count);
             }
 
             MiscUtilities.ClearProgressBar();
             FinalizeBake();
 
             ComputeShaderPool.ClearPool();
-            Debug.Log(string.Format("Hit Compute Shaders {0} times", BlendTerrainLayerUtility.UseCount));
+            //Debug.Log(string.Format("Hit Compute Shaders {0} times", BlendTerrainLayerUtility.UseCount));
         }
 
         void FinalizeBake()

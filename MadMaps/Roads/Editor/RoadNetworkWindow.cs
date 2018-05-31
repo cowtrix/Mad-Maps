@@ -143,7 +143,6 @@ namespace MadMaps.Roads
             if (FocusedRoadNetwork == null)
             {
                 EditorGUILayout.HelpBox("Select a Road Network object.", MessageType.Info);
-                GUIUtility.ExitGUI();
                 return;
             }
 

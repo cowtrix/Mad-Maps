@@ -163,7 +163,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 				{
 					if (stop!=null && stop(0)) return; //checking stop before reading output
 					Layer layer = gen.baseLayers[b];
-					if (layer.prefab == null) continue;
+					if (!layer.prefab) continue;
 
 					//loading objects from input
 					SpatialHash hash = (SpatialHash)gen.baseLayers[b].input.GetObject(results);

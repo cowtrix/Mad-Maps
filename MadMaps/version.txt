@@ -6,6 +6,7 @@ Current Version: 0.1.1
 - Data Inspector: Added the ability to preview object/position data such as trees, objects and more.
 - TerrainWrapper: Fixed making an object container when it doesn't need to.
 - Road Network: Fixed bug where nodes could share their configuration, causing unexpected behaviour.
+- Generic Editor: Fixes for drawing some null objects. Added more basic drawers.
 
 == History ==
 v 0.1.0 Initial Release 

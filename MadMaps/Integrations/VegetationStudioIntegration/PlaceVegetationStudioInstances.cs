@@ -123,7 +123,7 @@ namespace MadMaps.Roads
 
         private void ProcessWrapper(TerrainWrapper wrapper, SplineSegment spline, Config config, Random rand)
         {
-            if(config.Prototypes.SelectedIDs.Count == 0)
+            if(config.Prototypes.SelectedIDs.Count == 0 || config.Prototypes.Package == null)
             {
                 return;
             }
@@ -156,19 +156,21 @@ namespace MadMaps.Roads
                 var randIndex = Mathf.FloorToInt((float)rand.NextDouble() * config.Prototypes.SelectedIDs.Count);
                 var id = config.Prototypes.SelectedIDs[randIndex];
                 var wPos = spline.GetUniformPointOnSpline(uniformT) + offset;
-                wPos.y = config.YOffset;
-
+                
                 //Debug.DrawLine(wPos, wPos + Vector3.up *10, Color.red, 10);
                 var tPos = wrapper.Terrain.WorldToTreePos(wPos);
-
-                layer.VSInstances.Add(new VegetationStudioInstance()
+                tPos.y = config.YOffset;
+                var size = Vector3.one * config.Size.GetRand(rand);
+                var newInstance = new VegetationStudioInstance()
                 {
                     Guid = System.Guid.NewGuid().ToString(),
                     VSID = id,
                     Position = tPos,
-                    Scale = Vector2.one * config.Size.GetRand(rand),
+                    Scale = size,
                     Rotation = config.Rotation.GetRand(rand),
-                });
+                    Package = config.Prototypes.Package,
+                };
+                layer.VSInstances.Add(newInstance);
                 LastPlantCount++;
             }
         }

@@ -201,13 +201,15 @@ namespace MadMaps.Terrains
 #if VEGETATION_STUDIO
             FinaliseVegetationStudio();
 #endif
-
-#if UNITY_EDITOR
             Terrain.Flush();
-            UnityEditor.EditorUtility.SetDirty(this);
-            UnityEditor.EditorUtility.SetDirty(CompoundTerrainData);
-            UnityEditor.EditorUtility.ClearProgressBar();
-            UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+#if UNITY_EDITOR            
+            if(!Application.isPlaying)
+            {
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.EditorUtility.SetDirty(CompoundTerrainData);
+                UnityEditor.EditorUtility.ClearProgressBar();
+                UnityEditor.SceneManagement.EditorSceneManager.MarkAllScenesDirty();
+            }            
 #endif
         }
 

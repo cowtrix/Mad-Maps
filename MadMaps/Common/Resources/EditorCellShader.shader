@@ -15,6 +15,7 @@ SubShader {
 	Pass {  
 		CGPROGRAM
 				#pragma target 5.0
+				#pragma exclude_renderers glcore
 				#pragma vertex VS_Main
 				#pragma fragment FS_Main
 				#pragma geometry GS_Main
@@ -98,7 +99,7 @@ SubShader {
 				// Fragment Shader -----------------------------------------------
 				float4 FS_Main(FS_INPUT input) : COLOR
 				{
-					half threshold = 0.01;
+					half threshold = 0.1;
 					half2 wrapTex = abs((input.tex0 / 2) - 0.5);
 					if(wrapTex.x < threshold || wrapTex.y < threshold)
 						return saturate(1 - input.color);
@@ -106,7 +107,9 @@ SubShader {
 				}
 
 			ENDCG
+			
 	}
+	
 }
-
+Fallback "Hidden/EditorCellShaderSimple"
 }

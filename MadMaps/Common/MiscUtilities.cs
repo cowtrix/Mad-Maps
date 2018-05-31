@@ -63,6 +63,10 @@ namespace MadMaps.Common
         
         public static void ProgressBar(string header, string text, float val)
         {
+            if(Application.isPlaying)
+            {
+                return;
+            }
 #if UNITY_EDITOR
             EditorUtility.DisplayProgressBar(header, text, val);
 #endif
