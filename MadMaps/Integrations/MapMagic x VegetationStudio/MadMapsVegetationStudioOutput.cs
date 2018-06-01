@@ -1,7 +1,7 @@
 ﻿// Taken with some small modifications from Map Magic (https://assetstore.unity.com/packages/tools/terrain/mapmagic-world-generator-56762)
 // All rights reserved by the original creator.
 
-#if MAPMAGIC && VEGETATION_STUDIO && false
+#if MAPMAGIC && VEGETATION_STUDIO
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,16 +22,15 @@ using AwesomeTechnologies.Billboards;
 namespace MadMaps.Integration
 {
 	[System.Serializable]
-	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
+	[GeneratorMenu(menu = "Mad Maps", name = "Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
 	public class MadMapsVSOutput : OutputGenerator
 	{
 		#if VEGETATION_STUDIO
 		public VegetationPackage package;
 		[NonSerialized] private static VegetationPackage packageShared; //to make sure all vs outputs use the same package
 		private static float cellSize;
-		//[NonSerialized] private static Dictionary<CoordRect,BillboardSystem> billboardComponents = new Dictionary<CoordRect, BillboardSystem>();
 
-		public static readonly byte VS_MM_id = 15; // Number in Lennart's integration list priority :) 15 for MapMagic, 18 for Voxeland. 10 for Gaia.
+		public static byte VS_MM_id { get {return TerrainWrapper.VegetationStudio_ID}};
 
 		public static ObjectOutput.BiomeBlendType biomeBlendType = ObjectOutput.BiomeBlendType.AdditiveRandom;
 		#endif
@@ -47,7 +46,7 @@ namespace MadMaps.Integration
 
 			public float density = 1;
 
-			public bool relativeHeight = true;
+			//public bool relativeHeight = true;
 			public bool rotate = true;
 			public bool takeTerrainNormal = false;
 			public bool scale = true; //for obj
@@ -80,25 +79,15 @@ namespace MadMaps.Integration
 		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
 		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
 
-		//Prepare
-		public void CheckAddComponent(Chunk chunk)
-		{
-		}
-
 		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			#if VEGETATION_STUDIO
 			if (stop!=null && stop(0)) return;
-
-			List<VegetationStudioInstance> instances = new List<VegetationStudioInstance>();
-			
-			int cellXCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
-			int cellZCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
-
 			Noise noise = new Noise(12345, permutationCount:128); //to pick objects based on biome
 
 			if (stop!=null && stop(0)) return;
 
+			List<VegetationStudioInstance> instances = new List<VegetationStudioInstance>();
 			//object outputs
 			foreach (MadMapsVSOutput gen in gens.GeneratorsOfType<MadMapsVSOutput>(onlyEnabled:true, checkBiomes:true))
 			{
@@ -154,21 +143,17 @@ namespace MadMaps.Integration
 							
 							//flooring
 							float terrainHeight = 0;
-							if (layer.relativeHeight && results.heights != null) //if checbox enabled and heights exist (at least one height generator is in the graph)
+							/*if (layer.relativeHeight && results.heights != null) //if checbox enabled and heights exist (at least one height generator is in the graph)
 								terrainHeight = results.heights.GetInterpolated(obj.pos.x, obj.pos.y);
-							if (terrainHeight > 1) terrainHeight = 1;
+							if (terrainHeight > 1) terrainHeight = 1;*/
 
 
 							//terrain-space object position
 							Vector3 position = new Vector3(
-								(obj.pos.x - hash.offset.x) / hash.size * terrainSize.dimensions,
+								(obj.pos.x - hash.offset.x) / hash.size,
 								(obj.height + terrainHeight) * terrainSize.height, 
-								(obj.pos.y - hash.offset.y) / hash.size * terrainSize.dimensions);
+								(obj.pos.y - hash.offset.y) / hash.size);
 
-							//cell number
-							int cx = (int)(position.x / cellSize);
-							int cz = (int)(position.z / cellSize);
-							PersistentVegetationCell cell = storage.PersistentVegetationStoragePackage.PersistentVegetationCellList[cz + cx*cellXCount];
 
 							//rotation + taking terrain normal
 							Quaternion rotation;
@@ -192,9 +177,15 @@ namespace MadMaps.Integration
 								if (biomeVal < 0.001f) continue;  //skip zero-scaled objects
 								scale *= biomeVal;
 							}
-						
-							//storage.AddVegetationItemInstance(id, position, scale, rotation, layer.applyMeshRotation, VS_MM_id, true);
-							cell.AddVegetationItemInstance(id, position, scale, rotation, VS_MM_id);
+
+							instances.Add(new VegetationStudioInstance()
+							{
+								Guid = System.Guid.NewGuid().ToString(),
+								Package = packageShared,
+								Position = position,
+								Scale = scale,
+								Rotation = rotation.eulerAngles,
+							});
 						}
 
 						if (stop!=null && stop(0)) return;
@@ -229,7 +220,7 @@ namespace MadMaps.Integration
 							for (int cz = 0; cz <= cellZCount - 1; cz++)
 						{
 							//Vector3 cellCorner = new Vector3(terrainPosX + (cellSize * cx), 0, terrainPosZ + (cellSize * cz));           
-							PersistentVegetationCell cell = storage.PersistentVegetationStoragePackage.PersistentVegetationCellList[cz + cx*cellXCount];
+							//PersistentVegetationCell cell = storage.PersistentVegetationStoragePackage.PersistentVegetationCellList[cz + cx*cellXCount];
 
 							for (float x = 0; x < cellSize; x+=sampleDist)
 								for (float z = 0; z < cellSize; z+=sampleDist)
@@ -256,7 +247,7 @@ namespace MadMaps.Integration
 									float rnd = (noise.Random((int)(wx*10), (int)(wz*10)));
 									if (rnd < val*biomeFactor)
 									{
-										float terrainHeight = heights.GetInterpolated(mx,mz) * terrainSize.height;
+										//float terrainHeight = heights.GetInterpolated(mx,mz) * terrainSize.height;
 
 										//rotation + taking terrain normal
 										Quaternion rotation;
@@ -277,7 +268,16 @@ namespace MadMaps.Integration
 										Vector3 scale = new Vector3(rndScale, rndScale, rndScale);
 									
 										//storage.AddVegetationItemInstance(id, new Vector3(wx,terrainHeight,wz), scale, rotation, layer.applyMeshRotation, VS_MM_id, true);
-										cell.AddVegetationItemInstance(id, new Vector3(wx,terrainHeight,wz), scale, rotation, VS_MM_id);
+										//cell.AddVegetationItemInstance(id, new Vector3(wx,terrainHeight,wz), scale, rotation, VS_MM_id);
+										var position = new Vector3(mx,0,mz);
+										instances.Add(new VegetationStudioInstance()
+										{
+											Guid = System.Guid.NewGuid().ToString(),
+											Package = packageShared,
+											Position = position,
+											Scale = scale,
+											Rotation = rotation.eulerAngles,
+										});
 									}
 								}
 
@@ -420,7 +420,7 @@ namespace MadMaps.Integration
 				
 				if (layer.type == Layer.Type.Map) layout.Field(ref layer.density, "Density", fieldSize:0.5f);
 				
-				if (layer.type == Layer.Type.Object) layout.Toggle(ref layer.relativeHeight, "Relative Height");
+				//if (layer.type == Layer.Type.Object) layout.Toggle(ref layer.relativeHeight, "Relative Height");
 				layout.Toggle(ref layer.takeTerrainNormal, "Take Terrain Normal");
 				layout.Toggle(ref layer.rotate, "Rotate");
 				layout.Toggle(ref layer.applyMeshRotation, "Apply Mesh Rotation");

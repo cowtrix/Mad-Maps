@@ -34,12 +34,6 @@ namespace MadMaps.Common.Painter
             }
         }
         
-        [MenuItem("Tools/Mad Maps/Utilities/Force CPU Painting")]
-        public static void ToggleForceCPU()
-        {
-            ForceCPU = !ForceCPU;
-        }
-
         private static float __cellSize = 1;
         private static Material _material;
 

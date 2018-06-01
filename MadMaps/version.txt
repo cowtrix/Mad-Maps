@@ -1,4 +1,11 @@
-Current Version: 0.1.1
+Current Version: 0.1.2
+
+- Fixed painter on OpenGL platforms. If painting masks doesn't work for you, try enabling the fallback override with Tools/Mad Maps/Utilities/Force Fallback Painter
+- Added VegetationStudio x MapMagic integrated generator
+
+== History ==
+
+v 0.1.1
 
 - Map Magic Integration: Fixed terrain heightmap welding.
 - Vegetation Studio Integration: Added VegetationStudio data layers to the TerrainWrapper and World Stamps. 
@@ -8,5 +15,4 @@ Current Version: 0.1.1
 - Road Network: Fixed bug where nodes could share their configuration, causing unexpected behaviour.
 - Generic Editor: Fixes for drawing some null objects. Added more basic drawers.
 
-== History ==
 v 0.1.0 Initial Release 
