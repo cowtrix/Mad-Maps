@@ -8,8 +8,10 @@ using System.Collections.Generic;
 using UnityEngine.Profiling;
 using UnityEngine;
 using MapMagic;
+using MadMaps.Common;
 using MadMaps.Integration;
 using MadMaps.Terrains;
+using MadMaps.Terrains.MapMagicIntegration;
 
 #if VEGETATION_STUDIO
 using AwesomeTechnologies.Vegetation.PersistentStorage;
@@ -22,15 +24,15 @@ using AwesomeTechnologies.Billboards;
 namespace MadMaps.Integration
 {
 	[System.Serializable]
-	[GeneratorMenu(menu = "Mad Maps", name = "Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
+	[GeneratorMenu(menu = "Mad Maps", name = "MM Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
 	public class MadMapsVSOutput : OutputGenerator
 	{
 		#if VEGETATION_STUDIO
 		public VegetationPackage package;
-		[NonSerialized] private static VegetationPackage packageShared; //to make sure all vs outputs use the same package
-		private static float cellSize;
+		private static float cellSize = 10f;
+		public string LayerName = "MapMagic";
 
-		public static byte VS_MM_id { get {return TerrainWrapper.VegetationStudio_ID}};
+		public static byte VS_MM_id { get {return TerrainWrapper.VegetationStudio_ID;}}
 
 		public static ObjectOutput.BiomeBlendType biomeBlendType = ObjectOutput.BiomeBlendType.AdditiveRandom;
 		#endif
@@ -79,7 +81,7 @@ namespace MadMaps.Integration
 		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
 		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
 
-		public static void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
+		public void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
 			#if VEGETATION_STUDIO
 			if (stop!=null && stop(0)) return;
@@ -180,8 +182,9 @@ namespace MadMaps.Integration
 
 							instances.Add(new VegetationStudioInstance()
 							{
+								VSID = id,
 								Guid = System.Guid.NewGuid().ToString(),
-								Package = packageShared,
+								Package = package,
 								Position = position,
 								Scale = scale,
 								Rotation = rotation.eulerAngles,
@@ -191,7 +194,8 @@ namespace MadMaps.Integration
 						if (stop!=null && stop(0)) return;
 					}
 
-
+					int cellXCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
+					int cellZCount = Mathf.CeilToInt(terrainSize.dimensions / cellSize);
 					//map outputs
 					if (layer.type == Layer.Type.Map)
 					{
@@ -272,8 +276,9 @@ namespace MadMaps.Integration
 										var position = new Vector3(mx,0,mz);
 										instances.Add(new VegetationStudioInstance()
 										{
+											VSID = id,
 											Guid = System.Guid.NewGuid().ToString(),
-											Package = packageShared,
+											Package = package,
 											Position = position,
 											Scale = scale,
 											Rotation = rotation.eulerAngles,
@@ -298,46 +303,52 @@ namespace MadMaps.Integration
 
 			//pushing anything to apply
 			if (stop!=null && stop(0)) return;
-			results.apply.CheckAdd(typeof(MadMapsVSOutput), null, replace: true);
+			results.apply.CheckAdd(typeof(MadMapsVSOutput), instances, replace: true);
 		}
 
 
 
-		public static IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
+		public IEnumerator Apply(CoordRect rect, Terrain terrain, object dataBox, Func<float,bool> stop= null)
 		{
 			Profiler.BeginSample("VS Apply");
 
 			#if VEGETATION_STUDIO
 
-			//clear cache
-			VegetationSystem vetSys = terrain.gameObject.GetComponentInChildren<VegetationSystem>();
-			for (int i=0; i<vetSys.VegetationCellList.Count; i++)
-			{
-				vetSys.VegetationCellList[i].ClearCache();
-			}
-
-			vetSys.UnityTerrainData = new UnityTerrainData(terrain, false, false);
-
-			//refresh billboards
-			BillboardSystem billboardSystem = vetSys.GetComponent<BillboardSystem>(); 
-			billboardSystem.RefreshBillboards();
-
+			var instances = (List<VegetationStudioInstance>)dataBox;
+			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
+            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
+            terrainLayer.VSInstances = instances;
+			terrainLayer.VSRemovals.Clear();
 			Profiler.EndSample();
 
+			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+            global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+
 			#endif
+
+			
 
 			yield return null;
 		}
 
-		public static void Purge(CoordRect rect, Terrain terrain)
+		public void Purge(CoordRect rect, Terrain terrain)
 		{
-
+			var wrapper = terrain.gameObject.GetComponent<TerrainWrapper>();
+			if(!wrapper)
+			{
+				return;
+			}
+            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
+            terrainLayer.VSInstances.Clear();
+			terrainLayer.VSRemovals.Clear();
 		}
 
 
 
 		public override void OnGUI (GeneratorsAsset gens)
 		{
+			layout.Field(ref LayerName, "Layer");
+
 			#if VEGETATION_STUDIO
 			layout.Par(30); layout.Icon("VegetationStudioSplashSmall", layout.Inset(), Layout.IconAligment.resize, Layout.IconAligment.resize);
 			layout.Par(5);

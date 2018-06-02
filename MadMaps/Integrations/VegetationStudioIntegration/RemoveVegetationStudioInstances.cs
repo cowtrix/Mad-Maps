@@ -13,7 +13,7 @@ namespace MadMaps.Roads.Connections
         public class Config : ConnectionConfigurationBase
         {
             public float InstanceRemoveDistance = 1;
-            public string RegexMatch;
+            public VegetationStudioPrototypePicker IgnoredPrototypes = new VegetationStudioPrototypePicker();
 
             public override Type GetMonoType()
             {
@@ -77,6 +77,10 @@ namespace MadMaps.Roads.Connections
             for (int i = vsData.Count - 1; i >= 0; i--)
             {
                 var vsInstance = vsData[i];
+                if(config.IgnoredPrototypes.Contains(vsInstance.VSID))
+                {
+                    continue;
+                }
                 var wPos = wrapper.Terrain.TreeToWorldPos(vsInstance.Position);
                 if (!objectBounds.Contains(wPos) || !GeometryExtensions.BetweenPlanes(wPos, startPlane, endPlane))
                 {

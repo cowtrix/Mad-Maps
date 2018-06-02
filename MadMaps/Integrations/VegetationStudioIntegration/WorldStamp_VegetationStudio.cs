@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
+using MadMaps.Roads;
 using MadMaps.Terrains;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -16,6 +17,7 @@ namespace MadMaps.WorldStamp
         public bool VegetationStudioEnabled = true;
         public bool StencilVSData = true;
         public bool RemoveExistingVSData = true;
+        public VegetationStudioPrototypePicker IgnoredVSPrototypes = new VegetationStudioPrototypePicker();
 
         public void StampVegetationStudio(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
@@ -38,8 +40,13 @@ namespace MadMaps.WorldStamp
                         continue;
                     }
 
+                    if(IgnoredVSPrototypes.Contains(vsdataInstance.VSID))
+                    {
+                        continue;
+                    }
+
                     var wPos = vsdataInstance.Position;
-                    //wPos = new Vector3(wPos.x * tSize.x, wPos.y * tSize.y, wPos.z * tSize.z);
+                    wPos = new Vector3(wPos.x * tSize.x, wPos.y, wPos.z * tSize.z);
                     wPos += tPos;
 
                     if (stampBounds.Contains(wPos))

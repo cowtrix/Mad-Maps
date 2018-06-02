@@ -100,6 +100,7 @@ namespace MadMaps.WorldStamp.Authoring
                 }
                 data.Trees.Add(treeInstance.Clone());
             }
+            stamp.RemoveTrees = data.Trees.Count > 0;   
         }
 
 #if UNITY_EDITOR

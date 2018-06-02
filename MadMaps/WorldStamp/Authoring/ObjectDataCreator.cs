@@ -214,6 +214,7 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 data.Objects.Add(prefabObjectData.JSONClone());
             }
+            stamp.RemoveObjects = data.Objects.Count > 0;            
         }
 
         public override GUIContent Label

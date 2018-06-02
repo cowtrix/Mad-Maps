@@ -133,11 +133,12 @@ namespace MadMaps.Common
 
         void OnGUI()
         {
+            titleContent = new GUIContent("Data Inspector", GUIResources.EyeOpenIcon);
             if (_entries.IsNullOrEmpty())
             {
                 EditorGUILayout.HelpBox("No Data", MessageType.Info);
                 return;
-            }
+            }           
             
             var entry = _entries[_index];
             if (entry != null && entry.Texture != null)

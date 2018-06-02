@@ -229,6 +229,8 @@ namespace MadMaps.Terrains
             {
                 layer.Heights.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -250,6 +252,8 @@ namespace MadMaps.Terrains
             {
                 layer.SplatData.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -271,6 +275,8 @@ namespace MadMaps.Terrains
             {
                 layer.DetailData.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -294,6 +300,8 @@ namespace MadMaps.Terrains
             {
                 layer.Trees.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
 
@@ -303,6 +311,8 @@ namespace MadMaps.Terrains
             {
                 layer.TreeRemovals.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -327,6 +337,8 @@ namespace MadMaps.Terrains
             {
                 layer.VSInstances.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
 
@@ -336,6 +348,8 @@ namespace MadMaps.Terrains
             {
                 layer.VSRemovals.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -360,6 +374,8 @@ namespace MadMaps.Terrains
             {
                 layer.Objects.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal();
@@ -368,6 +384,8 @@ namespace MadMaps.Terrains
             {
                 layer.ObjectRemovals.Clear();
                 EditorUtility.SetDirty(layer);
+                EditorGUIUtility.ExitGUI();
+                return layer;
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
@@ -418,15 +436,17 @@ namespace MadMaps.Terrains
             EditorGUILayout.Space();
             if (GUILayout.Button("Apply To Terrain"))
             {
-                wrapper.PrepareApply();
-                layer.WriteToTerrain(wrapper);
-                wrapper.FinaliseApply();
+                if(wrapper.PrepareApply())
+                {
+                    layer.WriteToTerrain(wrapper);
+                    wrapper.FinaliseApply();
 
-                EditorUtility.SetDirty(layer);
-                EditorSceneManager.MarkAllScenesDirty();
+                    EditorUtility.SetDirty(layer);
+                    EditorSceneManager.MarkAllScenesDirty();
 
-                EditorGUIUtility.ExitGUI();
-                return layer;
+                    EditorGUIUtility.ExitGUI();
+                    return layer;
+                }                
             }
             EditorGUILayout.Space();
             if (GUILayout.Button("Clear Layer"))

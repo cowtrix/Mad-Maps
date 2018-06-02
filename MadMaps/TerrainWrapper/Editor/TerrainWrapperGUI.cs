@@ -49,6 +49,13 @@ namespace MadMaps.Terrains
             _layerDrawer = new TerrainLayerDrawer(Wrapper);
             _splatsDrawer = new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = new TerrainDetailsDrawer(Wrapper);
+            _tabs = new[]
+            {
+                new GUIContent("Layers") {image = EditorGUIUtility.FindTexture("Terrain Icon")}, 
+                new GUIContent("Splats") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolSplat")},
+                new GUIContent("Details") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolPlants")},
+                new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
+            };
         }
 
         void OnDisable()
@@ -72,7 +79,10 @@ namespace MadMaps.Terrains
                 }
             }
 
-            if (_tabs == null)
+            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
+            _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
+            if(_tabs == null)
             {
                 _tabs = new[]
                 {
@@ -82,9 +92,6 @@ namespace MadMaps.Terrains
                     new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
                 };
             }
-            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
-            _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
-            _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
             EditorGUILayout.BeginHorizontal();            
             CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20), GUILayout.Width(EditorGUIUtility.currentViewWidth - (IsPopout ? 12 : 40)));

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using MadMaps.Common;
+using MadMaps.Terrains;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -8,88 +10,116 @@ namespace MadMaps.WorldStamp
 {
     public class WorldStampPriorityEditorWindow : EditorWindow
     {
-        private ReorderableList _listGUI;
-        private List<WorldStamp> _list;
+        private List<WorldStampApplyManager.LayerStampMapping> _list;
         private Vector2 _scroll;
 
         private int _lastPriority;
-        private bool _needsResort;
+        public static bool NeedsResort;
+
+        public TerrainWrapper Context;
+        public string Filter = "";
 
         void OnEnable()
         {
-            _listGUI = new ReorderableList(_list, typeof(WorldStamp), false, false, false, false);
-            _listGUI.drawElementCallback += DrawElementCallback;
+            var wrappers = FindObjectsOfType<TerrainWrapper>();
+            if(wrappers.Length > 0)
+            {
+                Context = wrappers[0];
+            }
             Sort();
         }
         
         void Sort()
         {
-            _list = new List<WorldStamp>(FindObjectsOfType<WorldStamp>()).OrderBy(stamp => stamp.Priority).ThenBy((stamp => stamp.transform.GetSiblingIndex())).ToList();
-        }
-
-        private void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
-        {
-            rect.y += 2;
-            rect.height -= 2;
-            var nameRect = new Rect(rect.x, rect.y, rect.width*.6f, rect.height);
-            GUI.Label(nameRect, _list[index].name);
-
-            var selectRect = new Rect(nameRect.xMax + 4, rect.y, 30, rect.height-2);
-            var selectContent = EditorGUIUtility.IconContent("PreMatCube");
-            selectContent.tooltip = "Select In Hierarchy";
-            if (GUI.Button(selectRect, selectContent, EditorStyles.toolbarButton))
+            if(Context == null)
             {
-                Selection.activeGameObject = _list[index].gameObject;
-                EditorGUIUtility.PingObject(Selection.activeGameObject);
+                if(_list != null)
+                {
+                    _list.Clear();
+                }                
+                return;
             }
-
-            var editRect = new Rect(selectRect.xMax + 4, rect.y, rect.width*.4f - 8 - 30, rect.height-4);
-            var newPriority = EditorGUI.DelayedIntField(editRect, _list[index].Priority);
-            if (newPriority != _list[index].Priority)
-            {
-                _list[index].Priority = newPriority;
-                Sort();
-            }
-
-            if (index > 0 && _list[index].Priority < _lastPriority)
-            {
-                _needsResort = true;
-            }
-            _lastPriority = _list[index].Priority;
-        }
-
-        void OnGUI()
-        {
-            if (_needsResort)
-            {
-                _needsResort = false;
-                Sort();
-            }
-
-            if (_listGUI == null || _listGUI.list != _list)
-            {
-                OnEnable();
-            }
-
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
-            _lastPriority = int.MinValue;
-            _listGUI.DoLayoutList();
-            EditorGUILayout.EndScrollView();
+            _list = WorldStampApplyManager.SortStamps(Context, Filter);
         }
 
         void OnSelectionChange()
         {
-            if (Selection.activeGameObject == null)
+            if(!Selection.activeGameObject)
             {
                 return;
             }
-            var stamp = Selection.activeGameObject.GetComponent<WorldStamp>();
-            var index = _list.IndexOf(stamp);
-
-            if (index >= 0)
+            var wrapper = Selection.activeGameObject.GetComponent<TerrainWrapper>();
+            if(wrapper)
             {
-                _listGUI.index = index;
+                Context = wrapper;
+                NeedsResort = true;
             }
         }
+
+        void OnGUI()
+        {
+            titleContent = new GUIContent("WS Priorities");
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginVertical();
+            Context = (TerrainWrapper)EditorGUILayout.ObjectField("Terrain Wrapper", Context, typeof(TerrainWrapper));
+            Filter = EditorGUILayout.TextField("Layer Filter", Filter);
+            EditorGUILayout.EndVertical();
+            GUI.enabled = Context;
+            if(GUILayout.Button(EditorGUIUtility.IconContent("TreeEditor.Refresh"), GUILayout.Width(32), GUILayout.Height(32)))
+            {
+                NeedsResort = true;
+            }
+            GUI.enabled = true;
+            EditorGUILayout.EndHorizontal();
+
+            if(Context == null)
+            {
+                EditorGUILayout.HelpBox("Please Select a Terrain Wrapper", MessageType.Info);
+                return;
+            }
+
+            if (NeedsResort)
+            {
+                NeedsResort = false;
+                Sort();
+            }
+
+            if ((_list == null || _list.Count == 0))
+            {
+                EditorGUILayout.HelpBox("No Eligible Stamps Found In Scene", MessageType.Info);
+                return;
+            }
+
+            _scroll = EditorGUILayout.BeginScrollView(_scroll);
+            _lastPriority = int.MinValue;
+
+            foreach(var mapping in _list)
+            {
+                EditorExtensions.Seperator();
+                EditorGUILayout.LabelField(string.Format("[{0}]  Layer '{1}'", mapping.LayerIndex, mapping.LayerName));
+                
+                foreach(var stamp in mapping.Stamps)
+                {
+                    EditorGUILayout.BeginHorizontal();
+                    if(GUILayout.Button(string.Format("    {0}", stamp.name), EditorStyles.boldLabel))
+                    {
+                        Selection.activeGameObject = stamp.gameObject;
+                    }
+                    EditorGUILayout.LabelField("Priority", GUILayout.Width(50));
+                    var currentPriority = stamp.Priority;
+                    currentPriority = EditorGUILayout.DelayedIntField(currentPriority, GUILayout.Width(100));
+                    if(currentPriority != stamp.Priority)
+                    {
+                        stamp.Priority = currentPriority;
+                        NeedsResort = true;
+                    }
+                    EditorGUILayout.EndHorizontal();                    
+                }
+                EditorGUILayout.Space();
+            }
+
+            EditorGUILayout.EndScrollView();
+        }
+
     }
 }

@@ -22,6 +22,7 @@ namespace MadMaps.Common.Painter
         private List<int> _tris = new List<int>();
         private List<Color> _colors = new List<Color>();
         private List<Vector2> _uvs = new List<Vector2>();
+        double _lastAliveTime;
 
         private bool UseCPU()
         {
@@ -34,6 +35,15 @@ namespace MadMaps.Common.Painter
                 return true;
             }
             return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
+        }
+
+        public void SetAlive()
+        {
+            #if UNITY_EDITOR
+            _lastAliveTime = UnityEditor.EditorApplication.timeSinceStartup;
+            #else
+            _lastAliveTime = (double)Time.time;
+            #endif
         }
 
         public void Initialise()
@@ -127,6 +137,22 @@ namespace MadMaps.Common.Painter
         public void Update()
         {
             EditorCellHelper.Register(this);
+        #if UNITY_EDITOR
+            var t = UnityEditor.EditorApplication.timeSinceStartup;
+        #else
+            var t = (double)Time.time;
+        #endif
+            if (_lastAliveTime + EditorCellHelper.AutoClearTime < t)
+            {
+                if(Application.isPlaying)
+                {
+                    Destroy(gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(gameObject);
+                }
+            }
         }
 
         public void OnDestroy()

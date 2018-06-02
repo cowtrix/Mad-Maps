@@ -195,7 +195,13 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.PropertyField(_snapToTerrain);
             EditorGUILayout.PropertyField(_snapToTerrainOffset);
 
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_layerName);
+            if(EditorGUI.EndChangeCheck())
+            {
+                WorldStampPriorityEditorWindow.NeedsResort = true;
+            }
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(_previewEnabled);
             if (GUILayout.Button("All Off", EditorStyles.toolbarButton, GUILayout.Width(64)))
@@ -216,7 +222,7 @@ namespace MadMaps.WorldStamp
             priorityEditContent.tooltip = "Open Priority Editor Window";
             if (GUILayout.Button(priorityEditContent, EditorStyles.toolbarButton, GUILayout.Height(20), GUILayout.Width(20)))
             {
-                EditorWindow.GetWindow<WorldStampPriorityEditorWindow>().titleContent = new GUIContent("World Stamp Priority Editor");
+                EditorWindow.GetWindow<WorldStampPriorityEditorWindow>();
             }
             EditorGUILayout.EndHorizontal();
 
@@ -375,7 +381,7 @@ namespace MadMaps.WorldStamp
                 {
                     EditorGUILayout.HelpBox("No Objects in Stamp", MessageType.Info);
                 }
-                EditorGUILayout.PropertyField(_removeObjects);
+                EditorGUILayout.PropertyField(_removeObjects, new GUIContent("Remove Existing Objects"));
                 GUI.enabled = canWrite;
                 EditorGUILayout.PropertyField(_stencilObjects);
                 EditorGUILayout.PropertyField(_overrideRelativeObjectMode);
@@ -458,7 +464,7 @@ namespace MadMaps.WorldStamp
                     }
                     GUI.color = Color.white;
                 }
-                EditorGUILayout.PropertyField(_removeTrees);
+                EditorGUILayout.PropertyField(_removeTrees, new GUIContent("Remove Existing Trees"));
                 GUI.enabled = canWrite;
                 EditorGUILayout.PropertyField(_stencilTrees);
                 GUI.enabled = true;
@@ -714,6 +720,11 @@ namespace MadMaps.WorldStamp
                 if (_editingMask)
                 {
                     EditorUtility.SetDirty(stamp);
+                    if(_painter != null)
+                    {
+                        _painter.Destroy();
+                        _painter = null;
+                    }
                 }
                 else if (stamp.Mask == null || stamp.Mask.Count == 0)
                 {
@@ -731,6 +742,11 @@ namespace MadMaps.WorldStamp
                 {
                     stamp.Mask = null;
                     _editingMask = false;
+                    if(_painter != null)
+                    {
+                        _painter.Destroy();
+                        _painter = null;
+                    }
                 }
             }
             if (GUILayout.Button("Write Mask To Prefab") && stamp.Mask != null)
@@ -745,6 +761,11 @@ namespace MadMaps.WorldStamp
                 }              
                 stamp.Mask = null;
                 _editingMask = false;  
+                if(_painter != null)
+                {
+                    _painter.Destroy();
+                    _painter = null;
+                }
             }
 
             EditorGUILayout.EndHorizontal();
@@ -772,22 +793,26 @@ namespace MadMaps.WorldStamp
         void OnSceneGUI()
         {
             var worldStamp = target as WorldStamp;
-            var rotatedMatrix = Handles.matrix * Matrix4x4.TRS(worldStamp.transform.position, worldStamp.transform.rotation, worldStamp.transform.lossyScale);
-            _boxBoundsHandle.center = Vector3.up * (worldStamp.Size.y / 2);
-            _boxBoundsHandle.size = worldStamp.Size;
-            using (new Handles.DrawingScope(rotatedMatrix))
-            {
-                _boxBoundsHandle.DrawHandle();
-            }
-            if (worldStamp.Size != _boxBoundsHandle.size)
-            {
-                worldStamp.Size = _boxBoundsHandle.size;
-                SceneView.RepaintAll();
-            }
-
             if (!_editingMask)
             {
-                _painter = null;
+                var rotatedMatrix = Handles.matrix * Matrix4x4.TRS(worldStamp.transform.position, worldStamp.transform.rotation, worldStamp.transform.lossyScale);
+                _boxBoundsHandle.center = Vector3.up * (worldStamp.Size.y / 2);
+                _boxBoundsHandle.size = worldStamp.Size;
+                using (new Handles.DrawingScope(rotatedMatrix))
+                {
+                    _boxBoundsHandle.DrawHandle();
+                }
+                if (worldStamp.Size != _boxBoundsHandle.size)
+                {
+                    worldStamp.Size = _boxBoundsHandle.size;
+                    SceneView.RepaintAll();
+                }
+
+                if(_painter != null)
+                {
+                    _painter.Destroy();
+                    _painter = null;
+                }
                 return;
             }
 

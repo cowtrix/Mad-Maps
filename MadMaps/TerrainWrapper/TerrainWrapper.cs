@@ -124,14 +124,10 @@ namespace MadMaps.Terrains
 
             var size = Terrain.terrainData.size;
 
-            CompoundTerrainData.Trees.Clear();
-            CompoundTerrainData.SplatData.Clear();
-            CompoundTerrainData.DetailData.Clear();
-            #if VEGETATION_STUDIO
-            CompoundTerrainData.VegetationStudio.Clear();
-            #endif
-            
-            PrepareApply();
+            if(!PrepareApply())
+            {
+                return;
+            }
 
             OnPreRecalculate.SafeInvoke(this);
             
@@ -164,14 +160,20 @@ namespace MadMaps.Terrains
             _needsPostRecalcInvokation = true;
         }
 
-        public void PrepareApply()
+        public bool PrepareApply()
         {
             if (Layers.Count == 0)
             {
-                return;
+                return false;
             }
 
-            CompoundTerrainData.Clear(this);
+            if(!Terrain || !Terrain.terrainData)
+            {
+                Debug.LogError(string.Format("No terrain found for Terrain Wrapper {0}! Aborting Apply.", this), this);
+                return false;
+            }
+
+            CompoundTerrainData.Clear(this);           
 
             for (var i = 0; i < Layers.Count; ++i)
             {
@@ -184,6 +186,7 @@ namespace MadMaps.Terrains
 #if VEGETATION_STUDIO
             PrepareVegetationStudio();
 #endif
+            return true;
         }
 
         public void FinaliseApply()

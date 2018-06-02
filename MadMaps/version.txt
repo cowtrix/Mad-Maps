@@ -1,7 +1,11 @@
 Current Version: 0.1.2
 
 - Fixed painter on OpenGL platforms. If painting masks doesn't work for you, try enabling the fallback override with Tools/Mad Maps/Utilities/Force Fallback Painter
+- Improved painter tearing down, could sometimes leave an orphaned painter floating in the scene until recompile
 - Added VegetationStudio x MapMagic integrated generator
+- Fixed WorldStamps properly removing existing Vegetation Studio data
+- World Stamps will now properly configure themselves to remove existing data based on their own information, when created with the World Stamp Creator tool.
+- Improved the World Stamp priority explorer
 
 == History ==
 

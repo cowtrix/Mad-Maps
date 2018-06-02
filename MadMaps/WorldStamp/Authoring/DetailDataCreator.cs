@@ -156,6 +156,7 @@ namespace MadMaps.WorldStamp.Authoring
                 }
                 data.DetailData.Add(compressedDetailData.JSONClone());
             }
+            stamp.RemoveExistingDetails = data.DetailData.Count > 0;
         }
     }
 }

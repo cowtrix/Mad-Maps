@@ -124,6 +124,8 @@ namespace MadMaps.WorldStamp.Authoring
                 }
                 data.VSData.Add(instance.Clone());
             }
+            stamp.RemoveExistingVSData = data.VSData.Count > 0;
+            stamp.IgnoredVSPrototypes = IgnoredPrototypes.JSONClone();
         }
 
 #if UNITY_EDITOR

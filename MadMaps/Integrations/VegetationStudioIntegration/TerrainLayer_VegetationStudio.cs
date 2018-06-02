@@ -221,6 +221,7 @@ namespace MadMaps.Terrains
     {
         
         public List<VegetationStudioInstance> VSInstances = new List<VegetationStudioInstance>();
+        
         public List<string> VSRemovals = new List<string>();
         public override List<VegetationPackage> GetPackages()
         {

@@ -395,6 +395,9 @@ namespace MadMaps.Common.Painter
         public void Destroy()
         {
             EditorCellHelper.Clear(true);
+            EditorApplication.update -= Update;
+
+            //Debug.Log("Destroyed painter");
         }
 
         public void Repaint()

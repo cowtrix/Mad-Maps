@@ -69,7 +69,10 @@ namespace MadMaps.Terrains
         {
             if(index == 0)
             {
-                terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
+                if(Heights != null && Heights.Width > 0 && Heights.Height > 0)
+                {
+                    terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
+                }                
                 if(DetailData.Count > 0)
                 {
                     var firstMap = DetailData.First();

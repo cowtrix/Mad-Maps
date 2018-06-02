@@ -14,31 +14,22 @@ namespace MadMaps.WorldStamp
     /// </summary>
     public static class WorldStampApplyManager
     {
-        private class LayerStampMapping
+        public class LayerStampMapping
         {
             public string LayerName;
             public int LayerIndex = -1;
             public List<WorldStamp> Stamps = new List<WorldStamp>();
         }
 
-        /// <summary>
-        /// TODO: This is a very complicated method. Is there a way to move towards componentisation?
-        /// TODO: Layer filter method should be able to include/exclude arbitrary numbers of layers (currently it is all or one)
-        /// Generally it doesn't make sense to apply only one stamp for a given layer. While partial recalculation
-        /// might be possible, it doesn't currently exist. So when we recalcualte one stamp on a layer, we also
-        /// recalculate all other stamps on that layer.
-        /// </summary>
-        /// <param name="wrapper">The wrapper to recalculate the stamps for</param>
-        /// <param name="layerFilter">A name filter for the layers (for recalculating a single layer)</param>
-        public static void ApplyAllStamps(TerrainWrapper wrapper, string layerFilter = null)
+        public static List<LayerStampMapping> SortStamps(TerrainWrapper wrapper, string layerFilter)
         {
-            Profiler.BeginSample("ApplyAllStamps");
             Profiler.BeginSample("CollectAndOrganise");
 
             // Collect all WorldStamps that lie within the bounds of the TerrainWrapper and satisfy the layerFilter (if one is specified)
             var allStamps = new List<WorldStamp>(Object.FindObjectsOfType<WorldStamp>());
             var tBounds = new Bounds(wrapper.Terrain.GetPosition() + wrapper.Terrain.terrainData.size / 2,
                 wrapper.Terrain.terrainData.size);
+
             for (var i = allStamps.Count - 1; i >= 0; i--)
             {
                 var worldStamp = allStamps[i];
@@ -57,7 +48,7 @@ namespace MadMaps.WorldStamp
                     allStamps.RemoveAt(i);
                 }
             }
-
+            
             // Sort the stamps into what layer they each point to
             List<LayerStampMapping> mappings = new List<LayerStampMapping>();
             for (int i = 0; i < allStamps.Count; i++)
@@ -114,6 +105,23 @@ namespace MadMaps.WorldStamp
                 layer.Clear(wrapper);
             }
             Profiler.EndSample();
+            return mappings;
+        }
+
+        /// <summary>
+        /// TODO: This is a very complicated method. Is there a way to move towards componentisation?
+        /// TODO: Layer filter method should be able to include/exclude arbitrary numbers of layers (currently it is all or one)
+        /// Generally it doesn't make sense to apply only one stamp for a given layer. While partial recalculation
+        /// might be possible, it doesn't currently exist. So when we recalcualte one stamp on a layer, we also
+        /// recalculate all other stamps on that layer.
+        /// </summary>
+        /// <param name="wrapper">The wrapper to recalculate the stamps for</param>
+        /// <param name="layerFilter">A name filter for the layers (for recalculating a single layer)</param>
+        public static void ApplyAllStamps(TerrainWrapper wrapper, string layerFilter = null)
+        {
+            Profiler.BeginSample("ApplyAllStamps");
+            
+            var mappings = SortStamps(wrapper, layerFilter);
 
             // Okay, we've organised our stamps in such a way so we can iterate through and execute them.
             // Iterating the mappings here is equivalent to iterating through the TerrainWrapper layers and executing all the relevant stamps for each layer.

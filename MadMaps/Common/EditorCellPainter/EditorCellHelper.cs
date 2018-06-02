@@ -48,7 +48,7 @@ namespace MadMaps.Common.Painter
         private static List<Cell> _cells = new List<Cell>();
 
         private static double _lastAliveTime;
-        private const double AutoClearTime = .1;
+        public const double AutoClearTime = .1;
         private static bool _dirty;
         public static Matrix4x4 TRS = Matrix4x4.identity;
 
@@ -80,6 +80,13 @@ namespace MadMaps.Common.Painter
             {
                 _material.SetFloat("_Size", CellSize);
             }
+            for(var i = 0; i < _rendererList.Count; ++i)
+            {
+                var renderer = _rendererList[i];
+                renderer.SetAlive();
+            }
+            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
 
         public static void AddCell(Vector3 center, Color color)
@@ -90,6 +97,8 @@ namespace MadMaps.Common.Painter
                 Color = color,
             });
             _dirty = true;
+            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
 
         public static void Register(EditorCellRenderer r)
@@ -98,6 +107,8 @@ namespace MadMaps.Common.Painter
             {
                 _rendererList.Add(r);
             }
+            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
 
         // Change to invalidation
@@ -107,7 +118,10 @@ namespace MadMaps.Common.Painter
             {
                 for (int i = 0; i < _rendererList.Count; i++)
                 {
-                    Object.DestroyImmediate(_rendererList[i].gameObject);
+                    if(_rendererList[i])
+                    {
+                        Object.DestroyImmediate(_rendererList[i].gameObject);
+                    }                    
                 }
                 _rendererList.Clear();
                 return;
@@ -125,8 +139,14 @@ namespace MadMaps.Common.Painter
             }
             _material.SetFloat("_Size", CellSize);
 
-            //_rendererList.Clear();
-            //_rendererList.AddRange(Object.FindObjectsOfType<EditorCellRenderer>());
+            for(var i = _rendererList.Count - 1; i >= 0; i--)
+            {
+                if(!_rendererList[i])
+                {
+                    _rendererList.RemoveAt(i);
+                }
+            }
+
             int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)MAX_VERTS);
             for (int i = 0; i < requiredRendererCount; i++)
             {
@@ -141,7 +161,7 @@ namespace MadMaps.Common.Painter
 
                 EditorCellRenderer renderer = _rendererList[i];
                 renderer.Clear();
-                renderer.SetData(TRS, _material);
+                renderer.SetData(TRS, _material);                
             }
             for (int i = _rendererList.Count - 1; i >= requiredRendererCount; i--)
             {
@@ -170,6 +190,8 @@ namespace MadMaps.Common.Painter
             _lastAliveTime = EditorApplication.timeSinceStartup;
             _dirty = false;
 
+            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
             SceneView.RepaintAll();
         }
 

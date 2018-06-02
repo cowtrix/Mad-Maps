@@ -33,11 +33,16 @@ namespace MadMaps.Roads
             for(var i = 0; i < target.Package.VegetationInfoList.Count; ++i)
             {
                 var info = target.Package.VegetationInfoList[i];
+                
                 EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("", GUILayout.Width(EditorGUI.indentLevel * 16 - 4));
+                GUI.color = target.SelectedIDs.Contains(info.VegetationItemID) ? Color.red : Color.white;
+                EditorGUILayout.BeginHorizontal("Box");
+                GUI.color = Color.white;
                 Texture2D previewTex = UnityEditor.AssetPreview.GetAssetPreview(info.PrefabType == VegetationPrefabType.Mesh ?
                     (UnityEngine.Object)info.VegetationPrefab : (UnityEngine.Object)info.VegetationTexture);
-                GUI.color = target.SelectedIDs.Contains(info.VegetationItemID) ? Color.green : Color.white;
-                if(EditorGUILayoutX.IndentedButton(previewTex, GUILayout.Width(30), GUILayout.Height(30)) || GUILayout.Button(info.Name, EditorStyles.label, 
+                
+                if(GUILayout.Button(previewTex, GUILayout.Width(30), GUILayout.Height(30)) || GUILayout.Button(info.Name, EditorStyles.boldLabel, 
                     GUILayout.Height(30)))
                 {
                     if(target.SelectedIDs.Contains(info.VegetationItemID))
@@ -50,8 +55,8 @@ namespace MadMaps.Roads
                     }
                 }
                 EditorGUILayout.EndHorizontal();
-            }
-            GUI.color = Color.white;
+                EditorGUILayout.EndHorizontal();
+            }            
             EditorGUI.indentLevel--;
             return target;
         }
