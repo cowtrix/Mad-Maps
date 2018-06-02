@@ -95,6 +95,15 @@ namespace MadMaps.WorldStamp
             _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
         }
 
+        void OnDisable()
+        {
+            if(_painter != null)
+            {
+                _painter.Destroy();
+                _painter = null;
+            }
+        }
+
         void DoHeader(string text, ref bool expanded, SerializedProperty enabled, bool canEnable)
         {
             EditorGUILayout.BeginHorizontal();

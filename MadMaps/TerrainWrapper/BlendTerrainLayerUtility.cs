@@ -56,6 +56,12 @@ namespace MadMaps.Terrains
                     blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
                     blendShader.SetVector("_StencilSize", new Vector4(stencil.Width, stencil.Height));
                 }
+                else
+                {
+                    stencilBuffer = ComputeShaderPool.GetBuffer(0, sizeof(float));
+                    blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
+                    blendShader.SetVector("_StencilSize", new Vector4(0, 0));
+                }
 
                 blendShader.SetInt("_BlendMode", (int)blendMode);
                 blendShader.SetVector("_MinMax", new Vector4(offset.x, offset.z, 0, 0));
@@ -249,6 +255,12 @@ namespace MadMaps.Terrains
                     stencilBuffer.SetData(stencil.Data);
                     blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
                     blendShader.SetVector("_StencilSize", new Vector4(stencil.Width, stencil.Height));
+                }
+                else
+                {
+                    stencilBuffer = ComputeShaderPool.GetBuffer(0, sizeof(float));
+                    blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
+                    blendShader.SetVector("_StencilSize", new Vector4(0, 0));
                 }
 
                 blendShader.SetInt("_BlendMode", (int)blendMode);
