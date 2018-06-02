@@ -58,7 +58,7 @@ namespace MadMaps.Terrains
                 }
                 else
                 {
-                    stencilBuffer = ComputeShaderPool.GetBuffer(0, sizeof(float));
+                    stencilBuffer = ComputeShaderPool.GetBuffer(1, sizeof(float));
                     blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
                     blendShader.SetVector("_StencilSize", new Vector4(0, 0));
                 }
@@ -258,7 +258,7 @@ namespace MadMaps.Terrains
                 }
                 else
                 {
-                    stencilBuffer = ComputeShaderPool.GetBuffer(0, sizeof(float));
+                    stencilBuffer = ComputeShaderPool.GetBuffer(1, sizeof(float));
                     blendShader.SetBuffer(kernelHandle, "_Stencil", stencilBuffer);
                     blendShader.SetVector("_StencilSize", new Vector4(0, 0));
                 }
