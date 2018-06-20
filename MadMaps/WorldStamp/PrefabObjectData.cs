@@ -12,7 +12,7 @@ namespace MadMaps.WorldStamp
         public Vector3 Scale;
         public GameObject Prefab;
         public string Guid;
-        [FormerlySerializedAs("AbsoluteHeight")]
-        public bool IsRelativeToStamp;
+        [FormerlySerializedAs("IsRelativeToStamp")]
+        public bool AbsoluteHeight;
     }
 }

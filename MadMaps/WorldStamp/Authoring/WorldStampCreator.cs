@@ -94,7 +94,7 @@ namespace MadMaps.WorldStamp.Authoring
             EditorGUILayout.LabelField("Layers", EditorStyles.boldLabel);
             var recaptureContent = new GUIContent("Capture");
             recaptureContent.tooltip = "Recapture this data.";
-            GUI.color = Template.Creators.Any(layer => layer.NeedsRecapture) ? Color.Lerp(Color.red, Color.white, .5f) : Color.white;
+            GUI.color = Template.Creators.Any(layer => layer.NeedsRecapture && layer.Enabled) ? Color.Lerp(Color.red, Color.white, .5f) : Color.white;
             if (GUILayout.Button(recaptureContent, EditorStyles.miniButton, GUILayout.Height(16)))
             {
                 for (int i = 0; i < Template.Creators.Count; i++)

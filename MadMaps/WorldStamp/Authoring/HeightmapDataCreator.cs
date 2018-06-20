@@ -34,6 +34,15 @@ namespace MadMaps.WorldStamp.Authoring
             get { return true; }
         }
 
+        public override void Dispose()
+        {
+            if(_preview != null)
+            {
+                _preview.Dispose();
+                _preview = null;
+            }
+        }
+
         protected override void CaptureInternal(Terrain terrain, Bounds bounds)
         {
             var min = terrain.WorldToHeightmapCoord(bounds.min, TerrainX.RoundType.Floor);
@@ -60,7 +69,7 @@ namespace MadMaps.WorldStamp.Authoring
                         maxHeight = sample;
                     }
 
-                    if (dx == 0 || dx == width || dz == 0 || dz == height)
+                    if (dx == 0 || dx == width-1 || dz == 0 || dz == height-1)
                     {
                         avgMarginHeight += sample;
                         marginCount++;
@@ -89,6 +98,7 @@ namespace MadMaps.WorldStamp.Authoring
                 return;
             }
             Heights.Clear();
+            
         }
 
         protected override void CommitInternal(WorldStampData data, WorldStamp stamp)

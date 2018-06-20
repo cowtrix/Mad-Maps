@@ -126,7 +126,7 @@ namespace MadMaps.WorldStamp.Authoring
                 
                 var newData = new PrefabObjectData()
                 {
-                    IsRelativeToStamp = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
+                    AbsoluteHeight = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
                     Prefab = prefabAsset,
                     Position = relativePos,
                     Rotation = root.transform.rotation.eulerAngles,
@@ -215,6 +215,8 @@ namespace MadMaps.WorldStamp.Authoring
                 data.Objects.Add(prefabObjectData.JSONClone());
             }
             stamp.RemoveObjects = data.Objects.Count > 0;            
+            stamp.RelativeMode = RelativeMode;
+            stamp.NeedsRelativeModeCheck = false;
         }
 
         public override GUIContent Label

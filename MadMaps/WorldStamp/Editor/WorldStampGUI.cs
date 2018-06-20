@@ -50,7 +50,7 @@ namespace MadMaps.WorldStamp
         private SerializedProperty _objectsEnabled;
         private SerializedProperty _stencilObjects;
         private SerializedProperty _removeObjects;
-        private SerializedProperty _overrideRelativeObjectMode;
+        //private SerializedProperty _overrideRelativeObjectMode;
         private SerializedProperty _relativeObjectMode;
 
         
@@ -91,7 +91,7 @@ namespace MadMaps.WorldStamp
             _detailBlendMode = serializedObject.FindProperty("DetailBlendMode");
             _detailsBoost = serializedObject.FindProperty("DetailBoost");
             _detailsRemoveExisting = serializedObject.FindProperty("RemoveExistingDetails");
-            _overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
+            //_overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
             _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
         }
 
@@ -140,14 +140,27 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
             GUI.enabled = !_editingMask && (!_layerName.hasMultipleDifferentValues);
-            if (GUILayout.Button(string.Format("Stamp Layer '{0}'", _layerName.stringValue)))
+            var content = new GUIContent(string.Format("Stamp Layer '{0}'", _layerName.stringValue), "This will stamp only this layer.");
+            if (GUILayout.Button(content))
             {
                 StampAll(_layerName.stringValue);
+                GUIUtility.ExitGUI();
+                return;
             }
-            GUI.enabled = !_editingMask;
-            if (GUILayout.Button("Stamp All Layers"))
+            /*content = new GUIContent(string.Format("Stamp Up To Layer '{0}'", _layerName.stringValue), "This will stamp this layer, and all layers below.");
+            if (GUILayout.Button(content))
             {
                 StampAll();
+                GUIUtility.ExitGUI();
+                return;
+            }*/
+            GUI.enabled = !_editingMask;
+            content = new GUIContent("Stamp All Layers", "This will stamp all layers on this Terrain.");
+            if (GUILayout.Button(content))
+            {
+                StampAll();
+                GUIUtility.ExitGUI();
+                return;
             }
             EditorGUILayout.EndVertical();
 
@@ -174,7 +187,7 @@ namespace MadMaps.WorldStamp
             }
             EditorGUILayout.EndHorizontal();
 
-            EditorGUILayout.PropertyField(_gizmoColor, GUILayout.Width(180));
+            EditorGUILayout.PropertyField(_gizmoColor);
 
             EditorGUILayout.EndVertical();
             EditorGUILayout.EndHorizontal();
@@ -380,6 +393,23 @@ namespace MadMaps.WorldStamp
 
         private void DoObjectsSection()
         {
+            #region KILL ME ASAP
+            foreach(var t in targets)
+            {
+                var stamp = t as WorldStamp;
+                if(stamp && stamp.NeedsRelativeModeCheck && stamp.Data != null && stamp.Data.Objects.Count > 0)
+                {
+                    
+                    stamp.NeedsRelativeModeCheck = false;
+                    //RelativeHeight = RelativeMode == WorldStamp.EObjectRelativeMode.RelativeToStamp,
+                    stamp.RelativeMode = stamp.Data.Objects[0].AbsoluteHeight ? WorldStamp.EObjectRelativeMode.RelativeToStamp 
+                        : WorldStamp.EObjectRelativeMode.RelativeToTerrain;
+                    Debug.Log(string.Format("Updated stamp object relative mode of '{0}' to v0.1.2c. This set the Object Relative Mode to {1}. This should be a one time process.", stamp.name, stamp.RelativeMode), stamp);
+                    EditorUtility.SetDirty(stamp);
+                }
+            }
+            #endregion
+
             WorldStamp singleInstance = targets.Length == 1 ? target as WorldStamp : null;
             bool canWrite = !singleInstance || singleInstance.Data.Objects.Count > 0;
             DoHeader("Objects", ref _objectsExpanded, _objectsEnabled, canWrite);
@@ -393,11 +423,7 @@ namespace MadMaps.WorldStamp
                 EditorGUILayout.PropertyField(_removeObjects, new GUIContent("Remove Existing Objects"));
                 GUI.enabled = canWrite;
                 EditorGUILayout.PropertyField(_stencilObjects);
-                EditorGUILayout.PropertyField(_overrideRelativeObjectMode);
-                if (_overrideRelativeObjectMode.boolValue)
-                {
-                    EditorGUILayout.PropertyField(_relativeObjectMode);
-                }
+                EditorGUILayout.PropertyField(_relativeObjectMode);
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
             }
@@ -634,7 +660,7 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.LabelField("Heights", stamp.Data.Heights != null ? string.Format("{0}x{1}", stamp.Data.Heights.Width, stamp.Data.Heights.Height) : "null");
             if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                DataInspector.SetData(stamp.Data.Heights);
+                DataInspector.SetData(stamp.Data.Heights, null, true);
             }
             EditorGUILayout.EndHorizontal();
 
@@ -741,6 +767,8 @@ namespace MadMaps.WorldStamp
                     stamp.Mask = JsonUtility.FromJson<WorldStampMask>(JsonUtility.ToJson(stamp.Data.Mask));
                 }
                 _editingMask = !_editingMask;
+                GUIUtility.ExitGUI();
+                return;
             }
             GUI.enabled = !_editingMask && hasPrefab && alreadyHasMaskInstance;
             EditorGUILayout.BeginHorizontal();
@@ -757,6 +785,8 @@ namespace MadMaps.WorldStamp
                         _painter = null;
                     }
                 }
+                GUIUtility.ExitGUI();
+                return;
             }
             if (GUILayout.Button("Write Mask To Prefab") && stamp.Mask != null)
             {
@@ -775,6 +805,8 @@ namespace MadMaps.WorldStamp
                     _painter.Destroy();
                     _painter = null;
                 }
+                GUIUtility.ExitGUI();
+                return;
             }
 
             EditorGUILayout.EndHorizontal();

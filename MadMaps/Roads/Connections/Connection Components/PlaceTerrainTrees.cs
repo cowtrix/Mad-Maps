@@ -48,7 +48,17 @@ namespace MadMaps.Roads
 
         public void OnBake()
         {
+            if(!Network || Configuration == null)
+            {
+                return;
+            }
+
             var config = Configuration.GetConfig<Config>();
+            if(config == null)
+            {
+                return;
+            }
+            
             var spline = NodeConnection.GetSpline();
             var rand = new Random(NodeConnection.ThisNode.Seed);
             var terrainWrappers = TerrainLayerUtilities.CollectWrappers(spline.GetApproximateXZObjectBounds());
@@ -61,6 +71,8 @@ namespace MadMaps.Roads
 
         private void ProcessWrapper(TerrainWrapper wrapper, SplineSegment spline, Config config, Random rand)
         {
+            
+
             LastPlantCount = 0;
             var length = spline.Length;
             var step = config.StepDistance;

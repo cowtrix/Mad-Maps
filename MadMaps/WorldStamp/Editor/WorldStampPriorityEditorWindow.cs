@@ -13,7 +13,6 @@ namespace MadMaps.WorldStamp
         private List<WorldStampApplyManager.LayerStampMapping> _list;
         private Vector2 _scroll;
 
-        private int _lastPriority;
         public static bool NeedsResort;
 
         public TerrainWrapper Context;
@@ -61,7 +60,7 @@ namespace MadMaps.WorldStamp
             titleContent = new GUIContent("WS Priorities");
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
-            Context = (TerrainWrapper)EditorGUILayout.ObjectField("Terrain Wrapper", Context, typeof(TerrainWrapper));
+            Context = (TerrainWrapper)EditorGUILayout.ObjectField("Terrain Wrapper", Context, typeof(TerrainWrapper), true);
             Filter = EditorGUILayout.TextField("Layer Filter", Filter);
             EditorGUILayout.EndVertical();
             GUI.enabled = Context;
@@ -91,7 +90,6 @@ namespace MadMaps.WorldStamp
             }
 
             _scroll = EditorGUILayout.BeginScrollView(_scroll);
-            _lastPriority = int.MinValue;
 
             foreach(var mapping in _list)
             {

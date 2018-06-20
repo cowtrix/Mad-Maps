@@ -335,7 +335,7 @@ namespace MadMaps.Terrains
                 var worldPos = tPos + new Vector3(prefabObjectData.Position.x*tSize.x,
                                    prefabObjectData.Position.y,
                                    prefabObjectData.Position.z*tSize.z);
-                if (!prefabObjectData.IsRelativeToStamp)
+                if (!prefabObjectData.AbsoluteHeight)
                 {
                     worldPos.y += Terrain.SampleHeight(worldPos);
                 }

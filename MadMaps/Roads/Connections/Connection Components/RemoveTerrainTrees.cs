@@ -22,16 +22,7 @@ namespace MadMaps.Roads.Connections
 
         public void OnBake()
         {
-            if (!Network)
-            {
-                Debug.LogError("Unable to find network! " + name, this);
-                return;
-            }
-            if (!Network.RecalculateTerrain)
-            {
-                return;
-            }
-            if (Configuration == null)
+            if (!Network || Configuration == null)
             {
                 return;
             }

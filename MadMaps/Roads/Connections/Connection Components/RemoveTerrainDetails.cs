@@ -23,11 +23,7 @@ namespace MadMaps.Roads.Connections
 
         public void OnBake()
         {
-            if (!Network.RecalculateTerrain)
-            {
-                return;
-            }
-            if (Configuration == null)
+            if (!Network || Configuration == null)
             {
                 return;
             }
@@ -111,7 +107,7 @@ namespace MadMaps.Roads.Connections
                     //DebugHelper.DrawPoint(worldPos, .2f, Color.green, 20);
                     //Debug.DrawLine(worldPos, worldPos + Vector3.up * maskValue, Color.green, 20);
                     writeStencil[dx, dz] = 1;
-                    
+                    layer.Stencil[coordX, coordZ] = MiscUtilities.CompressStencil(GetPriority(), 1);
                     foreach (var data in layerDetails)
                     {
                         float readValue = data.Value[dx, dz];

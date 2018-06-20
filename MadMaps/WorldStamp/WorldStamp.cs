@@ -69,7 +69,8 @@ namespace MadMaps.WorldStamp
         public bool RemoveObjects = true;
         [Tooltip("Remove objects in this stamp if we don't write to the stencil?")]
         public bool StencilObjects = true;
-        public bool OverrideObjectRelativeMode = false;
+       
+        public bool NeedsRelativeModeCheck = true;
         public EObjectRelativeMode RelativeMode = EObjectRelativeMode.RelativeToTerrain;
         
         //======================================
@@ -929,7 +930,7 @@ namespace MadMaps.WorldStamp
 
                 prefabObjectData.Rotation = (transform.rotation * Quaternion.Euler(prefabObjectData.Rotation)).eulerAngles;
 
-                if (OverrideObjectRelativeMode)
+                //if (OverrideObjectRelativeMode)
                 {
                     float heightVal;
                     if (HaveHeightsBeenFlipped)
@@ -942,36 +943,25 @@ namespace MadMaps.WorldStamp
                         //prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
                         heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
                     }
-                    if (RelativeMode == EObjectRelativeMode.RelativeToStamp)
+
+                    if (RelativeMode == EObjectRelativeMode.RelativeToStamp && !prefabObjectData.AbsoluteHeight)
                     {
-                        if (prefabObjectData.IsRelativeToStamp)
-                        {
-                            //prefabObjectData.Position.y -= heightVal;
-                        }
-                        else
-                        {
-                            prefabObjectData.Position.y += heightVal;
-                        }
+                        prefabObjectData.Position.y += heightVal;
+                        prefabObjectData.Position.y += Data.ZeroLevel * Size.y;
                     }
-                    else
+                    if (RelativeMode == EObjectRelativeMode.RelativeToTerrain && prefabObjectData.AbsoluteHeight)
                     {
-                        if (prefabObjectData.IsRelativeToStamp)
-                        {
-                            prefabObjectData.Position.y -= heightVal;
-                        }
-                        else
-                        {
-                            //prefabObjectData.Position.y += heightVal;
-                        }
+                        prefabObjectData.Position.y -= heightVal;
+                        prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
                     }
 
-                    prefabObjectData.IsRelativeToStamp = RelativeMode == EObjectRelativeMode.RelativeToStamp;
+                    prefabObjectData.AbsoluteHeight = RelativeMode == EObjectRelativeMode.RelativeToStamp;
                 }
 
-                if (prefabObjectData.IsRelativeToStamp)
+                if (prefabObjectData.AbsoluteHeight)
                 {
-                    if(!OverrideObjectRelativeMode)
-                        prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
+                    //if(!OverrideObjectRelativeMode)
+                    prefabObjectData.Position.y -= Data.ZeroLevel * Size.y;
                     prefabObjectData.Position.y += transform.position.y;
                     prefabObjectData.Position.y -= tPos.y;
                 }

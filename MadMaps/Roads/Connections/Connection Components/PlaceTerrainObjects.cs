@@ -38,6 +38,11 @@ namespace MadMaps.Roads.Connections
 
         public void OnBake()
         {
+            if(Configuration== null  || !Network)
+            {
+                return;
+            }
+
             var config = Configuration.GetConfig<Config>();
             if (config == null)
             {
@@ -105,7 +110,7 @@ namespace MadMaps.Roads.Connections
                 
                 var prefabObject = new PrefabObjectData()
                 {
-                    IsRelativeToStamp = config.AbsoluteHeight,
+                    AbsoluteHeight = config.AbsoluteHeight,
                     Guid = Guid.NewGuid().ToString(),
                     Position = tPos,
                     Scale = scale,

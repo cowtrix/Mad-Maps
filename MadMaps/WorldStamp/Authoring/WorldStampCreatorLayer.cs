@@ -52,6 +52,8 @@ namespace MadMaps.WorldStamp.Authoring
             }
 
             GUIExpanded = EditorGUILayout.Foldout(GUIExpanded, Label);
+            //EditorGUILayout.LabelField(NeedsRecapture && Enabled ? "(Needs Recapture)" : string.Empty);
+
             var previewContent = new GUIContent("Preview");
             previewContent.tooltip = "Preview this data.";
             GUI.color = parent.SceneGUIOwner == this ? Color.green : Color.white;

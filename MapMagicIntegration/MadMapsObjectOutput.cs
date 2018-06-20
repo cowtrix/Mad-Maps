@@ -329,7 +329,7 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
 
                     var prefabObj = new PrefabObjectData()
                     {
-                        IsRelativeToStamp = false,
+                        AbsoluteHeight = false,
                         Guid = System.Guid.NewGuid().ToString(),
                         Prefab = prefab.gameObject,
                         Rotation = transition.rotation.eulerAngles,

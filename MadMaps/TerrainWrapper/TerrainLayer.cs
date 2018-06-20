@@ -11,8 +11,6 @@ using MadMaps.Terrains.Lookups;
 using MadMaps.WorldStamp;
 using UnityEngine;
 using System.Linq;
-#if UNITY_EDITOR
-#endif
 
 namespace MadMaps.Terrains
 {
@@ -21,9 +19,9 @@ namespace MadMaps.Terrains
     {
         public enum ETerrainLayerBlendMode
         {
-            Additive,
-            Set,
-            Stencil,
+            Additive = 0,
+            Set = 1,
+            Stencil = 2,
         }
 
         public ETerrainLayerBlendMode BlendMode = ETerrainLayerBlendMode.Set;
@@ -39,7 +37,7 @@ namespace MadMaps.Terrains
         /// Go and capture all of the data on a given terrain and store it in this layer.
         /// </summary>
         /// <param name="terrain">The terrain to capture</param>
-        public void SnapshotTerrain(Terrain terrain)
+        public virtual void SnapshotTerrain(Terrain terrain)
         {
             Debug.Log("Snapshotted Terrain " + terrain.name, terrain);
             this.SnapshotHeights(terrain);

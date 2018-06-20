@@ -25,7 +25,7 @@ namespace MadMaps.WorldStamp
         private void DoVegetationStudioSection()
         {
             WorldStamp singleInstance = targets.Length == 1 ? target as WorldStamp : null;
-            bool canWrite = !singleInstance || singleInstance.Data.VSData.Count > 0;
+            bool canWrite = !(singleInstance && singleInstance.Data.VSData.Count == 0);
             DoHeader("Vegetation Studio", ref _vegetationStudioExpanded, _vegetationStudioEnabled, canWrite);
             if (_vegetationStudioExpanded)
             {
@@ -33,6 +33,10 @@ namespace MadMaps.WorldStamp
 
                 if (!canWrite)
                 {
+                    if(singleInstance)
+                    {
+                        singleInstance.VegetationStudioEnabled = false;
+                    }
                     EditorGUILayout.HelpBox("No Vegetation Studio instances in Stamp", MessageType.Info);
                 }
 

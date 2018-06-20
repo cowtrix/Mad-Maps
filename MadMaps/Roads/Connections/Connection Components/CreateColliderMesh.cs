@@ -56,7 +56,7 @@ namespace MadMaps.Roads.Connections
         public void OnBake()
         {
             // Setup
-            if (Configuration == null || !NodeConnection)
+            if (!Network || Configuration == null || !NodeConnection)
             {
                 return;
             }

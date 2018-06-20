@@ -34,11 +34,7 @@ namespace MadMaps.Roads.Connections
 
         public void OnBake()
         {
-            if (!Network.RecalculateTerrain)
-            {
-                return;
-            }
-            if (Configuration == null)
+            if (!Network || Configuration == null)
             {
                 return;
             }
@@ -118,17 +114,6 @@ namespace MadMaps.Roads.Connections
                     {
                         var coordX = matrixMin.x + dx;
                         var coordZ = matrixMin.z + dz;
-
-                        float thisComponentStencilStrength;
-
-                        var stencilCoord = new Vector2(coordX / (float)splatRes, coordZ / (float)splatRes);
-                        layer.Stencil.StencilBilinearSample(stencilCoord, stencilKey, out thisComponentStencilStrength);
-                        thisPatchStencil[dx, dz] = thisComponentStencilStrength > 0 ? 1 : 0;
-                        if (thisComponentStencilStrength <= 0.01f || config.SplatConfigurations.Count == 0)
-                        {
-                            continue;
-                        }
-
                         var worldPos = terrain.SplatCoordToWorldPos(new Common.Coord(coordX, coordZ));
                         worldPos = new Vector3(worldPos.x, objectBounds.center.y, worldPos.z);
 
@@ -148,9 +133,11 @@ namespace MadMaps.Roads.Connections
                             }
 
                             var writeFloatValue = splatConfiguration.SplatStrength * maskValue;
-                            var writeValue = (byte)Mathf.Clamp(writeFloatValue * 255f, 0, 255);
+                            var writeValue = (byte)Mathf.RoundToInt(Mathf.Clamp(writeFloatValue * 255f, 0, 255));
                             var mainRead = baseLayerSplat[dx, dz];
-                            writeValue = (byte)Mathf.Max(writeValue, mainRead);
+                            //writeValue = (byte)Mathf.Max(writeValue, mainRead);
+
+                            //Debug.Log(string.Format("{0} = {1}", writeFloatValue, writeValue));
 
                             foreach (var currentPrototype in currentPrototypes)
                             {
@@ -164,8 +151,10 @@ namespace MadMaps.Roads.Connections
                                 baseData[currentPrototype][dx, dz] = write;
                             }
 
-                            var newVal = (byte)Mathf.Clamp(mainRead + writeValue, 0, 255);
+                            var newVal = (byte)Mathf.Clamp(Mathf.Max(writeValue, mainRead), 0, 255);
                             baseLayerSplat[dx, dz] = newVal;
+                            layer.Stencil[coordX, coordZ] = MiscUtilities.CompressStencil(stencilKey, 1);
+                            thisPatchStencil[dx, dz] = 1;
                         }
                         else
                         {

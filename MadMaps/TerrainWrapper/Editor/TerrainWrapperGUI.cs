@@ -42,9 +42,9 @@ namespace MadMaps.Terrains
 
         public void OnEnable()
         {
-            if (!Wrapper)
+            if (Wrapper == null)
             {
-                return;
+                Wrapper = target as TerrainWrapper;
             }
             _layerDrawer = new TerrainLayerDrawer(Wrapper);
             _splatsDrawer = new TerrainSplatsDrawer(Wrapper);
@@ -79,7 +79,7 @@ namespace MadMaps.Terrains
                 }
             }
 
-            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            /*_layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
             _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
             if(_tabs == null)
@@ -91,7 +91,7 @@ namespace MadMaps.Terrains
                     new GUIContent("Details") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolPlants")},
                     new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
                 };
-            }
+            }*/
 
             EditorGUILayout.BeginHorizontal();            
             CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20), GUILayout.Width(EditorGUIUtility.currentViewWidth - (IsPopout ? 12 : 40)));
@@ -106,7 +106,6 @@ namespace MadMaps.Terrains
             }
             EditorGUILayout.EndHorizontal();
             
-
             GUILayout.Space(4);
 
             var currentTabTitle = _tabs[CurrentTab].text;

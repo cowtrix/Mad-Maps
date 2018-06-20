@@ -36,6 +36,11 @@ namespace MadMaps.Terrains
             _saveContent = new GUIContent(Resources.Load<Texture2D>("WorldStamp/bttSaveIcon"), "Save Asset");
         }
 
+        private void DrawLayerHeaderCallback(Rect rect)
+        {
+            EditorGUI.LabelField(rect, "Layers");
+        }
+
         private void DrawLayerFooterCallback(Rect rect)
         {
             float buttonWidth = 96;
@@ -87,6 +92,7 @@ namespace MadMaps.Terrains
             var obj = list.list[list.index] as TerrainLayer;
             if (obj != null)
             {
+                
                 bool inLevel = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj));
                 if (!EditorUtility.DisplayDialog(
                     string.Format("Are you sure you want to delete layer {0}?", obj.name),
@@ -94,6 +100,7 @@ namespace MadMaps.Terrains
                         ? "This will DESTROY this layer's information!!!"
                         : "This layer is saved as an asset and so won't be destroyed", "Yes, Delete", "No, Go Back"))
                 {
+                    GUIUtility.ExitGUI();
                     return;
                 }
                 if (inLevel)
@@ -101,6 +108,7 @@ namespace MadMaps.Terrains
                     UnityEngine.Object.DestroyImmediate(obj);
                 }
                 obj.Dispose(_wrapper, true);
+                GUIUtility.ExitGUI();
             }
 
             list.list.RemoveAt(list.index);
@@ -118,6 +126,12 @@ namespace MadMaps.Terrains
                 }
                 newLayer.name = string.Format("New Layer {0}", counter);
                 list.list.Insert(0, newLayer);
+
+                /*var dLayer = newLayer as DeltaLayer;
+                if(dLayer)
+                {
+                    dLayer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Additive;
+                }*/
             });
             menu.ShowAsContext();
         }
@@ -142,7 +156,7 @@ namespace MadMaps.Terrains
 
             var terrainlayer = layer as TerrainLayer;
             var infoRect = new Rect(nameRect.xMax + 4, rect.y, rect.width - 24 - nameRect.width - 28, headerHeight);
-            if (terrainlayer != null)
+            if (terrainlayer != null/* && !(terrainlayer is DeltaLayer)*/)
             {
                 DrawLayerHeader(terrainlayer, infoRect);
             }
@@ -156,42 +170,40 @@ namespace MadMaps.Terrains
             layer.BlendMode = (TerrainLayer.ETerrainLayerBlendMode)EditorGUI.EnumPopup(infoRect, layer.BlendMode);
         }
 
-        private void DrawLayerHeaderCallback(Rect rect)
-        {
-            EditorGUI.LabelField(rect, "Layers");
-        }
-
         public static LayerBase DrawExpandedGUI(TerrainWrapper wrapper, LayerBase layer)
         {
             if (layer == null)
             {
                 return null;
             }
+
+            //var deltaLayer = layer as DeltaLayer;
             var terrainLayer = layer as TerrainLayer;
+            var procLayer = layer as ProceduralLayer;
+            EditorGUILayout.BeginVertical("Box");
+            EditorGUI.indentLevel++;
             if (terrainLayer != null)
             {
-                return DrawExpandedGUI(wrapper, terrainLayer);
-            }
-
-            var procLayer = layer as ProceduralLayer;
-            if (procLayer != null)
+                layer = DrawExpandedGUI(wrapper, terrainLayer);
+            }            
+            else if (procLayer != null)
             {
-                EditorGUILayout.BeginVertical("Box");
-                EditorGUI.indentLevel++;
-                GenericEditor.DrawGUI(procLayer.Components, "Components", typeof(List<ProceduralLayerComponent>), typeof(ProceduralLayer).GetField("Components"), procLayer);
-                EditorGUI.indentLevel--;
-                EditorGUILayout.EndVertical();
-                return procLayer;
+                GenericEditor.DrawGUI(procLayer.Components, "Components", 
+                    typeof(List<ProceduralLayerComponent>), typeof(ProceduralLayer).GetField("Components"), procLayer);
             }
-
-            EditorGUILayout.HelpBox(string.Format("Attempting to draw GUI for {0}, but type {1} is not implemented", layer.name, layer.GetType()), MessageType.Info);
+            else
+            {
+                EditorGUILayout.HelpBox(string.Format("Attempting to draw GUI for {0}, but type {1} is not implemented", 
+                    layer.name, layer.GetType()), MessageType.Info);
+            }
+            EditorGUI.indentLevel--;
+            EditorGUILayout.EndVertical();
+            
             return layer;
         }
-        
+
         public static TerrainLayer DrawExpandedGUI(TerrainWrapper wrapper, TerrainLayer layer)
         {
-            EditorGUILayout.BeginVertical("Box");
-
             bool isInScene = layer != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(layer));
             EditorGUILayout.BeginHorizontal();
             layer = (TerrainLayer)EditorGUILayout.ObjectField(isInScene ? "Asset (In-Scene)" : "Asset", layer, typeof(TerrainLayer), true);
@@ -465,61 +477,6 @@ namespace MadMaps.Terrains
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
-
-            /*if (GUILayout.Button("Debug: Get Compound Splats"))
-            {
-                var aRes = wrapper.Terrain.terrainData.alphamapResolution;
-                var splats = wrapper.GetCompoundSplats(layer, 0, 0, aRes, aRes, true);
-                DataInspector.SetData(splats.Values.ToList());
-            }
-            if (GUILayout.Button("Debug: Flip Height"))
-            {
-                layer.Heights = new Serializable2DFloatArray(layer.Heights.Deserialize().Flip());
-                EditorUtility.SetDirty(layer);
-            }
-            if (GUILayout.Button("Debug: Flip Splats"))
-            {
-                var keys = layer.SplatData.GetKeys();
-                foreach (var prototypeWrapper in keys)
-                {
-                    layer.SplatData[prototypeWrapper] = new Serializable2DByteArray(layer.SplatData[prototypeWrapper].Deserialize().Flip());
-                }
-                EditorUtility.SetDirty(layer);
-            }
-
-            */
-
-            /*if (GUILayout.Button("Fix bad prefabs"))
-            {
-                for (int i = layer.Objects.Count - 1; i >= 0; i--)
-                {
-                    var prefabObjectData = layer.Objects[i];
-                    prefabObjectData.Prefab = PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab);
-                    if (prefabObjectData.Prefab == null)
-                    {
-                        layer.Objects.RemoveAt(i);
-                        continue;
-                    }
-                    layer.Objects[i] = prefabObjectData;
-                }
-                EditorUtility.SetDirty(layer);
-            }
-
-            if (GUILayout.Button("Resample"))
-            {
-                var h = layer.Heights;
-                var newHRes = wrapper.Terrain.terrainData.heightmapResolution;
-                layer.Heights = new Serializable2DFloatArray(newHRes, newHRes);
-                for (var u = 0; u < layer.Heights.Width; ++u)
-                {
-                    for (var v = 0; v < layer.Heights.Height; ++v)
-                    {
-                        layer.Heights[u, v] = h.BilinearSample(new Vector2(u/(float) newHRes, v/(float) newHRes));
-                    }
-                }
-            }*/
-
-            EditorGUILayout.EndVertical();
             
             return layer;
         }

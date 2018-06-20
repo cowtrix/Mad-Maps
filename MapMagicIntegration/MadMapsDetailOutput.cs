@@ -69,7 +69,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 					if (renderMode == GrassRenderMode.Object || renderMode == GrassRenderMode.VertexLit)
 					{
 						Wrapper.Prototype = layout.Field(Wrapper.Prototype, "Object");
-						Wrapper.PrototypeTexture = null; //otherwise this texture will be included to build even if not displayed
+						//Wrapper.PrototypeTexture = null; //otherwise this texture will be included to build even if not displayed
 						//Wrapper.UsePrototypeMesh = true;
 					}
 					else
@@ -77,7 +77,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 						layout.Par(60); //not 65
 						layout.Inset((layout.field.width - 60) / 2);
 						Wrapper.PrototypeTexture = layout.Field(Wrapper.PrototypeTexture, rect: layout.Inset(60));
-						Wrapper.Prototype = null; //otherwise this object will be included to build even if not displayed
+						//Wrapper.Prototype = null; //otherwise this object will be included to build even if not displayed
 						//Wrapper.UsePrototypeMesh = false;
 						layout.Par(2);
 					}

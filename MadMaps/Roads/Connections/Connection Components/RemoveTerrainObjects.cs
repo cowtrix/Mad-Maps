@@ -30,7 +30,7 @@ namespace MadMaps.Roads
 
         public void OnBake()
         {
-            if (!Network.RecalculateTerrain)
+            if (!Network)
             {
                 return;
             }

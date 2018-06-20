@@ -24,11 +24,7 @@ namespace MadMaps.Roads.Connections
 
         public void OnBake()
         {
-            if (!Network.RecalculateTerrain)
-            {
-                return;
-            }
-            if (Configuration == null)
+            if (!Network || Configuration == null)
             {
                 return;
             }
