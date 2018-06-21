@@ -178,29 +178,8 @@ namespace MadMaps.WorldStamp
             }
 
             transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
-            if (SnapPosition)
-            {
-                transform.position = transform.position.Round();
-            }
-            if (SnapRotation)
-            {
-                transform.rotation = transform.rotation.SnapToNearest90Degrees();
-            }
-            if (SnapToTerrainHeight && transform.position != _lastSnapPosition)
-            {
-                var allWrappers =
-                    GetTerrainWrappers()
-                        .OrderBy(wrapper => Vector3.Distance(wrapper.transform.position, transform.position))
-                        .ToList();
-                if (allWrappers.Count > 0)
-                {
-                    var sample = allWrappers[0].transform.position.y +
-                                 allWrappers[0].GetCompoundHeight(allWrappers[0].GetLayer<TerrainLayer>(LayerName),
-                                     transform.position) * allWrappers[0].Terrain.terrainData.size.y;
-                    transform.position = new Vector3(transform.position.x, sample, transform.position.z) + Vector3.up * SnapToTerrainHeightOffset;
-                }
-                _lastSnapPosition = transform.position;
-            }
+
+            SnapStamp(false);
 
             if (!PreviewEnabled && _preview != null)
             {
@@ -214,6 +193,29 @@ namespace MadMaps.WorldStamp
                     Data.Heights, () => Size, () => transform.position, () => transform.lossyScale,
                     () => transform.rotation, () => this.Data.Size, HaveHeightsBeenFlipped, GetMask(), Data.GridManager,
                     () => this && gameObject.activeInHierarchy, 32);
+            }
+        }
+
+        public void SnapStamp(bool force)
+        {
+            if (SnapRotation)
+            {
+                transform.rotation = transform.rotation.SnapToNearest90Degrees();
+            }
+            if (SnapToTerrainHeight && (force || transform.position != _lastSnapPosition))
+            {
+                var allWrappers =
+                    GetTerrainWrappers()
+                        .OrderBy(wrapper => Vector3.Distance(wrapper.transform.position, transform.position))
+                        .ToList();
+                if (allWrappers.Count > 0)
+                {
+                    var sample = allWrappers[0].transform.position.y +
+                                 allWrappers[0].GetCompoundHeight(allWrappers[0].GetLayer<TerrainLayer>(LayerName),
+                                     transform.position) * allWrappers[0].Terrain.terrainData.size.y;
+                    transform.position = new Vector3(transform.position.x, sample, transform.position.z) + Vector3.up * SnapToTerrainHeightOffset;
+                }
+                _lastSnapPosition = transform.position;
             }
         }
 

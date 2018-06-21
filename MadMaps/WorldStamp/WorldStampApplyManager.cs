@@ -138,6 +138,8 @@ namespace MadMaps.WorldStamp
                 // on the map through their height values. For this reason heights needed to be evaluated first, so winners can be determined.
                 for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
                 {
+                    layerStampMapping.Stamps[j].SnapStamp(true);
+
                     MiscUtilities.ProgressBar(String.Format("Applying Heights for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
                     layerStampMapping.Stamps[j].StampHeights(wrapper, layer);
                 }
