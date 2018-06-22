@@ -223,6 +223,13 @@ namespace MadMaps.WorldStamp.Authoring
                 SceneGUIOwner.PreviewInScene(this);
             }
 
+            var heightmap = GetCreator<HeightmapDataCreator>();
+            if(heightmap != null && heightmap.Enabled)
+            {
+                HandleExtensions.DrawWireCube(Template.Bounds.center.xz().x0z(Template.Bounds.min.y + heightmap.ZeroLevel * Template.Bounds.size.y), 
+                    Template.Bounds.size.xz().x0z() / 2, Quaternion.identity, Color.cyan);
+            }
+
             Handles.color = Color.white;
             Handles.DrawWireCube(Template.Bounds.center, Template.Bounds.size);
             Handles.color = Color.white.WithAlpha(.5f);

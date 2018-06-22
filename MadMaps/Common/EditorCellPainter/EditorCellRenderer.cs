@@ -24,18 +24,7 @@ namespace MadMaps.Common.Painter
         private List<Vector2> _uvs = new List<Vector2>();
         double _lastAliveTime;
 
-        private bool UseCPU()
-        {
-            if(EditorCellHelper.ForceCPU)
-            {
-                return true;
-            }
-            if(SystemInfo.graphicsShaderLevel < 45)
-            {
-                return true;
-            }
-            return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
-        }
+        
 
         public void SetAlive()
         {
@@ -69,7 +58,7 @@ namespace MadMaps.Common.Painter
 
         public void QueueCell(EditorCellHelper.Cell cell)
         {
-            if(UseCPU())
+            if(EditorCellHelper.UseCPU())
             {
                 var cellSize = EditorCellHelper.CellSize;
                 int index = _verts.Count;
@@ -121,7 +110,7 @@ namespace MadMaps.Common.Painter
             Mesh.SetVertices(_verts);
             Mesh.SetTriangles(_tris, 0);
             Mesh.SetColors(_colors);
-            if(UseCPU())
+            if(EditorCellHelper.UseCPU())
             {
                 Mesh.SetUVs(0, _uvs);
             }            

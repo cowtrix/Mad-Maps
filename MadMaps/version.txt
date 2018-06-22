@@ -4,6 +4,10 @@ v 0.1.2c
 
 - Fixed Set Terrain Splat road connection component
 - Improved some issues when capturing only certain layers for a stamp
+- World Stamps will now update their snapping just before they are applied
+- Fixed some errors with painting large masks with the fallback OpenGL mode
+- Fixed blur brush for painter
+- Fixed specifying a manual zero level on stamp capturing
 
 == History ==
 

@@ -120,12 +120,13 @@ namespace MadMaps.WorldStamp.Authoring
             {
                 EditorGUI.indentLevel++;
                 var tHeight = parent.Template.Terrain.terrainData.size.y;
-                var newHeightMin = EditorGUILayout.Slider("Zero Level", ZeroLevel * tHeight, 0, 1) / tHeight;
+                var newHeightMin = EditorGUILayout.Slider("Zero Level", ZeroLevel * tHeight, 0, tHeight) / tHeight;
                 EditorGUI.indentLevel--;
                 if (newHeightMin != ZeroLevel)
                 {
                     ZeroLevel = newHeightMin;
                     NeedsRecapture = true;
+                    SceneView.RepaintAll();
                 }
             }
             if (EditorGUI.EndChangeCheck())
@@ -149,9 +150,7 @@ namespace MadMaps.WorldStamp.Authoring
                     () => Quaternion.identity, () => bounds.size, true, null, null,
                     () => parent.SceneGUIOwner == this, 128);
                 _dirty = false;
-            }
-
-            HandleExtensions.DrawWireCube(bounds.center.xz().x0z(bounds.min.y + ZeroLevel * bounds.size.y), bounds.size.xz().x0z() / 2, Quaternion.identity, Color.cyan);
+            }            
         }
 
         public override void PreviewInDataInspector()

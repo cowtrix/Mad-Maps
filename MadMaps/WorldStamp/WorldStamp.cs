@@ -620,7 +620,7 @@ namespace MadMaps.WorldStamp
 
         public void StampDetails(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
         {
-            if (!WriteDetails)
+            if (!WriteDetails&& !RemoveExistingDetails)
             {
                 return;
             }

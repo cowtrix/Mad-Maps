@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEngine.Rendering;
 
 namespace MadMaps.Common.Painter
 {
@@ -20,6 +21,18 @@ namespace MadMaps.Common.Painter
             {
                 EditorPrefs.SetBool(ForceCPUKey, value);
             }
+        }
+        public static bool UseCPU()
+        {
+            if(EditorCellHelper.ForceCPU)
+            {
+                return true;
+            }
+            if(SystemInfo.graphicsShaderLevel < 45)
+            {
+                return true;
+            }
+            return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
         }
         public static float CellSize
         {
@@ -147,7 +160,9 @@ namespace MadMaps.Common.Painter
                 }
             }
 
-            int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)MAX_VERTS);
+            int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)(UseCPU() ? (MAX_VERTS-4) / 4 : MAX_VERTS));
+
+            //Debug.Log(string.Format("{0} = {1}", _cells.Count, requiredRendererCount));
             for (int i = 0; i < requiredRendererCount; i++)
             {
                 if (_rendererList.Count <= i)
@@ -169,13 +184,19 @@ namespace MadMaps.Common.Painter
                 _rendererList.RemoveAt(i);
             }
 
+            if(requiredRendererCount == 0)
+            {
+                return;
+            }
+
+            
             var activeRenderer = _rendererList[0];
             int index = 0;
             for (int i = 0; i < _cells.Count; i++)
             {
                 var cell = _cells[i];
                 activeRenderer.QueueCell(cell);
-                if (activeRenderer.VertCount > MAX_VERTS)
+                if (activeRenderer.VertCount > (UseCPU() ? MAX_VERTS - 4 : MAX_VERTS))
                 {
                     index++;
                     activeRenderer = _rendererList[index];

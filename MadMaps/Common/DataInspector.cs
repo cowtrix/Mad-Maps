@@ -193,10 +193,10 @@ namespace MadMaps.Common
             }
             _index = Mathf.Clamp(_index, 0, _entries.Count - 1);
 
-            /*if (GUILayout.Button("Normalize Preview"))
+            if (GUILayout.Button("Normalize Preview"))
             {
-                Normalise(tex);
-            }*/
+                Normalise(entry);
+            }
 
             if (GUILayout.Button("Save as Texture"))
             {
@@ -206,6 +206,11 @@ namespace MadMaps.Common
                     File.WriteAllBytes(path, entry.Texture.EncodeToPNG());
                 }
             }
+        }
+
+        private void Normalise(DataEntry entry)
+        {
+            entry.Texture = entry.Data.ToTexture2D(true, entry.Texture);
         }
     }
 #endif

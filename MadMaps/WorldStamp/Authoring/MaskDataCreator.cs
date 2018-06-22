@@ -180,6 +180,8 @@ namespace MadMaps.WorldStamp.Authoring
                 {
                     ResetMask(parent.Template.Bounds);
                 }
+                GUIUtility.ExitGUI();
+                return;
             }
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();

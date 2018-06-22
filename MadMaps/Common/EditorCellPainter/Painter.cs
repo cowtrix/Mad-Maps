@@ -308,6 +308,11 @@ namespace MadMaps.Common.Painter
 
         private void DrawSceneControls()
         {
+            if (Event.current.type == EventType.MouseMove)
+            {
+                return;
+            }
+
             if (Event.current.type == EventType.Repaint)
             {
                 UIBlockers.Clear();
@@ -316,7 +321,7 @@ namespace MadMaps.Common.Painter
             GUILayout.BeginArea(new Rect(0, 0, 240, Screen.height));
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-
+            EditorGUILayout.LabelField(EditorCellHelper.UseCPU() ? "Using CPU Painting" : "Using GPU Painting");
             var offset = EditorPrefs.GetFloat("Painter_PlaneOffset", 0);
             offset = EditorGUILayout.FloatField("Plane Offset", offset);
             if (!Mathf.Approximately(PlaneOffset, offset))

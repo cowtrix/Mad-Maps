@@ -7,93 +7,124 @@ namespace MadMaps.Common.Painter
 {
     public class BlurBrush : BaseBrush, IBrush
     {
-        public int Radius = 2;
-        public float Strength = 1;
+        private double _lastPaint;
+        public EBrushShape BrushShape;
+        public AnimationCurve Falloff = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 1));
         public float Flow = 3;
+        public int Radius = 2;
+        [Range(0, 1)]
+        public float Strength = 1;
         public int Iterations = 1;
-        public AnimationCurve Falloff = new AnimationCurve(new[] { new Keyframe(0, 1), new Keyframe(1, 1) });
-
-        public override void DrawSpecificGUI()
-        {
-            Strength = Mathf.Max(0, EditorGUILayout.Slider("Strength", Strength, 0, 1));
-            Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
-            Radius = Mathf.Max(0, EditorGUILayoutX.IntSlider("Radius", Radius, 0, 10));
-        }
-
-        protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
-        {
-            var gridSize = gridManager.GetGridSize();
-            Handles.color = Color.white*0.5f;
-            Handles.CircleHandleCap(-1, inputState.PlanePosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
-            var scaledRad = gridSize * Radius;
-            for (var i = -scaledRad; i <= scaledRad; i += gridSize)
-            {
-                for (var j = -scaledRad; j <= scaledRad; j += gridSize)
-                {
-                    var pos = inputState.GridPosition + new Vector3(i, 0, j);
-                    var circleDist = Vector2.Distance(inputState.GridPosition.xz(), pos.xz());
-                    if (circleDist > scaledRad)
-                    {
-                        continue;
-                    }
-                    Handles.RectangleHandleCap(-1, pos, Quaternion.LookRotation(Vector3.up), gridSize / 2, EventType.Repaint);
-                }
-            }
-            Handles.color = Color.white;
-            Handles.CircleHandleCap(-1, inputState.GridPosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
-        }
 
         public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
         {
-            bool dirty = false;
-
-            var gridSize = gridManager.GetGridSize();
-            var scaledRad = gridSize * Radius;
-            
-            for (var i = -scaledRad; i <= scaledRad; i += gridSize)
+            var dirty = false;
+            var scaledRad = gridManager.GetGridSize()*Radius;
+            for (var i = -scaledRad; i <= scaledRad; i += gridManager.GetGridSize())
             {
-                for (var j = -scaledRad; j <= scaledRad; j += gridSize)
+                for (var j = -scaledRad; j <= scaledRad; j += gridManager.GetGridSize())
                 {
                     var pos = inputState.GridPosition + new Vector3(i, 0, j);
-                    if (!rect.Contains(pos.xz()))
+                    var cell = gridManager.GetCell(pos);
+
+                    if (rect.size.magnitude > 0 && !rect.Contains(pos.xz()))
                     {
+                        canvas.RemoveCell(cell);
                         continue;
                     }
 
-                    var circleDist = Vector2.Distance(inputState.GridPosition.xz(), pos.xz());
-                    if (circleDist > scaledRad)
+                    var normalisedDist = 1f;
+                    if (BrushShape == EBrushShape.Circle)
                     {
-                        continue;
+                        var circleDist = Vector2.Distance(inputState.GridPosition.xz(), pos.xz());
+                        if (circleDist > scaledRad)
+                        {
+                            continue;
+                        }
+                        normalisedDist = circleDist/scaledRad;
+                    }
+                    else
+                    {
+                        normalisedDist = Mathf.Abs(inputState.GridPosition.x - pos.x) +
+                                         Mathf.Abs(inputState.GridPosition.y - pos.y);
+                        normalisedDist /= scaledRad;
                     }
 
-                    var normalisedDist = circleDist / scaledRad;
                     var falloff = 1f;
                     if (!float.IsNaN(normalisedDist))
                     {
                         falloff = Falloff.Evaluate(normalisedDist);
                     }
-
-                    var baseCell = gridManager.GetCell(pos);
-                    float existingVal = canvas.GetValue(baseCell);
+                    var val = Strength*falloff;
                     
-                    for (var k = 0; k < Iterations; ++k)
+                    //var existingVal = canvas.GetValue(cell);
+
+                    var sum = 0f;
+                    for(var iter = 0; iter < Iterations; ++iter)
                     {
-                        var sum = 0f;
-                        for (var u = -1; u <= 1; ++u)
+                        for(var u = -1; u <= 1; ++u)
                         {
-                            for (var v = -1; v <= 1; ++v)
+                            for(var v = -1; v <= 1; ++v)
                             {
-                                var cell = gridManager.GetCell(pos + new Vector3(u*gridSize, 0, v*gridSize));
-                                sum += canvas.GetValue(cell);
+                                var neighbourPos = inputState.GridPosition + new Vector3(i + u * gridManager.GetGridSize(), 0, j + v * gridManager.GetGridSize());
+                                var neighbourCell = gridManager.GetCell(neighbourPos);
+                                sum += canvas.GetValue(neighbourCell);
                             }
                         }
-                        canvas.SetValue(baseCell, Mathf.Lerp(existingVal, sum / 9f, falloff) * dt * Flow);
                     }
 
+                    val = Mathf.Lerp(sum / 9, val, Strength * Flow * dt);
+                    val = Mathf.Clamp(val, minVal, maxVal);
+
+                    canvas.SetValue(cell, val);
                     dirty = true;
                 }
             }
             return dirty;
+        }
+
+        public override void DrawSpecificGUI()
+        {
+            Strength = Mathf.Max(0, EditorGUILayout.FloatField("Strength", Strength));
+            Radius = Mathf.Clamp(EditorGUILayout.IntField("Radius", Radius), 0, 32);
+            Falloff = EditorGUILayout.CurveField("Falloff", Falloff, Color.white, new Rect(0, 0, 1, 1));
+            BrushShape = (EBrushShape) EditorGUILayout.EnumPopup("Shape", BrushShape);
+            Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
+        }
+
+        protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        {
+            Radius = Mathf.Clamp(Radius, 0, 32);
+            //var scaledRad = gridManager.GetGridSize()*Radius;
+
+            var translatedPlanePos = TRS.MultiplyPoint(inputState.PlanePosition);
+            var translatedGridPos = TRS.MultiplyPoint(inputState.GridPosition);
+            var planeUp = TRS.GetRotation()*Vector3.up;
+            var planeForward = TRS.GetRotation()*Vector3.forward;
+            var planeRot = Quaternion.LookRotation(planeUp, planeForward);
+
+            Handles.color = Color.white*0.5f;
+            if (BrushShape == EBrushShape.Circle)
+            {
+                Handles.CircleHandleCap(-1, translatedPlanePos, planeRot,
+                    gridManager.GetGridSize()*Radius, EventType.Repaint);
+            }
+            else
+            {
+                Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
+                    gridManager.GetGridSize()*Radius, EventType.Repaint);
+            }
+            Handles.color = Color.white;
+            if (BrushShape == EBrushShape.Circle)
+            {
+                Handles.CircleHandleCap(-1, translatedGridPos, planeRot,
+                    gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
+            }
+            else
+            {
+                Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
+                    gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
+            }
         }
     }
 }
