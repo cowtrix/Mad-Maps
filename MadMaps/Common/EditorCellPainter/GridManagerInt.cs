@@ -1,8 +1,13 @@
 using UnityEngine;
+using Painter = MadMaps.Common.Painter.Painter;
+using IGridManager = MadMaps.Common.Painter.IGridManager;
+using GridManagerInt = MadMaps.Common.Painter.GridManagerInt;
+using IBrush = MadMaps.Common.Painter.IBrush;
+using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 
 namespace MadMaps.Common.Painter
 {
-    public class GridManagerInt : IGridManager
+    public class GridManagerInt : MadMaps.Common.Painter.IGridManager
     {
         public readonly float GRID_SIZE;
         public readonly int GRID_MAX;

@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
-
+using Painter = MadMaps.Common.Painter.Painter;
+using IGridManager = MadMaps.Common.Painter.IGridManager;
+using GridManagerInt = MadMaps.Common.Painter.GridManagerInt;
+using IBrush = MadMaps.Common.Painter.IBrush;
+using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 #if UNITY_EDITOR
 using UnityEditor;
 
@@ -92,7 +96,7 @@ namespace MadMaps.Common.Painter
             Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
         }
 
-        protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             Radius = Mathf.Clamp(Radius, 0, 32);
             //var scaledRad = gridManager.GetGridSize()*Radius;

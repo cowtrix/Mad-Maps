@@ -21,7 +21,7 @@ namespace MadMaps.Common.Painter
         Rectangle
     }
 
-    public class DefaultBrush : BaseBrush, IBrush
+    public class DefaultBrush : MadMaps.Common.Painter.BaseBrush, MadMaps.Common.Painter.IBrush
     {
         private double _lastPaint;
         public EBrushBlendMode BrushBlendMode;
@@ -31,7 +31,7 @@ namespace MadMaps.Common.Painter
         public int Radius = 2;
         public float Strength = 1;
 
-        public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
+        public override bool Paint(float dt, MadMaps.Common.Painter.IPaintable canvas, MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
         {
             var dirty = false;
             var brushBlendMode = BrushBlendMode;
@@ -102,15 +102,15 @@ namespace MadMaps.Common.Painter
             Strength = Mathf.Max(0, EditorGUILayout.FloatField("Strength", Strength));
             Radius = Mathf.Clamp(EditorGUILayout.IntField("Radius", Radius), 0, 32);
             Falloff = EditorGUILayout.CurveField("Falloff", Falloff, Color.white, new Rect(0, 0, 1, 1));
-            BrushBlendMode = (EBrushBlendMode) EditorGUILayout.EnumPopup("Blend Mode", BrushBlendMode);
-            BrushShape = (EBrushShape) EditorGUILayout.EnumPopup("Shape", BrushShape);
+            BrushBlendMode = (MadMaps.Common.Painter.EBrushBlendMode) EditorGUILayout.EnumPopup("Blend Mode", BrushBlendMode);
+            BrushShape = (MadMaps.Common.Painter.EBrushShape) EditorGUILayout.EnumPopup("Shape", BrushShape);
             if (BrushBlendMode == EBrushBlendMode.Add || BrushBlendMode == EBrushBlendMode.Subtract)
             {
                 Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
             }
         }
 
-        protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             Radius = Mathf.Clamp(Radius, 0, 32);
             //var scaledRad = gridManager.GetGridSize()*Radius;

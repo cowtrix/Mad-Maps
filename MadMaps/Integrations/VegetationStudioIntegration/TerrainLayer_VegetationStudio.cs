@@ -148,6 +148,16 @@ namespace MadMaps.Terrains
                     Debug.LogWarning(string.Format("Couldn't capture from system {0} as it doesn't have a Vegetation Package assigned.", vegSys), vegSys);
                     continue;
                 }
+                if(vegStorage == null)
+                {
+                    Debug.LogError(string.Format("Unable to find Vegetation Storage from system {0}!", vegSys), vegSys);
+                    continue;
+                }
+                if(vegStorage.PersistentVegetationStoragePackage == null)
+                {
+                    Debug.LogError(string.Format("Unable to find PersistentVegetation Storage from system {0}!", vegStorage), vegStorage);
+                    continue;
+                }
                 foreach(var cell in vegStorage.PersistentVegetationStoragePackage.PersistentVegetationCellList)
                 {
                     foreach(var info in cell.PersistentVegetationInfoList)

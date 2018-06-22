@@ -20,7 +20,7 @@ namespace MadMaps.Common.Painter
         // internal variables
         private bool _repaint = true;
         public CellDelegate DoSceneGUIForHoverCell;
-        public IGridManager GridManager;
+        public MadMaps.Common.Painter.IGridManager GridManager;
         public float MaxValue = float.MaxValue;
         public float MinValue = float.MinValue;
         public float Opacity;
@@ -35,14 +35,14 @@ namespace MadMaps.Common.Painter
         public CellColorDelegate TransmuteCellColor;
         public Matrix4x4 TRS = Matrix4x4.identity;
 
-        public Painter(IPaintable canvas, IGridManager gridManager)
+        public Painter(MadMaps.Common.Painter.IPaintable canvas, MadMaps.Common.Painter.IGridManager gridManager)
         {
             Canvas = canvas;
             GridManager = gridManager;
             _lastUpdate = EditorApplication.timeSinceStartup;
         }
 
-        public IPaintable Canvas
+        public MadMaps.Common.Painter.IPaintable Canvas
         {
             get { return __canvas; }
             set
@@ -57,7 +57,7 @@ namespace MadMaps.Common.Painter
 
         public bool PaintingEnabled { get; set; }
 
-        private IBrush CurrentBrush
+        private MadMaps.Common.Painter.IBrush CurrentBrush
         {
             get
             {
@@ -82,11 +82,11 @@ namespace MadMaps.Common.Painter
             }
         }
 
-        private IBrush DefaultBrush
+        private MadMaps.Common.Painter.IBrush DefaultBrush
         {
             get
             {
-                return new DefaultBrush
+                return new MadMaps.Common.Painter.DefaultBrush
                 {
                     BrushShape = EBrushShape.Circle,
                     BrushBlendMode = EBrushBlendMode.Add,
@@ -181,7 +181,7 @@ namespace MadMaps.Common.Painter
                 {
                     try
                     {
-                        CurrentBrush = (IBrush) JsonUtility.FromJson(json, type);
+                        CurrentBrush = (MadMaps.Common.Painter.IBrush) JsonUtility.FromJson(json, type);
                     }
                     catch (Exception)
                     {

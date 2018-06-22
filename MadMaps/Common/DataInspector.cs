@@ -73,6 +73,11 @@ namespace MadMaps.Common
         public static void SetData(IDataInspectorProvider data, object context = null, bool normalise = false)
         {
             Dispose();
+            if(data == null)
+            {
+                Debug.LogWarning("Attempted to view null data in the Data Inspector! " + context);
+                return;
+            }
             var texture = data.ToTexture2D(normalise);
             _entries.Add(new DataEntry()
             {

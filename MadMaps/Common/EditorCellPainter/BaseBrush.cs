@@ -7,7 +7,7 @@ namespace MadMaps.Common.Painter
     {
         public abstract bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float maxValue, float maxVal, Rect rect, Matrix4x4 TRS);
 
-        public void DrawGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        public void DrawGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             if (!inputState.MouseBlocked)
             {
@@ -15,7 +15,7 @@ namespace MadMaps.Common.Painter
             }
         }
 
-        protected abstract void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS);
+        protected abstract void DrawSceneGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS);
 
         public void DrawGUI()
         {
