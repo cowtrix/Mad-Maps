@@ -5,11 +5,14 @@ using MadMaps.Common.Collections;
 using MadMaps.Terrains;
 using MadMaps.Terrains.Lookups;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using Painter = MadMaps.Common.Painter.Painter;
 using IGridManager = MadMaps.Common.Painter.IGridManager;
 using GridManagerInt = MadMaps.Common.Painter.GridManagerInt;
 using IBrush = MadMaps.Common.Painter.IBrush;
 using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
+#endif
 
 #if VEGETATION_STUDIO
 using AwesomeTechnologies;
