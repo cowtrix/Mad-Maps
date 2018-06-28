@@ -20,6 +20,10 @@ namespace MadMaps.WorldStamp.Authoring
         [Common.GenericEditor.ShowIf("AutoZeroLevel", false)]
         public float ZeroLevel = 0;
 
+        [NonSerialized]
+        [HideInInspector]
+        public float HeightSize;
+
         private WorldStampPreview _preview;
 
         private bool _dirty;
@@ -87,7 +91,7 @@ namespace MadMaps.WorldStamp.Authoring
                     Heights[dx, dz] -= ZeroLevel;
                 }
             }
-            //Debug.Log(maxHeight);
+            HeightSize = maxHeight - ZeroLevel;
             _dirty = true;
         }
 

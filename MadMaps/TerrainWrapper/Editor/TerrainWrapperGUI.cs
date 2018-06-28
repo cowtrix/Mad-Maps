@@ -44,6 +44,10 @@ namespace MadMaps.Terrains
         {
             if (Wrapper == null)
             {
+                if(IsPopout)
+                {
+                    return;
+                }
                 Wrapper = target as TerrainWrapper;
             }
             _layerDrawer = new TerrainLayerDrawer(Wrapper);
@@ -65,8 +69,16 @@ namespace MadMaps.Terrains
 
         public override void OnInspectorGUI()
         {
+            if(IsPopout)
+            {
+                Wrapper = (TerrainWrapper)EditorGUILayout.ObjectField("Terrain Wrapper", Wrapper, typeof(TerrainWrapper), true );
+            }
             if (Wrapper == null)
             {
+                if(IsPopout)
+                {
+                    return;
+                }
                 Wrapper = target as TerrainWrapper;
                 return;
             }
@@ -78,6 +90,10 @@ namespace MadMaps.Terrains
                     Wrapper.Layers.RemoveAt(i);
                 }
             }
+
+            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
+            _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
             /*_layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
             _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);

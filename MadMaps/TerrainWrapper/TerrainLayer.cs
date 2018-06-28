@@ -40,14 +40,55 @@ namespace MadMaps.Terrains
         public virtual void SnapshotTerrain(Terrain terrain)
         {
             Debug.Log("Snapshotted Terrain " + terrain.name, terrain);
-            this.SnapshotHeights(terrain);
-            this.SnapshotSplats(terrain);
-            this.SnapshotDetails(terrain);
-            this.SnapshotTrees(terrain);
-            this.SnapshotObjects(terrain);
-
+            try
+            {
+                this.SnapshotHeights(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
+            try
+            {
+                this.SnapshotSplats(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
+            try
+            {
+                this.SnapshotDetails(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
+            try
+            {
+                this.SnapshotTrees(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
+            try
+            {
+                this.SnapshotObjects(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
             #if VEGETATION_STUDIO
-            this.SnapshotVegetationStudioData(terrain);
+            try
+            {
+                this.SnapshotVegetationStudioData(terrain);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e, terrain);
+            }
             #endif
         }
 
@@ -65,12 +106,12 @@ namespace MadMaps.Terrains
 
         public override void PrepareApply(TerrainWrapper terrainWrapper, int index)
         {
-            if(index == 0)
+            if(index == terrainWrapper.Layers.Count - 1)
             {
                 if(Heights != null && Heights.Width > 0 && Heights.Height > 0)
                 {
                     terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
-                }                
+                }
                 if(DetailData.Count > 0)
                 {
                     var firstMap = DetailData.First();
@@ -175,8 +216,8 @@ namespace MadMaps.Terrains
                 {
                     Debug.LogWarning(
                         string.Format(
-                            "Failed to write heights for layer {0} as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
-                            name, Heights.Width, heightmapRes));
+                            "Failed to write heights for layer '{0}' as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
+                            name, heightmapRes, Heights.Width), wrapper);
                 }
                 return;
             }
@@ -233,8 +274,8 @@ namespace MadMaps.Terrains
                 {
                     Debug.LogWarning(
                         string.Format(
-                            "Failed to write splat layer {0} as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
-                            splatPrototypeWrapper.name, splatRes, readData.Width));
+                            "Failed to write splat layer {0} for layer '{3}' as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
+                            splatPrototypeWrapper.name, splatRes, readData.Width, name), wrapper);
                     continue;
                 }
 
@@ -291,8 +332,8 @@ namespace MadMaps.Terrains
                 {
                     Debug.LogWarning(
                         string.Format(
-                            "Failed to write detail layer {0} as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
-                            detailPrototypeWrapper.name, detailResolution, readData.Width));
+                            "Failed to write detail layer {0} for layer '{3}' as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
+                            detailPrototypeWrapper.name, detailResolution, readData.Width, name), wrapper);
                     continue;
                 }
 

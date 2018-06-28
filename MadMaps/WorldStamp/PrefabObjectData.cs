@@ -14,5 +14,6 @@ namespace MadMaps.WorldStamp
         public string Guid;
         [FormerlySerializedAs("IsRelativeToStamp")]
         public bool AbsoluteHeight;
+        public string ContainerMetadata;
     }
 }

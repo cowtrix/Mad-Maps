@@ -135,8 +135,9 @@ namespace MadMaps.WorldStamp.Authoring
                 var temp = TargetInjectionTemplate;
                 temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
                 temp.Mask = mask.GetArrayFromMask(this);
-                temp.Size = Template.Bounds.size;
+                temp.Size = Template.Bounds.size;                
             }
+
             GUI.enabled = true;
             GUILayout.EndHorizontal();
 
@@ -171,6 +172,7 @@ namespace MadMaps.WorldStamp.Authoring
                     }
                 }
                 data.Size = Template.Bounds.size;
+                
                 stamp.SetData(data);
                 stamp.HaveHeightsBeenFlipped = true;
                 go.transform.SetLayerRecursive(Template.Layer);
@@ -188,6 +190,7 @@ namespace MadMaps.WorldStamp.Authoring
                     worldStampCreatorLayer.Commit(data, TargetInjectionStamp);
                 }
                 data.Size = Template.Bounds.size;
+                
                 TargetInjectionStamp.SetData(data);
                 TargetInjectionStamp.HaveHeightsBeenFlipped = true;
                 TargetInjectionStamp.gameObject.layer = Template.Layer;

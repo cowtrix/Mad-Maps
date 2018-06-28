@@ -115,7 +115,8 @@ namespace MadMaps.Roads.Connections
                     Position = tPos,
                     Scale = scale,
                     Rotation = rotation.eulerAngles, 
-                    Prefab = prefab
+                    Prefab = prefab,
+                    ContainerMetadata = layer.name,
                 };
 
                 layer.Objects.Add(prefabObject);

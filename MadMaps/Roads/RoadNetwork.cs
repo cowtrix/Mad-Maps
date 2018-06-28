@@ -218,9 +218,17 @@ namespace MadMaps.Roads
                 var terrains = FindObjectsOfType<Terrain>();
                 foreach (var terrain in terrains)
                 {
+                    if(!terrain)
+                    {
+                        continue;
+                    }
                     var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-                    var layer = GetLayer(wrapper, true);
+                    if(!wrapper)
+                    {
+                        continue;
+                    }
 
+                    var layer = GetLayer(wrapper, true);
                     layer.Clear(wrapper);
                     
                     var sRes = wrapper.Terrain.terrainData.heightmapResolution;

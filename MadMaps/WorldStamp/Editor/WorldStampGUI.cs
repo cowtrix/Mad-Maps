@@ -29,6 +29,7 @@ namespace MadMaps.WorldStamp
         private SerializedProperty _layerName;
         private SerializedProperty _previewEnabled;
         private SerializedProperty _gizmoColor, _gizmosEnabled;
+        private SerializedProperty _disableStencil;
 
         [SerializeField]
         private bool _heightsExpanded, _treesExpanded, _objectsExpanded, _splatsExpanded, _detailsExpanded;
@@ -101,6 +102,7 @@ namespace MadMaps.WorldStamp
             _detailsRemoveExisting = serializedObject.FindProperty("RemoveExistingDetails");
             //_overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
             _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
+            _disableStencil = serializedObject.FindProperty("DisableStencil");
         }
 
         void OnDisable()
@@ -256,6 +258,8 @@ namespace MadMaps.WorldStamp
             }
             EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.PropertyField(_disableStencil);
+
             EditorExtensions.Seperator();
 
             DoHeightsSection();
@@ -271,6 +275,8 @@ namespace MadMaps.WorldStamp
             #if VEGETATION_STUDIO
             DoVegetationStudioSection();
             #endif
+
+
 
             serializedObject.ApplyModifiedProperties();
             GUI.enabled = true;

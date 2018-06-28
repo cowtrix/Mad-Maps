@@ -81,8 +81,9 @@ namespace MadMaps.Terrains
                             "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper", "Skip For Now");
                     if (promptResult == 0)                       
                     {
+                        var rootAssetName = prototype.texture != null ? prototype.texture.name : "NullTexture";
                         var path = EditorExtensions.SaveFilePanel("Create New SplatPrototype Wrapper",
-                            prototype.texture.name + "Wrapper", "asset");
+                            rootAssetName + "Wrapper", "asset");
                         if (!String.IsNullOrEmpty(path))
                         {
                             wrapper = ScriptableObject.CreateInstance<SplatPrototypeWrapper>();
@@ -147,8 +148,14 @@ namespace MadMaps.Terrains
                             "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper", "Skip For Now");
                     if (promptResult == 0)
                     {
+                        var rootAsset = (((UnityEngine.Object)prototype.prototypeTexture ?? prototype.prototype));
+                        string rootAssetPath = "NullTexture";
+                        if(rootAsset != null)
+                        {
+                            rootAssetPath = rootAsset.name;
+                        }
                         var path = EditorExtensions.SaveFilePanel("Create New DetailPrototype Wrapper", 
-                            (((UnityEngine.Object)prototype.prototypeTexture ?? prototype.prototype)).name + "Wrapper", "asset");
+                            rootAssetPath + "Wrapper", "asset");
                         if (!String.IsNullOrEmpty(path))
                         {
                             wrapper = ScriptableObject.CreateInstance<DetailPrototypeWrapper>();
@@ -264,7 +271,8 @@ namespace MadMaps.Terrains
                     Prefab = prefabAsset,
                     Position = relativePos,
                     Rotation = rootInScene.transform.localRotation.eulerAngles,
-                    Scale = rootInScene.transform.localScale
+                    Scale = rootInScene.transform.localScale,
+                    ContainerMetadata = layer.name,
                 });
 
                 done.Add(rootInScene.transform);

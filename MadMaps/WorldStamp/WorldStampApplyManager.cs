@@ -146,8 +146,13 @@ namespace MadMaps.WorldStamp
                 // The Stencil is a critical component of stamping. Fundament It holds a dual purpose - blending 
                 for (int j = 0; j < layerStampMapping.Stamps.Count; j++)
                 {
-                    MiscUtilities.ProgressBar(String.Format("Applying Stencil for Stamp {0} : Layer {1}", layerStampMapping.Stamps[j].name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
-                    layerStampMapping.Stamps[j].StampStencil(wrapper, layer, j + 1);
+                    var stamp = layerStampMapping.Stamps[j];
+                    if(stamp.DisableStencil)
+                    {
+                        continue;
+                    }
+                    MiscUtilities.ProgressBar(String.Format("Applying Stencil for Stamp {0} : Layer {1}", stamp.name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Stamps.Count), j / (float)layerStampMapping.Stamps.Count);
+                    stamp.StampStencil(wrapper, layer, j + 1);
                 }
 
                 MiscUtilities.ClampStencil(layer.Stencil);

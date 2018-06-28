@@ -155,7 +155,7 @@ namespace MadMaps.Terrains
             ComputeShaderPool.ClearPool();
 
             Debug.Log(string.Format("Applied all layers at {0} (took {1}) (Compute Shaders {2})",
-                DateTime.Now.ToShortTimeString(), sw.Elapsed, ComputeShaders ? "ON" : "OFF"));
+                DateTime.Now.ToShortTimeString(), sw.Elapsed, (ComputeShaders && BlendTerrainLayerUtility.ShouldCompute()) ? "ON" : "OFF"));
 
             _needsPostRecalcInvokation = true;
         }
@@ -173,7 +173,21 @@ namespace MadMaps.Terrains
                 return false;
             }
 
-            CompoundTerrainData.Clear(this);           
+            CompoundTerrainData.Clear(this);
+
+            /*var lastSetLayer = Layers.Last((layer) => 
+            {
+                if(!(layer is TerrainLayer))
+                {
+                    return false;
+                }
+                return (layer as TerrainLayer).BlendMode == TerrainLayer.ETerrainLayerBlendMode.Set;
+            });
+            Debug.Log(lastSetLayer);
+            if(lastSetLayer.Heights != null)
+            {
+                Terrain.Layer
+            }*/
 
             for (var i = 0; i < Layers.Count; ++i)
             {
@@ -361,7 +375,30 @@ namespace MadMaps.Terrains
                 newObj.transform.position = worldPos;
                 newObj.transform.localScale = prefabObjectData.Scale;
                 newObj.transform.rotation = Quaternion.Euler(prefabObjectData.Rotation);
-                newObj.transform.SetParent(ObjectContainer.transform);
+
+                var parent = ObjectContainer.transform;
+                if(!string.IsNullOrEmpty(prefabObjectData.ContainerMetadata))
+                {
+                    parent = ObjectContainer.transform.Find(prefabObjectData.ContainerMetadata);
+                    if(!parent)
+                    {
+                        Transform currentTraversal = ObjectContainer.transform;
+                        var split = prefabObjectData.ContainerMetadata.Split('/');
+                        for(var i = 0; i < split.Length; ++i)
+                        {
+                            var child = currentTraversal.Find(split[i]);
+                            if(!child)
+                            {
+                                child = new GameObject(split[i]).transform;
+                                child.SetParent(currentTraversal);
+                            }
+                            currentTraversal = child;
+                        }
+                        parent = currentTraversal;
+                    }
+                }
+
+                newObj.transform.SetParent(parent);
                 instantiatedObjectData.InstantiatedObject = newObj;
                 //CompoundTerrainData.OwnedInstantiatedObjects.Add(newObj);
             }
@@ -1184,18 +1221,17 @@ namespace MadMaps.Terrains
             return -1;
         }
 
-        /*public void OnDestroy()
+        public void OnDestroy()
         {
-#if UNITY_EDITOR
-            foreach (var layer in Layers)
+            if(ObjectContainer)
             {
-                if (UnityEditor.AssetDatabase.Contains(layer))
-                    continue;
-                DestroyImmediate(layer, true);
+                #if UNITY_EDITOR
+                UnityEditor.Undo.DestroyObjectImmediate(ObjectContainer);
+                #else
+                Destroy(ObjectContainer);
+                #endif
             }
-#endif
-            DestroyImmediate(CompoundTerrainData);
-        }*/
+        }
 
         /// <summary>
         /// If you know you're going to smash a 

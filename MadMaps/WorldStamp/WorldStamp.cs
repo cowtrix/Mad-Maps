@@ -50,6 +50,7 @@ namespace MadMaps.WorldStamp
         public bool SnapRotation;
         public bool SnapToTerrainHeight;
         public float SnapToTerrainHeightOffset;
+        public bool DisableStencil;
 
         public string LayerName = "StampLayer";
 
@@ -170,6 +171,14 @@ namespace MadMaps.WorldStamp
             if (GizmosEnabled)
             {
                 GizmoExtensions.DrawWireCube(transform.position, Size.xz().x0z()/2, transform.rotation, GizmoColor);
+                Gizmos.color = GizmoColor;
+                var size = Mathf.Min(Size.MaxElement(), 10);                
+                
+                Gizmos.DrawCube(transform.position, size * new Vector3(1, 0.25f, 1));
+                Gizmos.DrawCube(transform.position + Vector3.up * size * .5f, size * new Vector3(.25f, .75f, .25f));
+                Gizmos.DrawSphere(transform.position + Vector3.up * size, size * .5f);
+
+                Gizmos.color = Color.white;
             }
 #endif
             if (_dataContainer != null && _dataContainer.Redirect == null)
@@ -860,7 +869,7 @@ namespace MadMaps.WorldStamp
                         if (stencilAmount > 0.5f)
                         {
                             layer.ObjectRemovals.Add(prefabObjectData.Guid);
-                            Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);
+                            //Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);
                         }
                     }
                 }
@@ -938,12 +947,12 @@ namespace MadMaps.WorldStamp
                     if (HaveHeightsBeenFlipped)
                     {
                         //prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
-                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Data.Size.y;
+                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.x, oldPos.z)) * Size.y;
                     }
                     else
                     {
                         //prefabObjectData.Position.y += Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
-                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Data.Size.y;
+                        heightVal = Data.Heights.BilinearSample(new Vector2(oldPos.z, oldPos.x)) * Size.y;
                     }
 
                     if (RelativeMode == EObjectRelativeMode.RelativeToStamp && !prefabObjectData.AbsoluteHeight)
@@ -972,6 +981,8 @@ namespace MadMaps.WorldStamp
                 {
                     Debug.LogWarning(string.Format("Stamp {0} has created an object ({1}) with negative scale. This can cause performance issues if you do this lots! Select the stamp prefab to resolve this.", name, prefabObjectData.Prefab.name), this);
                 }
+
+                prefabObjectData.ContainerMetadata = string.Format("{0}/{1}", layer.name, name);
 
                 layer.Objects.Add(prefabObjectData);
             }

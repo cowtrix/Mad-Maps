@@ -123,21 +123,22 @@ namespace MadMaps.Roads.Connections
                         {
                             var uniformT = mainSpline.GetClosestUniformTimeOnSplineXZ(worldPos.xz()); // Expensive!
                             var closestOnSpline = mainSpline.GetUniformPointOnSpline(uniformT);
-                            var normalizedFlatDistToSpline =
-                                Mathf.Clamp01((worldPos - closestOnSpline).xz().magnitude / (config.Radius));
-                            var maskValue = config.SplatFalloff.Evaluate(normalizedFlatDistToSpline);
-
-                            if (maskValue <= 0)
+                            var normalizedFlatDistToSpline = (worldPos - closestOnSpline).xz().magnitude / (config.Radius);
+                            if(normalizedFlatDistToSpline != Mathf.Clamp01(normalizedFlatDistToSpline))
                             {
                                 continue;
                             }
-
+                            var maskValue = config.SplatFalloff.Evaluate(normalizedFlatDistToSpline);
                             var writeFloatValue = splatConfiguration.SplatStrength * maskValue;
                             var writeValue = (byte)Mathf.RoundToInt(Mathf.Clamp(writeFloatValue * 255f, 0, 255));
                             var mainRead = baseLayerSplat[dx, dz];
-                            //writeValue = (byte)Mathf.Max(writeValue, mainRead);
+                            var newVal = (byte)Mathf.Clamp(Mathf.Max(writeValue, mainRead), 0, 255);
+                            var delta = newVal - mainRead;
 
-                            //Debug.Log(string.Format("{0} = {1}", writeFloatValue, writeValue));
+                            if(delta < 1/255f)
+                            {
+                                continue;
+                            }
 
                             foreach (var currentPrototype in currentPrototypes)
                             {
@@ -145,13 +146,16 @@ namespace MadMaps.Roads.Connections
                                 {
                                     continue;
                                 }
+                                if(currentPrototype == splatPrototypeWrapper)
+                                {
+                                    continue;
+                                }
                                 var otherSplatFloatValue = baseData[currentPrototype][dx, dz] / 255f;
-                                var otherSplatFloatWriteVal = (otherSplatFloatValue * (1 - writeFloatValue));
-                                var write = (byte)Mathf.Clamp(otherSplatFloatWriteVal * 255, 0, 255);
+                                var otherSplatFloatWriteVal = (otherSplatFloatValue * (1 - (delta / 255f)));
+                                var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
                                 baseData[currentPrototype][dx, dz] = write;
                             }
 
-                            var newVal = (byte)Mathf.Clamp(Mathf.Max(writeValue, mainRead), 0, 255);
                             baseLayerSplat[dx, dz] = newVal;
                             layer.Stencil[coordX, coordZ] = MiscUtilities.CompressStencil(stencilKey, 1);
                             thisPatchStencil[dx, dz] = 1;

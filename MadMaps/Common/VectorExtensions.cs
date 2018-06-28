@@ -69,6 +69,10 @@ namespace MadMaps.Common
         {
             return new Vector3(Mathf.Clamp(obj.x, min.x, max.x), Mathf.Clamp(obj.y, min.y, max.y), Mathf.Clamp(obj.z, min.z, max.z));
         }
+        public static float MaxElement(this Vector3 obj)
+        {
+            return Mathf.Max(obj.x, obj.y, obj.z);
+        }
         public static Vector3 Round(this Vector3 vec)
         {
             return new Vector3(Mathf.Round(vec.x), Mathf.Round(vec.y), Mathf.Round(vec.z));

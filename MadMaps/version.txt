@@ -1,15 +1,29 @@
 Current Version:
 
+v 0.1.2d
+
+- Fixed an exception if you tried to capture from a Terrain with a detail prototype, where neither the Prototype Texture or Prototype Model were defined (thanks DocSavage!)
+- Fixed errors when popping out the Terrain Wrapper inspector into its own window
+- Fixed innacurate splat renormalisation with the Set Terrain Splat road component
+- Added a clickable gizmo cube to all stamps to make them easier to select
+- Improved behaviour and errors when attempting to use multiple layers with different resolutions
+- Fixed relative-to-stamp object placement when scaling world stamps on the Y axis
+- Added ability to disable stencil writing on world stamps - this allows you to create stamps that do things like only add trees on the same layer as existing stamps.
+- Objects will now be organised according to their source under the ObjectContainer (thanks Jerome!)
+
+== History ==
+
 v 0.1.2c
 
 - Fixed Set Terrain Splat road connection component
+- Fixed more GUI harmless exception spam
 - Improved some issues when capturing only certain layers for a stamp
 - World Stamps will now update their snapping just before they are applied
 - Fixed some errors with painting large masks with the fallback OpenGL mode
 - Fixed blur brush for painter
 - Fixed specifying a manual zero level on stamp capturing
-
-== History ==
+- Removed debug code from WorldStamp object removal
+- Added "Normalize Preview" button in Data Inspector
 
 v 0.1.2b
 
