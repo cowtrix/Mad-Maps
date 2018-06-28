@@ -10,6 +10,7 @@ v 0.1.2d
 - Fixed relative-to-stamp object placement when scaling world stamps on the Y axis
 - Added ability to disable stencil writing on world stamps - this allows you to create stamps that do things like only add trees on the same layer as existing stamps.
 - Objects will now be organised according to their source under the ObjectContainer (thanks Jerome!)
+- Improved Splat/Detail management. You can now resolve and create new splat/detail wrappers from their respective tabs on the Terrain Wrapper
 
 == History ==
 

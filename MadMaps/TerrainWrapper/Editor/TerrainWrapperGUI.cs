@@ -146,10 +146,66 @@ namespace MadMaps.Terrains
             else if (currentTabTitle == "Splats")
             { 
                 _splatsDrawer.List.DoLayoutList();
+                var splatProtos = new List<SplatPrototype>(Wrapper.Terrain.terrainData.splatPrototypes);
+                foreach(var wrapper in Wrapper.SplatPrototypes)
+                {
+                    var firstProto = wrapper.GetPrototype();
+                    for(var i = splatProtos.Count-1; i >= 0; --i)
+                    {
+                        var secondProto = splatProtos[i];
+                        if(SplatPrototypeWrapper.SplatPrototypeComparer.StaticEquals(firstProto, secondProto))
+                        {
+                            splatProtos.RemoveAt(i);
+                            continue;
+                        }
+                    }
+                }
+                if(splatProtos.Count > 0)
+                {
+                    EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                    GUILayout.Label(string.Format("You have {0} splat{1} on your terrain that {2} not currently handled with Wrappers!", 
+                        splatProtos.Count, splatProtos.Count > 1 ? "s" : string.Empty, splatProtos.Count > 1 ? "are" : "is"));
+                    if(GUILayout.Button("Fix Now"))
+                    {
+                        var newSplats = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.splatPrototypes);
+                        Wrapper.SplatPrototypes = newSplats.Values.ToList();
+                        GUIUtility.ExitGUI();
+                        return;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
             }
             else if (currentTabTitle == "Details")
             {
                 _detailsDrawer.List.DoLayoutList();
+                var detailProtos = new List<DetailPrototype>(Wrapper.Terrain.terrainData.detailPrototypes);
+                foreach(var wrapper in Wrapper.DetailPrototypes)
+                {
+                    var firstProto = wrapper.GetPrototype();
+                    for(var i = detailProtos.Count-1; i >= 0; --i)
+                    {
+                        var secondProto = detailProtos[i];
+                        if(DetailPrototypeWrapper.DetailPrototypeComparer.StaticEquals(firstProto, secondProto))
+                        {
+                            detailProtos.RemoveAt(i);
+                            continue;
+                        }
+                    }
+                }
+                if(detailProtos.Count > 0)
+                {
+                    EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                    GUILayout.Label(string.Format("You have {0} detail{1} on your terrain that {2} not currently handled with Wrappers!", 
+                        detailProtos.Count, detailProtos.Count > 1 ? "s" : string.Empty, detailProtos.Count > 1 ? "are" : "is"));
+                    if(GUILayout.Button("Fix Now"))
+                    {
+                        var newDetails = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.detailPrototypes);
+                        Wrapper.DetailPrototypes = newDetails.Values.ToList();
+                        GUIUtility.ExitGUI();
+                        return;
+                    }
+                    EditorGUILayout.EndHorizontal();
+                }
             }
             else if (currentTabTitle == "Info")
             {

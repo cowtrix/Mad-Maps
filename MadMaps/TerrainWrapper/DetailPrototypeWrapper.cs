@@ -39,9 +39,24 @@ namespace MadMaps.Terrains
 
         public class DetailPrototypeComparer : IEqualityComparer<DetailPrototype>
         {
+            public static bool StaticEquals(DetailPrototype x, DetailPrototype y)
+            {
+                return x.prototypeTexture == y.prototypeTexture 
+                    && x.prototype == y.prototype 
+                    && x.renderMode == y.renderMode 
+                    && x.healthyColor == y.healthyColor 
+                    && x.dryColor == y.dryColor
+                    && x.maxHeight == y.maxHeight
+                    && x.minHeight == y.minHeight
+                    && x.maxWidth == y.maxWidth
+                    && x.minWidth == y.minWidth
+                    && x.bendFactor == y.bendFactor
+                    && x.noiseSpread == y.noiseSpread;
+            }
+
             public bool Equals(DetailPrototype x, DetailPrototype y)
             {
-                return x.prototypeTexture == y.prototypeTexture && x.prototype == y.prototype && x.renderMode == y.renderMode && x.healthyColor == y.healthyColor && x.dryColor == y.dryColor;
+                return StaticEquals(x, y);
             }
 
             public int GetHashCode(DetailPrototype obj)

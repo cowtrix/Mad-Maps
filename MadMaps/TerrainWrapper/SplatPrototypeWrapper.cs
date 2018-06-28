@@ -45,9 +45,20 @@ namespace MadMaps.Terrains
 
         public class SplatPrototypeComparer : IEqualityComparer<SplatPrototype>
         {
+            public static bool StaticEquals(SplatPrototype x, SplatPrototype y)
+            {
+                return x.texture == y.texture
+                    && x.normalMap == y.normalMap
+                    && x.smoothness == y.smoothness
+                    && x.specular == y.specular
+                    && x.metallic == y.metallic
+                    && x.tileSize == y.tileSize
+                    && x.tileOffset == y.tileOffset;
+            }
+
             public bool Equals(SplatPrototype x, SplatPrototype y)
             {
-                return x.texture == y.texture;
+                return StaticEquals(x, y);
             }
 
             public int GetHashCode(SplatPrototype obj)
