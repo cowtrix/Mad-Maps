@@ -116,13 +116,7 @@ namespace MadMaps.WorldStamp.Authoring
 
             if (GUILayout.Button("Create Stamp Template"))
             {
-                var mask = GetCreator<MaskDataCreator>();
-                var newTemplate = new GameObject("Stamp Template");
-                var temp = newTemplate.AddComponent<WorldStampTemplate>();
-                temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
-                temp.Mask = mask.GetArrayFromMask(this);
-                temp.Template = Template.JSONClone();
-                temp.Size = Template.Bounds.size;
+                CreateTemplate();
             }
 
             GUILayout.BeginHorizontal();
@@ -131,11 +125,7 @@ namespace MadMaps.WorldStamp.Authoring
             GUI.enabled = TargetInjectionTemplate;
             if (GUILayout.Button("Replace Existing Stamp Template", GUILayout.Width(220)))
             {
-                var mask = GetCreator<MaskDataCreator>();
-                var temp = TargetInjectionTemplate;
-                temp.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
-                temp.Mask = mask.GetArrayFromMask(this);
-                temp.Size = Template.Bounds.size;                
+                CreateTemplate(TargetInjectionTemplate);          
             }
 
             GUI.enabled = true;
@@ -146,59 +136,95 @@ namespace MadMaps.WorldStamp.Authoring
             Template.Layer = EditorGUILayout.LayerField("Create Stamp On Layer:", Template.Layer);
             if (GUILayout.Button("Create New Stamp"))
             {
-                if (Template.Creators.Any(layer => layer.Enabled && layer.NeedsRecapture) && EditorUtility.DisplayDialog("Layer {0} Needs Recapture",
-                        string.Format("We need to recapture the terrain. Do this now?"), "Yes", "No"))
-                {
-                    for (int i = 0; i < Template.Creators.Count; i++)
-                    {
-                        var layer = Template.Creators[i];
-                        if (layer.Enabled && layer.NeedsRecapture)
-                        {
-                            layer.Capture(Template.Terrain, Template.Bounds);
-                        }
-                    }
-                }
-
-                GameObject go = new GameObject("New WorldStamp");
-                
-                go.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y) + Vector3.up * GetCreator<HeightmapDataCreator>().ZeroLevel * Template.Terrain.terrainData.size.y;
-                var stamp = go.AddComponent<WorldStamp>();
-                var data = new WorldStampData();
-                foreach (var layer in Template.Creators)
-                {
-                    if (layer.Enabled)
-                    {
-                        layer.Commit(data, stamp);
-                    }
-                }
-                data.Size = Template.Bounds.size;
-                
-                stamp.SetData(data);
-                stamp.HaveHeightsBeenFlipped = true;
-                go.transform.SetLayerRecursive(Template.Layer);
-                
-                EditorGUIUtility.PingObject(stamp);
+                CreateStamp();
             }
             EditorGUILayout.BeginHorizontal();
             TargetInjectionStamp = (WorldStamp) EditorGUILayout.ObjectField(TargetInjectionStamp, typeof (WorldStamp), true);
             GUI.enabled = TargetInjectionStamp;
             if (GUILayout.Button("Replace Existing Stamp", GUILayout.Width(220)))
             {
-                var data = new WorldStampData();
-                foreach (var worldStampCreatorLayer in Template.Creators)
-                {
-                    worldStampCreatorLayer.Commit(data, TargetInjectionStamp);
-                }
-                data.Size = Template.Bounds.size;
-                
-                TargetInjectionStamp.SetData(data);
-                TargetInjectionStamp.HaveHeightsBeenFlipped = true;
-                TargetInjectionStamp.gameObject.layer = Template.Layer;
-                EditorGUIUtility.PingObject(TargetInjectionStamp);
-                EditorUtility.SetDirty(TargetInjectionStamp);
+                CreateStamp(TargetInjectionStamp);
             }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();
+        }
+
+        public WorldStamp CreateStamp(WorldStamp stampToReplace = null)
+        {
+            if (Template.Creators.Any(layer => layer.Enabled && layer.NeedsRecapture) && EditorUtility.DisplayDialog("Layer {0} Needs Recapture",
+                    string.Format("We need to recapture the terrain. Do this now?"), "Yes", "No"))
+            {
+                for (int i = 0; i < Template.Creators.Count; i++)
+                {
+                    var layer = Template.Creators[i];
+                    if (layer.Enabled && layer.NeedsRecapture)
+                    {
+                        layer.Capture(Template.Terrain, Template.Bounds);
+                    }
+                }
+            }
+
+            bool isWritingToPrefab = false;
+            GameObject go  = null;
+            if(stampToReplace != null)
+            {
+                var prefabType = PrefabUtility.GetPrefabType(stampToReplace);
+                if(prefabType == PrefabType.Prefab)
+                {
+                    go = (GameObject)PrefabUtility.InstantiatePrefab(stampToReplace.gameObject);                    
+                }
+                else
+                {
+                    go = stampToReplace.gameObject;
+                }
+                isWritingToPrefab = true;
+            }
+            else
+            {
+                go = new GameObject("New WorldStamp");
+            }
+            
+            go.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y) + Vector3.up * GetCreator<HeightmapDataCreator>().ZeroLevel * Template.Terrain.terrainData.size.y;
+            var stamp = go.GetOrAddComponent<WorldStamp>();
+            var data = new WorldStampData();
+            foreach (var layer in Template.Creators)
+            {
+                if (layer.Enabled)
+                {
+                    layer.Commit(data, stamp);
+                }
+            }
+            data.Size = Template.Bounds.size;
+            
+            stamp.SetData(data);
+            stamp.HaveHeightsBeenFlipped = true;
+            go.transform.SetLayerRecursive(Template.Layer);
+
+            if(isWritingToPrefab)
+            {
+                stamp = PrefabUtility.ReplacePrefab(stamp.gameObject, stampToReplace.gameObject).GetComponent<WorldStamp>();
+                DestroyImmediate(go);
+            }
+            
+            EditorGUIUtility.PingObject(stamp);
+            EditorUtility.SetDirty(stamp);
+            return stamp;
+        }
+
+        public WorldStampTemplate CreateTemplate(WorldStampTemplate templateToReplace = null)
+        {
+            if(templateToReplace == null)
+            {
+                var newTemplate = new GameObject("Stamp Template");
+                templateToReplace = newTemplate.AddComponent<WorldStampTemplate>();
+            }
+                        
+            templateToReplace.transform.position = Template.Bounds.center.xz().x0z(Template.Bounds.min.y);
+            var mask = GetCreator<MaskDataCreator>();
+            templateToReplace.Mask = mask.GetArrayFromMask(this);
+            templateToReplace.Template = Template.JSONClone();
+            templateToReplace.Size = Template.Bounds.size;
+            return templateToReplace;
         }
 
         protected override void OnSceneGUI(SceneView sceneView)

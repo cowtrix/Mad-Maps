@@ -1,5 +1,13 @@
 Current Version:
 
+v 0.1.3
+
+- Road nodes will now update their snapping before rebaking
+- Added icons for Splat and Detail wrappers
+- Fixed replacing World Stamps from the World Stamp Creator when also capturing a road network
+
+== History ==
+
 v 0.1.2d
 
 - Fixed an exception if you tried to capture from a Terrain with a detail prototype, where neither the Prototype Texture or Prototype Model were defined (thanks DocSavage!)
@@ -11,8 +19,6 @@ v 0.1.2d
 - Added ability to disable stencil writing on world stamps - this allows you to create stamps that do things like only add trees on the same layer as existing stamps.
 - Objects will now be organised according to their source under the ObjectContainer (thanks Jerome!)
 - Improved Splat/Detail management. You can now resolve and create new splat/detail wrappers from their respective tabs on the Terrain Wrapper
-
-== History ==
 
 v 0.1.2c
 

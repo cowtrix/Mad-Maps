@@ -149,6 +149,10 @@ namespace MadMaps.Terrains
                 var splatProtos = new List<SplatPrototype>(Wrapper.Terrain.terrainData.splatPrototypes);
                 foreach(var wrapper in Wrapper.SplatPrototypes)
                 {
+                    if(wrapper == null)
+                    {
+                        continue;
+                    }
                     var firstProto = wrapper.GetPrototype();
                     for(var i = splatProtos.Count-1; i >= 0; --i)
                     {
@@ -181,6 +185,10 @@ namespace MadMaps.Terrains
                 var detailProtos = new List<DetailPrototype>(Wrapper.Terrain.terrainData.detailPrototypes);
                 foreach(var wrapper in Wrapper.DetailPrototypes)
                 {
+                    if(wrapper == null)
+                    {
+                        continue;
+                    }
                     var firstProto = wrapper.GetPrototype();
                     for(var i = detailProtos.Count-1; i >= 0; --i)
                     {

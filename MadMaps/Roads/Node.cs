@@ -56,7 +56,7 @@ namespace MadMaps.Roads
 #if HURTWORLDSDK
     [StripComponentOnBuild]
 #endif
-    public class Node : sBehaviour
+    public class Node : sBehaviour, IOnPrebakeCallback
     {
         public List<NodeConnection> InConnections = new List<NodeConnection>();
         public List<NodeConnection> OutConnections = new List<NodeConnection>();
@@ -568,6 +568,16 @@ namespace MadMaps.Roads
                 OutConnections[i].Strip();
             }
             DestroyImmediate(this);
+        }
+
+        public int GetPriority()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void OnPrebake()
+        {
+            Snap();
         }
     }
 
