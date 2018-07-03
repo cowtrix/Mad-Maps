@@ -572,7 +572,7 @@ namespace MadMaps.Roads
 
         public int GetPriority()
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         public void OnPrebake()

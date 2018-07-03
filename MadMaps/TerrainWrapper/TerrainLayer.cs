@@ -108,19 +108,27 @@ namespace MadMaps.Terrains
         {
             if(index == terrainWrapper.Layers.Count - 1)
             {
-                if(Heights != null && Heights.Width > 0 && Heights.Height > 0)
+                if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && terrainWrapper.Terrain.terrainData.heightmapResolution != Heights.Width)
                 {
                     terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
                 }
                 if(DetailData.Count > 0)
                 {
                     var firstMap = DetailData.First();
-                    terrainWrapper.Terrain.terrainData.SetDetailResolution (firstMap.Value.Width, 
-                        terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
+                    var detailRes = firstMap.Value.Width;
+                    if(detailRes != terrainWrapper.Terrain.terrainData.detailResolution)
+                    {
+                        terrainWrapper.Terrain.terrainData.SetDetailResolution (detailRes, 
+                            terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
+                    }                    
                 }
                 if(SplatData.Count > 0)
                 {
-                    terrainWrapper.Terrain.terrainData.alphamapResolution = SplatData.First().Value.Width;
+                    var splatRes = SplatData.First().Value.Width;
+                    if(terrainWrapper.Terrain.terrainData.alphamapResolution != splatRes)
+                    {
+                        terrainWrapper.Terrain.terrainData.alphamapResolution = splatRes;
+                    }                    
                 }
             }
         }

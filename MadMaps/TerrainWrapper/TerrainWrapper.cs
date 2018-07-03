@@ -1181,7 +1181,7 @@ namespace MadMaps.Terrains
 
         public List<SplatPrototypeWrapper> RefreshSplats()
         {
-            var notNullSplats = SplatPrototypes.Where(wrapper => wrapper != null).ToList();
+            var notNullSplats = SplatPrototypes.Where(wrapper => wrapper != null && wrapper.Texture != null).ToList();
             var sp = new SplatPrototype[notNullSplats.Count];
             for (var i = 0; i < notNullSplats.Count; i++)
             {
@@ -1195,7 +1195,7 @@ namespace MadMaps.Terrains
 
         public List<DetailPrototypeWrapper> RefreshDetails()
         {
-            var notNullDetails = DetailPrototypes.Where(wrapper => wrapper != null).ToList();
+            var notNullDetails = DetailPrototypes.Where(wrapper => wrapper != null ).ToList();
             var sp = new DetailPrototype[notNullDetails.Count];
             for (var i = 0; i < notNullDetails.Count; i++)
             {

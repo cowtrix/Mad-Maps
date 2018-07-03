@@ -10,10 +10,16 @@ namespace MadMaps.Roads
 {
     public partial class RoadNetworkWindow : EditorWindow
     {
+        public enum ENodePlacementKey
+        {
+            MiddleMouse,
+            RightMouse,
+        }
+
         //public static EditorPersistantVal<bool> DrawConnections = new EditorPersistantVal<bool>("NodeNetworkGUI_DrawConnections", true);
         private static EditorPersistantVal<int> _currentTab = new EditorPersistantVal<int>("NodeNetworkGUI_CurrentTab", 0);
         private static EditorPersistantVal<bool> _configurationIgnoredTypesExpanded = new EditorPersistantVal<bool>("NodeNetworkGUI_IgnoredTypesExpanded", false);
-
+        private static EditorPersistantVal<ENodePlacementKey> _placementKey = new EditorPersistantVal<ENodePlacementKey>("NodeNetworkGUI_NodePlacementKey", ENodePlacementKey.MiddleMouse);
         public RoadNetwork FocusedRoadNetwork;
 
         private static Vector2 _scroll;
@@ -178,7 +184,9 @@ namespace MadMaps.Roads
         private Vector2 _roadConfigScroll;
         private void DoConnectionsUI()
         {
-            EditorGUILayout.HelpBox("Press [Middle Mouse Button] to select a node and [Shift] to select multiple.\n\nHold [CTRL] and press [Middle Mouse Button] to place a new node, or connect two existing nodes.", MessageType.Info);
+            EditorGUILayout.HelpBox(
+                string.Format("Press [{0}] to select a node and [Shift] to select multiple.\n\nHold [CTRL] and press [Middle Mouse Button] to place a new node, or connect two existing nodes."
+                , _placementKey.Value), MessageType.Info);
 
             // Connection Configuration history for easy selection
             FocusedRoadNetwork.RoadConfigHistory =
@@ -359,7 +367,6 @@ namespace MadMaps.Roads
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
             FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
             FocusedRoadNetwork.RecalculateTerrain = EditorGUILayout.Toggle("Recalculate Terrain", FocusedRoadNetwork.RecalculateTerrain);
-            //DrawConnections.Value = EditorGUILayout.Toggle("Draw Connections", DrawConnections);
 
             EditorGUILayout.BeginHorizontal();
             _configurationIgnoredTypesExpanded.Value = EditorGUILayout.Foldout(_configurationIgnoredTypesExpanded,
@@ -428,6 +435,10 @@ namespace MadMaps.Roads
                 var rn = newObj.GetComponent<RoadNetwork>();
                 rn.Strip();
             }
+
+            EditorExtensions.Seperator();
+            EditorGUILayout.LabelField("Controls", EditorStyles.boldLabel);
+            _placementKey.Value = (ENodePlacementKey)EditorGUILayout.EnumPopup("Placement Key", _placementKey.Value);
         }
 
         private void MoveProcMeshesToMesh()

@@ -14,6 +14,7 @@ namespace MadMaps.Roads.Connections
         public class Config : ConnectionConfigurationBase
         {
             [Serializable]
+            [Name("Splat Configuration")]
             public class SplatConfig
             {
                 public SplatPrototypeWrapper SplatPrototype;
@@ -155,7 +156,7 @@ namespace MadMaps.Roads.Connections
                                 var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
                                 baseData[currentPrototype][dx, dz] = write;
                             }
-
+                            DebugHelper.DrawPoint(worldPos, 1, Color.red, 10);
                             baseLayerSplat[dx, dz] = newVal;
                             layer.Stencil[coordX, coordZ] = MiscUtilities.CompressStencil(stencilKey, 1);
                             thisPatchStencil[dx, dz] = 1;

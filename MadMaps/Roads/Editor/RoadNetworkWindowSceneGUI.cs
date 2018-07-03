@@ -161,6 +161,11 @@ namespace MadMaps.Roads
 
         private sBehaviour DoConnectOrCreateNodes(Event myEvent, Vector3 hitPoint, Vector3 hitNormal)
         {
+            if(!myEvent.control)
+            {
+                return null;
+            }
+
             var currentSelection = GetCurrentlySelectedNodes();
             Node currentlySelectedNode = null;
             if (!currentSelection.IsNullOrEmpty() && currentSelection.Count == 1)
@@ -168,10 +173,18 @@ namespace MadMaps.Roads
                 currentlySelectedNode = currentSelection[0];
             }
 
-            const int selectionMouseNum = 2;
-            sBehaviour createdObject = null;
-            if (myEvent.type == EventType.MouseDown && myEvent.button == selectionMouseNum && myEvent.control)
+            int selectionMouseNum = 2;
+            if(_placementKey.Value == ENodePlacementKey.RightMouse)
             {
+                selectionMouseNum = 1;
+            }
+            sBehaviour createdObject = null;
+            if (myEvent.type == EventType.MouseDown)
+            {
+                if(myEvent.button != selectionMouseNum)
+                {
+                    return null;
+                }
                 if (_currentHoverNode == null)
                 {
                     // Create a new node and set the selection to it
@@ -234,7 +247,8 @@ namespace MadMaps.Roads
         private static void SceneGUICast(out RaycastHit hit)
         {
             var myEvent = Event.current;
-            var ray = HandleUtility.GUIPointToWorldRay(myEvent.mousePosition);
+            var mousePos = myEvent.mousePosition; 
+            var ray = HandleUtility.GUIPointToWorldRay(mousePos);
             if (!Physics.Raycast(ray, out hit, 1000, ~0))
             {
                 var hPlane = new Plane(Vector3.up, new Vector3(0, 0, 0));
