@@ -84,8 +84,8 @@ namespace MadMaps.Roads.Connections
             GenerateSplinePlanes(planeGive, mainSpline, out startPlane, out endPlane);
 
             // Get matrix space min/max
-            var matrixMin = terrain.WorldToSplatCoord(bounds.min);
-            var matrixMax = terrain.WorldToSplatCoord(bounds.max);
+            var matrixMin = terrain.WorldToSplatCoord(bounds.min, TerrainX.RoundType.Floor);
+            var matrixMax = terrain.WorldToSplatCoord(bounds.max, TerrainX.RoundType.Ceil);
 
             matrixMin = new Common.Coord(Mathf.Clamp(matrixMin.x, 0, terrain.terrainData.alphamapResolution), Mathf.Clamp(matrixMin.z, 0, terrain.terrainData.alphamapResolution));
             matrixMax = new Common.Coord(Mathf.Clamp(matrixMax.x, 0, terrain.terrainData.alphamapResolution), Mathf.Clamp(matrixMax.z, 0, terrain.terrainData.alphamapResolution));
@@ -156,7 +156,7 @@ namespace MadMaps.Roads.Connections
                                 var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
                                 baseData[currentPrototype][dx, dz] = write;
                             }
-                            DebugHelper.DrawPoint(worldPos, 1, Color.red, 10);
+                            //DebugHelper.DrawPoint(worldPos, 1, Color.red, 10);
                             baseLayerSplat[dx, dz] = newVal;
                             layer.Stencil[coordX, coordZ] = MiscUtilities.CompressStencil(stencilKey, 1);
                             thisPatchStencil[dx, dz] = 1;

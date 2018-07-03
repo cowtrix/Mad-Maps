@@ -6,6 +6,8 @@ v 0.1.3
 - Added icons for Splat and Detail wrappers
 - Fixed replacing World Stamps from the World Stamp Creator when also capturing a road network
 - Fixed "splat missing texture" error when assigning a Splat Wrapper with no texture
+- Fixed the heightmap, splat maps and detail maps being erased when they weren't being written to by the Terrain Wrapper
+- Fixed slight assymetry on Set Detail Splats road component
 
 == History ==
 

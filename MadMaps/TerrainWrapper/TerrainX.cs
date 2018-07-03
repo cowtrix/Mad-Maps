@@ -89,7 +89,7 @@ namespace MadMaps.Common
 
 
 
-        public static Coord WorldToSplatCoord(this Terrain terrain, Vector3 worldPos)
+        public static Coord WorldToSplatCoord(this Terrain terrain, Vector3 worldPos, RoundType rounding = RoundType.Round)
         {
             var terrainSize = terrain.terrainData.size;
             var resolution = terrain.terrainData.alphamapResolution;
@@ -98,7 +98,15 @@ namespace MadMaps.Common
             worldPos = new Vector3(worldPos.x / terrainSize.x, worldPos.y / terrainSize.y, worldPos.z / terrainSize.z);
             worldPos = new Vector3(worldPos.x * resolution, 0, worldPos.z * resolution);
 
-            return new Coord(Mathf.RoundToInt(worldPos.x), Mathf.RoundToInt(worldPos.z));
+            switch (rounding)
+            {
+                case RoundType.Round:    
+                    return new Coord(Mathf.RoundToInt(worldPos.x), Mathf.RoundToInt(worldPos.z));
+                case RoundType.Floor:
+                    return new Coord(Mathf.FloorToInt(worldPos.x), Mathf.FloorToInt(worldPos.z));
+                default:
+                    return new Coord(Mathf.CeilToInt(worldPos.x), Mathf.CeilToInt(worldPos.z));
+            }            
         }
 
         public static Vector3 SplatCoordToWorldPos(this Terrain terrain, Coord terrainPos)
@@ -110,6 +118,7 @@ namespace MadMaps.Common
             var normalizedPos = new Vector3(terrainSpaceCoordPos.x / (float)resolution, 0, (float)terrainSpaceCoordPos.z / resolution);
             var terrainSizePos = new Vector3(normalizedPos.x * terrainSize.x, 0, normalizedPos.z * terrainSize.z);
             terrainSizePos += terrain.GetPosition();
+            //terrainSizePos += new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
 
             return terrainSizePos;
         }
