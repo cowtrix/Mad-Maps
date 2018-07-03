@@ -153,6 +153,7 @@ namespace MadMaps.Roads.Connections
         private BakeResult CreateNewBakeResult(Config.LodLevel config, GameObject rootTarget, int lodLevelIndex, int chunkCount)
         {
             rootTarget.GetOrAddComponent<ProceduralMeshContainer>().Collider = config.CopyToCollider;
+            rootTarget.layer = config.Layer;
             return new BakeResult()
             {
                 Mesh = new Mesh(),
@@ -161,7 +162,7 @@ namespace MadMaps.Roads.Connections
                 MeshCollider = config.CopyToCollider ? rootTarget.GetOrAddComponent<MeshCollider>() : null,
                 TargetLodLevel = lodLevelIndex,
                 ChunkIndex = chunkCount,
-            };
+            };            
         }
 
         private void DoLodLevel(GameObject rootTarget, Config.LodLevel config, int lodLevelIndex)

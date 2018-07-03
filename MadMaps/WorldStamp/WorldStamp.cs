@@ -173,10 +173,10 @@ namespace MadMaps.WorldStamp
                 GizmoExtensions.DrawWireCube(transform.position, Size.xz().x0z()/2, transform.rotation, GizmoColor);
                 Gizmos.color = GizmoColor;
                 var size = Mathf.Min(Size.MaxElement(), 10);                
-                
-                Gizmos.DrawCube(transform.position, size * new Vector3(1, 0.25f, 1));
-                Gizmos.DrawCube(transform.position + Vector3.up * size * .5f, size * new Vector3(.25f, .75f, .25f));
-                Gizmos.DrawSphere(transform.position + Vector3.up * size, size * .5f);
+                var yOffset = Vector3.up * Size.y *.3f;
+                Gizmos.DrawCube(transform.position + yOffset, size * new Vector3(1, 0.25f, 1));
+                Gizmos.DrawCube(transform.position + Vector3.up * size * .5f + yOffset, size * new Vector3(.25f, .75f, .25f));
+                Gizmos.DrawSphere(transform.position + Vector3.up * size + yOffset, size * .5f);
 
                 Gizmos.color = Color.white;
             }

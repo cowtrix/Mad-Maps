@@ -198,7 +198,7 @@ namespace MadMaps.WorldStamp.Authoring
             
             stamp.SetData(data);
             stamp.HaveHeightsBeenFlipped = true;
-            go.transform.SetLayerRecursive(Template.Layer);
+            //go.transform.SetLayerRecursive(Template.Layer);
 
             if(isWritingToPrefab)
             {

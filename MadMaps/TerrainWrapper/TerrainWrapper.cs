@@ -265,6 +265,42 @@ namespace MadMaps.Terrains
             Debug.Log(string.Format("Culled {0} trees", counter));
         }*/
 
+        private Dictionary<GameObject, Queue<GameObject>> GenerateObjectContainerCacheRecursvive(Transform root, Dictionary<GameObject, Queue<GameObject>> cache = null)
+        {
+            if(cache == null) 
+            {
+                cache = new Dictionary<GameObject, Queue<GameObject>>();
+            }
+            foreach(Transform instantiatedObject in root)
+            {
+                //var instantiatedObject = CompoundTerrainData.OwnedInstantiatedObjects[i];
+                if (!instantiatedObject)
+                {
+                    continue;
+                }
+#if UNITY_EDITOR
+                var prefab = UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject;
+#else
+                GameObject prefab = null;
+#endif
+                if (prefab == null)
+                {
+                    DestroyImmediate(instantiatedObject.gameObject);
+                    continue;
+                }
+
+                Queue<GameObject> queue;
+                if (!cache.TryGetValue(prefab, out queue))
+                {
+                    queue = new Queue<GameObject>();
+                    cache[prefab] = queue;
+                }
+                queue.Enqueue(instantiatedObject.gameObject);
+                cache = GenerateObjectContainerCacheRecursvive(instantiatedObject, cache);
+            }
+            return cache;
+        }
+
         /// <summary>
         ///     Instantiate the prefab objects in CompoundData
         /// </summary>
@@ -292,39 +328,12 @@ namespace MadMaps.Terrains
             {
                 ObjectContainer = new GameObject(string.Format("{0}_ObjectContainer", name));
             }
-            ObjectContainer.transform.SetParent(transform.parent);
 
             var tPos = transform.position;
             var tSize = Terrain.terrainData.size;
             // Objects
             MiscUtilities.ProgressBar("Applying Final Objects", "", 0.8f);
-            var cache = new Dictionary<GameObject, Queue<GameObject>>();
-            foreach(Transform instantiatedObject in ObjectContainer.transform)
-            {
-                //var instantiatedObject = CompoundTerrainData.OwnedInstantiatedObjects[i];
-                if (!instantiatedObject)
-                {
-                    continue;
-                }
-#if UNITY_EDITOR
-                var prefab = UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject;
-#else
-                GameObject prefab = null;
-#endif
-                if (prefab == null)
-                {
-                    DestroyImmediate(instantiatedObject.gameObject);
-                    continue;
-                }
-
-                Queue<GameObject> queue;
-                if (!cache.TryGetValue(prefab, out queue))
-                {
-                    queue = new Queue<GameObject>();
-                    cache[prefab] = queue;
-                }
-                queue.Enqueue(instantiatedObject.gameObject);
-            }
+            var cache = GenerateObjectContainerCacheRecursvive(ObjectContainer.transform);
             int missingCount = 0;
             //CompoundTerrainData.OwnedInstantiatedObjects.Clear();
             foreach (var keyValuePair in CompoundTerrainData.Objects)
