@@ -28,6 +28,9 @@ namespace MadMaps.WorldStamp.Authoring
 
         public static bool IsCommiting;
 
+        [HideInInspector]
+        public bool IsDummy = false;
+
         [SerializeField] [HideInInspector] private Vector3 _nodeControl;
 
         public void Update()
@@ -39,10 +42,16 @@ namespace MadMaps.WorldStamp.Authoring
 
         public override void Strip()
         {
+            if(IsDummy)
+            {
+                return;
+            }
+            
             var n = gameObject.AddComponent<Node>();
             n.Configuration.ExplicitControl = _nodeControl;
             n.Configuration.IsExplicitControl = true;
             n.Configuration.SnappingMode = NodeConfiguration.ESnappingMode.None;
+            IsDummy = true;
         }
 
 #if UNITY_EDITOR

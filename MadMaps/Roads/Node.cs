@@ -4,6 +4,7 @@ using MadMaps.Common;
 using MadMaps.Terrains;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using MadMaps.WorldStamp.Authoring;
 
 namespace MadMaps.Roads
 {
@@ -361,7 +362,6 @@ namespace MadMaps.Roads
                     Debug.LogWarning("Node with a Wrapper snap setting on a terrain without a TerrainWrapper component - this won't work.");
                 }
                 _lastSnapPosition = transform.position;
-                return;
             }
 
             if (Configuration.SnappingMode == NodeConfiguration.ESnappingMode.Terrain)
@@ -370,7 +370,6 @@ namespace MadMaps.Roads
                 var newY = terrain.SampleHeight(transform.position) + terrain.GetPosition().y + Configuration.SnapOffset;
                 transform.position = new Vector3(transform.position.x, newY, transform.position.z);
                 _lastSnapPosition = transform.position;
-                return;
             }
 
             if (Configuration.SnappingMode == NodeConfiguration.ESnappingMode.Raycast)
@@ -383,7 +382,12 @@ namespace MadMaps.Roads
                     transform.position = hitInfo.point + Vector3.up*Configuration.SnapOffset;
                 }
                 _lastSnapPosition = transform.position;
-                return;
+            }
+
+            var exitNode = GetComponent<StampExitNode>();
+            if(exitNode)
+            {
+                exitNode.Update();
             }
         }
 

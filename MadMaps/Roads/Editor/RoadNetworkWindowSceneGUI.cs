@@ -140,7 +140,11 @@ namespace MadMaps.Roads
             }
 
             var myEvent = Event.current;
-            const int selectionMouseNum = 2;
+            int selectionMouseNum = 2;
+            if(_placementKey == ENodePlacementKey.RightMouse)
+            {
+                selectionMouseNum = 1;
+            }
             //sBehaviour createdObject = null;
             if (myEvent.type == EventType.MouseDown && myEvent.button == selectionMouseNum && !myEvent.control && _currentHoverNode != null)
             {
