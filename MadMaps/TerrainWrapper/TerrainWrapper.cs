@@ -533,6 +533,10 @@ namespace MadMaps.Terrains
         /// </summary>
         private void FinaliseSplats()
         {
+            if(!WriteSplats)
+            {
+                return;
+            }
             MiscUtilities.ProgressBar("Applying Final Splats", "", 0.3f);
             // Splats
             foreach (var compoundSplat in CompoundTerrainData.SplatData)
@@ -1181,6 +1185,11 @@ namespace MadMaps.Terrains
 
         public List<SplatPrototypeWrapper> RefreshSplats()
         {
+            if(!WriteSplats)
+            {
+                Debug.LogWarning("Refreshing splats, but Write Splats is disabled in the Info tab. This will have no effect.", this);
+                return null;
+            }
             var notNullSplats = SplatPrototypes.Where(wrapper => wrapper != null && wrapper.Texture != null).ToList();
             var sp = new SplatPrototype[notNullSplats.Count];
             for (var i = 0; i < notNullSplats.Count; i++)
@@ -1195,6 +1204,11 @@ namespace MadMaps.Terrains
 
         public List<DetailPrototypeWrapper> RefreshDetails()
         {
+            if(!WriteDetails)
+            {
+                Debug.LogWarning("Refreshing details, but Write Details is disabled in the Info tab. This will have no effect.", this);
+                return null;
+            }
             var notNullDetails = DetailPrototypes.Where(wrapper => wrapper != null ).ToList();
             var sp = new DetailPrototype[notNullDetails.Count];
             for (var i = 0; i < notNullDetails.Count; i++)
@@ -1232,14 +1246,18 @@ namespace MadMaps.Terrains
 
         public void OnDestroy()
         {
+            #if !HURTWORLDSDK
             if(ObjectContainer)
             {
                 #if UNITY_EDITOR
-                UnityEditor.Undo.DestroyObjectImmediate(ObjectContainer);
-                #else
-                Destroy(ObjectContainer);
+                if(UnityEditor.EditorUtility.DisplayDialog("Delete Object Container?", 
+                    string.Format("Delete Object Container as well for Terrain Wrapper {0}?", name), "Yes", "No"))
+                {
+                    UnityEditor.Undo.DestroyObjectImmediate(ObjectContainer);
+                }
                 #endif
             }
+            #endif
         }
 
         /// <summary>

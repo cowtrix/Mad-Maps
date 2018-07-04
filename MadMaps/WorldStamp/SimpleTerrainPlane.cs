@@ -40,6 +40,10 @@ namespace MadMaps.WorldStamp
         public bool RemoveObjects = true;
         public bool RemoveTrees = true;
         public bool RemoveGrass = true;
+        public bool SetSplat = false;
+        public SplatPrototypeWrapper Splat;
+        [Range(0, 1)]
+        public float SplatStrength = 1;
         public Vector2 Size;
         [Min(1)]
         public int Priority;
@@ -69,12 +73,69 @@ namespace MadMaps.WorldStamp
                     {
                         ProcessGrass(objectBounds, terrainWrapper);
                     }
+                    if(SetSplat && Splat != null && SplatStrength > 0)
+                    {
+                        SetSplats(objectBounds, terrainWrapper);
+                    }
                 }
                 catch (Exception)
                 {
                     Debug.LogError("SimpleTerrainPlane thew exception! " + name, this);
                     throw;
                 }
+            }
+        }
+
+        private void SetSplats(ObjectBounds objectBounds, TerrainWrapper terrainWrapper)
+        {
+            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            var aRes = terrainWrapper.Terrain.terrainData.alphamapResolution;
+            var axisBounds = objectBounds.Flatten().ToAxisBounds();
+
+            var matrixMin = terrainWrapper.Terrain.WorldToSplatCoord(axisBounds.min);
+            matrixMin = new Common.Coord(Mathf.Clamp(matrixMin.x, 0, aRes), Mathf.Clamp(matrixMin.z, 0, aRes));
+
+            var matrixMax = terrainWrapper.Terrain.WorldToSplatCoord(axisBounds.max);
+            matrixMax = new Common.Coord(Mathf.Clamp(matrixMax.x, 0, aRes), Mathf.Clamp(matrixMax.z, 0, aRes));
+
+            var arraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
+
+            var existingSplats = layer.GetSplatMaps(matrixMin.x, matrixMin.z, arraySize.x, arraySize.z, aRes);
+            for (var dx = 0; dx < arraySize.x; ++dx)
+            {
+                var xF = dx/(float) arraySize.x;
+                for (var dz = 0; dz < arraySize.z; ++dz)
+                {
+                    var zF = dz / (float)arraySize.z;
+                    var falloff = GetFalloff(new Vector2(xF, zF));
+                    
+                    float splatStrength = falloff * SplatStrength;
+                    if(!existingSplats.ContainsKey(Splat))
+                    {
+                        existingSplats.Add(Splat, new Serializable2DByteArray(arraySize.x, arraySize.z));
+                    }
+                    var existingbaseVal = existingSplats[Splat][dx,dz] / 255f;
+                    var newBaseVal = Mathf.Max(existingbaseVal, splatStrength);
+                    var writeBaseValue = (byte)Mathf.Clamp(newBaseVal * 255, 0, 255);
+                    existingSplats[Splat][dx,dz] = writeBaseValue;
+
+                    foreach (var serializable2DByteArray in existingSplats)
+                    {
+                        if(serializable2DByteArray.Key == Splat)
+                        {
+                            continue;
+                        }
+
+                        var readValue = serializable2DByteArray.Value[dx, dz] / 255f;
+                        var newValue = readValue * (1 - newBaseVal);
+                        var writeValue = (byte)Mathf.Clamp(newValue * 255, 0, 255);
+                        serializable2DByteArray.Value[dx, dz] = writeValue;
+                    }
+                }
+            }
+            foreach (var serializable2DByteArray in existingSplats)
+            {
+                layer.SetSplatmap(serializable2DByteArray.Key, matrixMin.x, matrixMin.z, serializable2DByteArray.Value, aRes);
             }
         }
 

@@ -224,8 +224,16 @@ namespace MadMaps.WorldStamp
 
             /*EditorGUILayout.PropertyField(_snapPosition);
             EditorGUILayout.PropertyField(_snapRotation, new GUIContent("Snap Rotation (90\u00B0)"));*/
+            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_snapToTerrain);
             EditorGUILayout.PropertyField(_snapToTerrainOffset);
+            if(EditorGUI.EndChangeCheck())
+            {
+                foreach(var obj in targets)
+                {
+                    (obj as WorldStamp).SnapStamp(true);
+                }
+            }
 
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_layerName);

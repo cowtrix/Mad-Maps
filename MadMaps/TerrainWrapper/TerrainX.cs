@@ -118,7 +118,7 @@ namespace MadMaps.Common
             var normalizedPos = new Vector3(terrainSpaceCoordPos.x / (float)resolution, 0, (float)terrainSpaceCoordPos.z / resolution);
             var terrainSizePos = new Vector3(normalizedPos.x * terrainSize.x, 0, normalizedPos.z * terrainSize.z);
             terrainSizePos += terrain.GetPosition();
-            //terrainSizePos += new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
+            terrainSizePos += new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
 
             return terrainSizePos;
         }

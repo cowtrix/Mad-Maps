@@ -20,6 +20,9 @@ namespace MadMaps.WorldStamp
             _objectsEnabled,
             _treesEnabled,
             _grassEnabled,
+            _setSplat,
+            _splat,
+            _splatStrength,
             _priority;
 
         public void OnEnable()
@@ -34,6 +37,9 @@ namespace MadMaps.WorldStamp
             _objectsEnabled = serializedObject.FindProperty("RemoveObjects");
             _treesEnabled = serializedObject.FindProperty("RemoveTrees");
             _grassEnabled = serializedObject.FindProperty("RemoveGrass");
+            _setSplat = serializedObject.FindProperty("SetSplat");
+            _splat = serializedObject.FindProperty("Splat");
+            _splatStrength = serializedObject.FindProperty("SplatStrength");
             _priority = serializedObject.FindProperty("Priority");
         }
 
@@ -62,6 +68,16 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.PropertyField(_objectsEnabled);
             EditorGUILayout.PropertyField(_treesEnabled);
             EditorGUILayout.PropertyField(_grassEnabled);
+
+            EditorGUILayout.PropertyField(_setSplat);
+            if(_setSplat.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(_splat);
+                EditorGUILayout.PropertyField(_splatStrength);
+                EditorGUI.indentLevel--;
+            }
+
             EditorGUILayout.PropertyField(_priority);
 
             if (EditorGUI.EndChangeCheck())

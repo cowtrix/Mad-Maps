@@ -281,7 +281,7 @@ namespace MadMaps.Roads
 
         private void DoIntersectionsUI()
         {
-            //EditorGUILayout.HelpBox("To insert an intersection, select a node and then click \"Insert Into Node\". The Road Network will attempt to insert the node as best it can. You can alter the intersection's rotation with the Rotation field. Alternatively, you can just place intersections in the scene yourself as you would with any prefab.", MessageType.Info);
+            EditorGUILayout.HelpBox("To insert an intersection, select a node and then click \"Insert Into Node\". The Road Network will attempt to insert the node as best it can. You can alter the intersection's rotation with the Rotation field. Alternatively, you can just place intersections in the scene yourself as you would with any prefab.", MessageType.Info);
             if (FocusedRoadNetwork.IntersectionHistory.Count > 0)
             {
                 _intersectionScroll = EditorGUILayout.BeginScrollView(_intersectionScroll, GUILayout.Height(115));
@@ -325,6 +325,7 @@ namespace MadMaps.Roads
                 typeof(GameObject), false);
             if (_currentIntersection == null)
             {
+                EditorGUILayout.HelpBox("Please select an intersection prefab.", MessageType.Info);
                 return;
             }
 
