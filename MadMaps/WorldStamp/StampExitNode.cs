@@ -37,6 +37,12 @@ namespace MadMaps.WorldStamp.Authoring
         {
             if(!Node)
                 return;
+
+            if(Node.ConnectionCount > 1)
+            {
+                Debug.LogWarning(string.Format("Exit Node {0} has multiple connections! This is not supported.", name), this);
+            }
+
             _nodeControl = Node.GetNodeControl(null);
         }
 
