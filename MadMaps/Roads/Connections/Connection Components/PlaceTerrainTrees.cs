@@ -4,11 +4,12 @@ using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
 using UnityEngine;
+
 using Random = System.Random;
 
 namespace MadMaps.Roads
 {
-    public class PlaceTerrainTrees : ConnectionComponent, IOnBakeCallback
+    public class PlaceTerrainTrees : ConnectionComponent
     {
         [Name("Terrain/Place Trees")]
         public class Config : ConnectionConfigurationBase
@@ -44,10 +45,15 @@ namespace MadMaps.Roads
             }
         }
 
-        public int LastPlantCount = 0;
-
-        public void OnBake()
+        public override void ProcessTrees(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             if(!Network || Configuration == null)
             {
                 return;
@@ -60,23 +66,9 @@ namespace MadMaps.Roads
             }
             
             var spline = NodeConnection.GetSpline();
-            var rand = new Random(NodeConnection.ThisNode.Seed);
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(spline.GetApproximateXZObjectBounds());
-            for (int i = 0; i < terrainWrappers.Count; i++)
-            {
-                var wrapper = terrainWrappers[i];
-                ProcessWrapper(wrapper, spline, config, rand);
-            }
-        }
-
-        private void ProcessWrapper(TerrainWrapper wrapper, SplineSegment spline, Config config, Random rand)
-        {
-            
-
-            LastPlantCount = 0;
+            var rand = new Random(NodeConnection.ThisNode.Seed);            
             var length = spline.Length;
             var step = config.StepDistance;
-            var layer = Network.GetLayer(wrapper);
             var tSize = wrapper.Terrain.terrainData.size;
 
             for (var i = 0f; i < length; i += step.GetRand(rand))
@@ -108,7 +100,6 @@ namespace MadMaps.Roads
                 //Debug.DrawLine(wPos, wPos + Vector3.up *10, Color.red, 10);
                 var tPos = wrapper.Terrain.WorldToTreePos(wPos);
                 layer.Trees.Add(new MadMapsTreeInstance(tPos, Vector2.one * config.Size.GetRand(rand), prefab, config.Color.GetRand(rand)));
-                LastPlantCount++;
             }
         }
     }

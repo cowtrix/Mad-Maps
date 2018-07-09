@@ -3,11 +3,12 @@ using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
+
 using UnityEngine;
 
 namespace MadMaps.Roads.Connections
 {
-    public class RemoveTerrainDetails : ConnectionComponent, IOnBakeCallback
+    public class RemoveTerrainDetails : ConnectionComponent
     {
         [Name("Terrain/Remove Details")]
         public class Config : ConnectionConfigurationBase
@@ -21,8 +22,14 @@ namespace MadMaps.Roads.Connections
             }
         }
 
-        public void OnBake()
+        public override void ProcessDetails(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
             if (!Network || Configuration == null)
             {
                 return;
@@ -34,17 +41,6 @@ namespace MadMaps.Roads.Connections
                 return;
             }
             
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var wrapper in terrainWrappers)
-            {
-                var layer = Network.GetLayer(wrapper, true);
-                layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                ProcessTerrainDetails(config, wrapper, layer);
-            }
-        }
-        
-        private void ProcessTerrainDetails(Config config, TerrainWrapper wrapper, TerrainLayer layer)
-        {
             var terrain = wrapper.Terrain;
             var dRes = terrain.terrainData.detailResolution;
             var mainSpline = NodeConnection.GetSpline();

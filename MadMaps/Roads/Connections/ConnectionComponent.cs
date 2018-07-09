@@ -1,6 +1,7 @@
 ﻿using System;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
+using MadMaps.Terrains;
 using UnityEngine;
 
 namespace MadMaps.Roads
@@ -36,14 +37,32 @@ namespace MadMaps.Roads
         }
     }
 
-    public abstract class ConnectionComponent : sBehaviour
+    public abstract class ConnectionComponent : LayerComponentBase
     {
         public bool OverridePriority;
+        
+        public ComponentConfigurationRef Configuration;
+        public NodeConnection NodeConnection;
         [Min(1)]
         public int Priority = 1;
 
-        public ComponentConfigurationRef Configuration;
-        public NodeConnection NodeConnection;
+        public override Vector3 Size
+        {
+            get
+            {
+                if(NodeConnection == null)
+                {
+                    return Vector3.zero;
+                }
+                return NodeConnection.GetSplineBounds().size;
+            }
+        }
+
+        public override string GetLayerName()
+        {
+            return RoadNetwork.LAYER_NAME;
+        }
+
 
         public RoadNetwork Network
         {
@@ -55,6 +74,11 @@ namespace MadMaps.Roads
                 }
                 return NodeConnection.Network;
             }
+        }
+
+        public override Type GetLayerType()
+        {
+            return typeof(TerrainLayer);
         }
 
         public virtual void Think()
@@ -81,37 +105,27 @@ namespace MadMaps.Roads
         {
         }
 
-        [ContextMenu("Force Rebake")]
-        public void ForceBake()
-        {
-            var prebake = this as IOnPrebakeCallback;
-            if (prebake != null)
-            {
-                prebake.OnPrebake();
-            }
-            var bake = this as IOnBakeCallback;
-            if (bake != null)
-            {
-                bake.OnBake();
-            }
-            var post = this as IOnPostBakeCallback;
-            if (post != null)
-            {
-                post.OnPostBake();
-            }
-        }
-
         /// <summary>
         /// If a connection component wants to enforce that it should be done early or late
         /// </summary>
         /// <returns></returns>
-        public virtual int GetPriority()
+        public override int GetPriority()
         {
             if (OverridePriority)
             {
                 return Priority;
             }
-            return Configuration != null && Configuration.GetConfig() != null ? Configuration.GetConfig().Priority : 0;
+            return Configuration != null && Configuration.GetConfig() != null ? Configuration.GetConfig().Priority : 1;
+        }
+
+        public override void SetPriority(int newPriority)
+        {
+            if (!OverridePriority)
+            {
+                Debug.LogWarning(string.Format("Setting Explicit Priority on {0} to {1}", name, newPriority));
+                OverridePriority = true;
+            }
+            Priority = newPriority;
         }
 
         public void Strip()

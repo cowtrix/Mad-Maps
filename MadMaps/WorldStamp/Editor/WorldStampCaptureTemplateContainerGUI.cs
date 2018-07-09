@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [CustomEditor(typeof(WorldStampTemplate))]
     public class WorldStampCaptureTemplateContainerGUI : Editor

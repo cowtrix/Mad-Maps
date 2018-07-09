@@ -8,13 +8,14 @@ using System.Collections;
 using System.Collections.Generic;
 using MapMagic;
 using MadMaps.Common;
+using MadMaps.Terrains;
 
 #if UN_MapMagic
 using uNature.Core.Extensions.MapMagicIntegration;
 using uNature.Core.FoliageClasses;
 #endif
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
 	public static class MapMagicIntegrationUtilities
 	{

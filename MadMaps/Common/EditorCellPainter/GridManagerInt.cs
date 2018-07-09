@@ -12,10 +12,10 @@ namespace MadMaps.Common.Painter
 {
     public class GridManagerInt : MadMaps.Common.Painter.IGridManager
     {
-        public readonly float GRID_SIZE;
-        public readonly int GRID_MAX;
-        public readonly int UNSIGNED_GRID_MAX;
-        public readonly int UNSIGNED_GRID_MAX_SQUARED;
+        public readonly float GRID_SIZE = 1;
+        public readonly int GRID_MAX = 1;
+        public readonly int UNSIGNED_GRID_MAX = 2;
+        public readonly int UNSIGNED_GRID_MAX_SQUARED = 4;
         public readonly int GLOBAL_OFFSET;
 
         public GridManagerInt(float cellSize, int offset = 0, int size = 100 * 1000)
@@ -51,6 +51,10 @@ namespace MadMaps.Common.Painter
 
         public Vector2 GetCellMin(int cell)
         {
+            if(UNSIGNED_GRID_MAX == 0)
+            {
+                Debug.Log("?");
+            }
             cell -= GLOBAL_OFFSET;
             return (new Vector2(cell % UNSIGNED_GRID_MAX, (cell / UNSIGNED_GRID_MAX) % UNSIGNED_GRID_MAX)
                     - new Vector2(GRID_MAX, GRID_MAX)) * GRID_SIZE;

@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 using UnityEditor;
 #endif
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class ObjectDataCreator : WorldStampCreatorLayer

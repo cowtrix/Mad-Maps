@@ -9,7 +9,7 @@ using System.Linq;
 using UnityEditor;
 #endif
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class TreeDataCreator : WorldStampCreatorLayer

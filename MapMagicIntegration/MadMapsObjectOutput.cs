@@ -10,9 +10,10 @@ using MadMaps.Common.Collections;
 using MapMagic;
 using UnityEngine;
 using System.Linq;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
+using MadMaps.Terrains;
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
     [System.Serializable]
 	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Objects", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Objects")]

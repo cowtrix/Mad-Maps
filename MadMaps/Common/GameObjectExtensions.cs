@@ -24,7 +24,7 @@ namespace MadMaps.Common
             for (int i = 0; i < childCache.Count; i++)
             {
                 DestroyEmptyObjectsInHierarchy(childCache[i]);
-                if (childCache[i].GetComponents<Component>().Length == 1)
+                if (childCache[i].childCount == 0 && childCache[i].GetComponents<Component>().Length == 1)
                 {
                     Object.DestroyImmediate(childCache[i].gameObject);
                 }

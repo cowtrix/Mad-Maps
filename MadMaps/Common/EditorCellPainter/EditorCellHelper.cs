@@ -98,6 +98,10 @@ namespace MadMaps.Common.Painter
                 var renderer = _rendererList[i];
                 renderer.SetAlive();
             }
+            if(_rendererList.Count == 0 && _cells.Count > 0)
+            {
+                _dirty = true;
+            }
             SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
             SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }

@@ -5,13 +5,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MadMaps.Terrains;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MapMagic;
 using UnityEngine;
 using System.Linq;
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
     [System.Serializable]
 	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Trees", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Trees")]

@@ -4,11 +4,12 @@ using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
+
 using UnityEngine;
 
 namespace MadMaps.Roads.Connections
 {
-    public class SetTerrainSplats : ConnectionComponent, IOnBakeCallback
+    public class SetTerrainSplats : ConnectionComponent
     {
         [Name("Terrain/Set Splats")]
         public class Config : ConnectionConfigurationBase
@@ -33,8 +34,14 @@ namespace MadMaps.Roads.Connections
 
         public const int SplatOffset = 2;
 
-        public void OnBake()
+        public override void ProcessSplats(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
             if (!Network || Configuration == null)
             {
                 return;
@@ -46,17 +53,6 @@ namespace MadMaps.Roads.Connections
                 return;
             }
 
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var wrapper in terrainWrappers)
-            {
-                var layer = Network.GetLayer(wrapper, true);
-                layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                ProcessTerrainSplat(config, wrapper, layer);
-            }
-        }
-        
-        private void ProcessTerrainSplat(Config config, TerrainWrapper wrapper, TerrainLayer layer)
-        {
             var terrain = wrapper.Terrain;
             var splatRes = wrapper.Terrain.terrainData.alphamapResolution;
             var mainSpline = NodeConnection.GetSpline();
@@ -96,7 +92,7 @@ namespace MadMaps.Roads.Connections
             var currentPrototypes = wrapper.GetCompoundSplatPrototypes(layer, true);
             var baseData = layer.GetSplatMaps(matrixMin.x, matrixMin.z, floatArraySize.x, floatArraySize.z, splatRes);
 
-            var stencilKey = GetStencilKey();
+            stencilKey = GetStencilKey();
             Serializable2DFloatArray thisPatchStencil = new Serializable2DFloatArray(floatArraySize.x,
                 floatArraySize.z);
             foreach (var splatConfiguration in config.SplatConfigurations)

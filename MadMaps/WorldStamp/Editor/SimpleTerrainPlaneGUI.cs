@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEditor;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [CustomEditor(typeof(SimpleTerrainPlane))]
     [CanEditMultipleObjects]
@@ -33,7 +33,7 @@ namespace MadMaps.WorldStamp
             _falloffTexture = serializedObject.FindProperty("FalloffTexture");
             _layerName = serializedObject.FindProperty("LayerName");
             _offset = serializedObject.FindProperty("Offset");
-            _size = serializedObject.FindProperty("Size");
+            _size = serializedObject.FindProperty("AreaSize");
             _objectsEnabled = serializedObject.FindProperty("RemoveObjects");
             _treesEnabled = serializedObject.FindProperty("RemoveTrees");
             _grassEnabled = serializedObject.FindProperty("RemoveGrass");

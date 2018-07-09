@@ -4,6 +4,18 @@ namespace MadMaps.Common
 {
     public static partial class GUIResources
     {
+        public static Font OpenSans_ExtraBold
+        {
+            get
+            {
+                if (__openSans_ExtraBold == null)
+                {
+                    __openSans_ExtraBold = Resources.Load<Font>("OpenSans/OpenSans-ExtraBold");
+                }
+                return __openSans_ExtraBold;
+            }
+        }
+        private static Font __openSans_ExtraBold;
         public static Texture2D PopoutIcon
         {
             get

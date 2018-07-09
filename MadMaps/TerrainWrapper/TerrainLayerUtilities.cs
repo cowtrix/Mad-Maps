@@ -1,11 +1,11 @@
-using MadMaps.WorldStamp.Authoring;
+using MadMaps.WorldStamps.Authoring;
 using System.Linq;
 using MadMaps.Roads;
 using MadMaps.Common;
 using System;
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -214,7 +214,7 @@ namespace MadMaps.Terrains
                     continue;
                 }
 
-                var ws = transform.GetComponentInAncestors<WorldStamp.WorldStamp>();
+                var ws = transform.GetComponentInAncestors<LayerComponentBase>();
                 if (ws)
                 {
                     //Debug.Log(string.Format("WorldStamp Object Capture : Ignored {0} as it contained a WorldStamp. Recursive WorldStamps are currently not supported.", transform), transform);

@@ -38,12 +38,14 @@ namespace MadMaps.Roads
             wantsMouseMove = true;
             EditorApplication.update -= Update;
             EditorApplication.update += Update;
-
-            if (Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.Tab)
+            if (Event.current.type == EventType.keyDown)
             {
-                _nodeIndex++;
-                Event.current.Use();
-                return;
+                if(Event.current.keyCode == KeyCode.Tab)
+                {
+                    _nodeIndex++;
+                    Event.current.Use();
+                    return;
+                }                
             }
 
             _currentHoverNode = null;
@@ -93,16 +95,22 @@ namespace MadMaps.Roads
 
             var intersectionNodes = _currentIntersection.GetComponents<Node>();
 
-            var extraRot = Quaternion.LookRotation(insertionNode.CalculateTangent(null).Flatten()) * Quaternion.Euler(_extraRotation);
-            IntersectionMetadata metaData = _currentIntersection.GetComponent<IntersectionMetadata>();
-            if (metaData && insertionNode.AllConnections().Count() > 1)
+            var tangent = insertionNode.CalculateTangent(null).Flatten();
+            if(Mathf.Approximately(tangent.sqrMagnitude, 0))
             {
-                extraRot *= Quaternion.Euler(metaData.TwoNodeRotation);
+                tangent = insertionNode.transform.forward;
+            }
+            var extraRot = Quaternion.LookRotation(tangent) * Quaternion.Euler(_extraRotation);
+            IntersectionMetadata metaData = _currentIntersection.GetComponent<IntersectionMetadata>();
+            if (metaData)
+            {
+                extraRot *= metaData.GetRotation(insertionNode);
+                nodePos += extraRot * metaData.GetOffset(insertionNode);
             }
             
             for (int i = 0; i < intersectionNodes.Length; i++)
             {
-                Handles.DrawWireCube(nodePos + nodeRot * extraRot* intersectionNodes[i].Offset, NodePreviewSize * Vector3.one);
+                Handles.DrawWireCube(nodePos + nodeRot * extraRot* intersectionNodes[i].Offset, NodePreviewSize * Vector3.one * 1.2f);
             }
         }
 
@@ -264,6 +272,16 @@ namespace MadMaps.Roads
                 var planePos = ray.origin + ray.direction*dist;
                 hit.point = planePos;
             }
+        }
+
+        public static bool IsSelected(Node obj)
+        {
+            if(!IsSelected(obj as sBehaviour))
+            {
+                return false;
+            }
+            var nodes = obj.GetComponents<Node>();
+            return nodes[_nodeIndex%nodes.Length] == obj;
         }
 
         public static bool IsSelected(sBehaviour obj)

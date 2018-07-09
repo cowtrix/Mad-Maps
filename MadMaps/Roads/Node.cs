@@ -4,7 +4,7 @@ using MadMaps.Common;
 using MadMaps.Terrains;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using MadMaps.WorldStamp.Authoring;
+using MadMaps.WorldStamps.Authoring;
 
 namespace MadMaps.Roads
 {
@@ -57,7 +57,7 @@ namespace MadMaps.Roads
 #if HURTWORLDSDK
     [StripComponentOnBuild]
 #endif
-    public class Node : sBehaviour, IOnPrebakeCallback
+    public class Node : LayerComponentBase
     {
         public List<NodeConnection> InConnections = new List<NodeConnection>();
         public List<NodeConnection> OutConnections = new List<NodeConnection>();
@@ -333,7 +333,7 @@ namespace MadMaps.Roads
             }
         }
 
-        private void Snap()
+        public void Snap()
         {
             if (!Network || Configuration.SnappingMode == NodeConfiguration.ESnappingMode.None || Vector3.Distance(_lastSnapPosition, transform.position) < .01f)
             {
@@ -464,11 +464,11 @@ namespace MadMaps.Roads
             }
             var tangent = Vector3.ClampMagnitude(CalculateTangent(relativeNode) * GetCurviness(), dist);
             if (tangent != Vector3.zero)
-                return tangent;
+                return transform.rotation * tangent;
             if(relativeNode != null)
-                return (relativeNode.NodePosition - NodePosition).normalized * GetCurviness();
+                return transform.rotation * (relativeNode.NodePosition - NodePosition).normalized * GetCurviness();
             Debug.LogError("We shouldn't really be able to get to this point", this);
-            return Vector3.forward;
+            return transform.forward;
         }
 
         public void Destroy()
@@ -533,11 +533,6 @@ namespace MadMaps.Roads
 #endif
         }
 
-        public void OnPreForceThink()
-        {
-            //_lastSnapPosition = Vector3.zero;
-        }
-
         public void ResetSnapPosition()
         {
             _lastSnapPosition = Vector3.zero;
@@ -574,14 +569,35 @@ namespace MadMaps.Roads
             DestroyImmediate(this);
         }
 
-        public int GetPriority()
+        public override int GetPriority()
         {
-            return 0;
+            return -1;
         }
 
-        public void OnPrebake()
+        public override void SetPriority(int priority)
+        {
+            Debug.LogWarning("This is not supported for Node Objects", this);
+        }
+
+        public override string GetLayerName()
+        {
+            return RoadNetwork.LAYER_NAME;
+        }
+
+        public override void OnPreBake()
         {
             Snap();
+        }
+
+        public override Vector3 Size
+        {
+            get{
+                return new Vector3(0.1f, 1000000, 0.1f);
+            }
+        }
+
+        public override Type GetLayerType(){
+            return typeof(TerrainLayer);
         }
     }
 

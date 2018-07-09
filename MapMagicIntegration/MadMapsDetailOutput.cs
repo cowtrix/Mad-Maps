@@ -15,7 +15,7 @@ using uNature.Core.Extensions.MapMagicIntegration;
 using uNature.Core.FoliageClasses;
 #endif
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
 	[System.Serializable]
 	[GeneratorMenu(menu = "Mad Maps", name = "Mad Maps Grass", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/Grass")]

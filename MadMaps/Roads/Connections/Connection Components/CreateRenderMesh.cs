@@ -5,11 +5,13 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
+using MadMaps.Terrains;
+
 
 namespace MadMaps.Roads.Connections
 {
     [Serializable]
-    public class CreateRenderMesh : ConnectionComponent, IOnBakeCallback
+    public class CreateRenderMesh : ConnectionComponent
     {
         [Name("Mesh/Create Render Mesh")]
         public class Config : ConnectionConfigurationBase
@@ -79,9 +81,8 @@ namespace MadMaps.Roads.Connections
         }
 
         public List<BakeResult> Results = new List<BakeResult>();
-        //public RoadLOD Lod;
-
-        public void OnBake()
+        
+        public override void OnPostBake()
         {
             // Setup
             if (!Network || Configuration == null || !NodeConnection)

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace MadMaps.Roads.Connections
 {
-    public class SetTerrainHeight : ConnectionComponent, IOnBakeCallback
+    public class SetTerrainHeight : ConnectionComponent
     {
         [Name("Terrain/Set Height")]
         public class Config : ConnectionConfigurationBase
@@ -19,27 +19,6 @@ namespace MadMaps.Roads.Connections
             public override Type GetMonoType()
             {
                 return typeof(SetTerrainHeight);
-            }
-        }
-
-        public void OnBake()
-        {
-            if (!Network || Configuration == null)
-            {
-                return;
-            }
-            var config = Configuration.GetConfig<Config>();
-            if (config == null)
-            {
-                Debug.LogError("Invalid configuration! Expected ConnectionTerrainHeightConfiguration");
-                return;
-            }
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var wrapper in terrainWrappers)
-            {
-                var layer = Network.GetLayer(wrapper, true);
-                layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                ProcessTerrainHeight(config, wrapper, layer);
             }
         }
 
@@ -59,8 +38,24 @@ namespace MadMaps.Roads.Connections
             endPlane = new Plane(endNodeControl, endNodePos + endNodeControl * planeGive);
         }
 
-        private void ProcessTerrainHeight(Config config, TerrainWrapper wrapper, TerrainLayer layer)
+        public override void ProcessHeights(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            if (!Network || Configuration == null)
+            {
+                return;
+            }
+            var config = Configuration.GetConfig<Config>();
+            if (config == null)
+            {
+                Debug.LogError("Invalid configuration! Expected ConnectionTerrainHeightConfiguration");
+                return;
+            }
             var terrain = wrapper.Terrain;
             var terrainPos = wrapper.Terrain.GetPosition();
             var terrainSize = wrapper.Terrain.terrainData.size;
@@ -107,7 +102,7 @@ namespace MadMaps.Roads.Connections
             var layerHeights = layer.GetHeights(matrixMin.x, matrixMin.z, floatArraySize.x, floatArraySize.z, heightRes) ??
                                new Serializable2DFloatArray(floatArraySize.x, floatArraySize.z);
 
-            var stencilKey = GetStencilKey();
+            stencilKey = GetStencilKey();
             if (layer.Stencil == null || layer.Stencil.Width != heightRes || layer.Stencil.Height != heightRes)
             {
                 layer.Stencil = new Stencil(heightRes, heightRes);

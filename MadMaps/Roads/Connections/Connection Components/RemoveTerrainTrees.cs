@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace MadMaps.Roads.Connections
 {
-    public class RemoveTerrainTrees : ConnectionComponent, IOnBakeCallback
+    public class RemoveTerrainTrees : ConnectionComponent
     {
         [Name("Terrain/Remove Trees")]
         public class Config : ConnectionConfigurationBase
@@ -20,8 +20,15 @@ namespace MadMaps.Roads.Connections
             }
         }
 
-        public void OnBake()
+        public override void ProcessTrees(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             if (!Network || Configuration == null)
             {
                 return;
@@ -33,17 +40,6 @@ namespace MadMaps.Roads.Connections
                 return;
             }
 
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var wrapper in terrainWrappers)
-            {
-                var layer = Network.GetLayer(wrapper, true);
-                layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                ProcessTerrainTrees(config, wrapper, layer);
-            }
-        }
-
-        private void ProcessTerrainTrees(Config config, TerrainWrapper wrapper, TerrainLayer layer)
-        {
             var mainSpline = NodeConnection.GetSpline();
             var radius = config.TreeRemoveDistance;
 

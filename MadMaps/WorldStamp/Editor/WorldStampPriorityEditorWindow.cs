@@ -6,11 +6,11 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     public class WorldStampPriorityEditorWindow : EditorWindow
     {
-        private List<WorldStampApplyManager.LayerStampMapping> _list;
+        private List<LayerComponentApplyManager.LayerComponentMapping> _list;
         private Vector2 _scroll;
 
         public static bool NeedsResort;
@@ -38,7 +38,7 @@ namespace MadMaps.WorldStamp
                 }                
                 return;
             }
-            _list = WorldStampApplyManager.SortStamps(Context, Filter);
+            _list = LayerComponentApplyManager.SortComponents(Context, Filter);
         }
 
         void OnSelectionChange()
@@ -85,7 +85,7 @@ namespace MadMaps.WorldStamp
 
             if ((_list == null || _list.Count == 0))
             {
-                EditorGUILayout.HelpBox("No Eligible Stamps Found In Scene", MessageType.Info);
+                EditorGUILayout.HelpBox("No Eligible Layer Components Found In Scene", MessageType.Info);
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace MadMaps.WorldStamp
                 EditorExtensions.Seperator();
                 EditorGUILayout.LabelField(string.Format("[{0}]  Layer '{1}'", mapping.LayerIndex, mapping.LayerName));
                 
-                foreach(var stamp in mapping.Stamps)
+                foreach(var stamp in mapping.Components)
                 {
                     EditorGUILayout.BeginHorizontal();
                     if(GUILayout.Button(string.Format("    {0}", stamp.name), EditorStyles.boldLabel))
@@ -104,11 +104,11 @@ namespace MadMaps.WorldStamp
                         Selection.activeGameObject = stamp.gameObject;
                     }
                     EditorGUILayout.LabelField("Priority", GUILayout.Width(50));
-                    var currentPriority = stamp.Priority;
+                    var currentPriority = stamp.GetPriority();
                     currentPriority = EditorGUILayout.DelayedIntField(currentPriority, GUILayout.Width(100));
-                    if(currentPriority != stamp.Priority)
+                    if(currentPriority != stamp.GetPriority())
                     {
-                        stamp.Priority = currentPriority;
+                        stamp.SetPriority(currentPriority);
                         NeedsResort = true;
                     }
                     EditorGUILayout.EndHorizontal();                    

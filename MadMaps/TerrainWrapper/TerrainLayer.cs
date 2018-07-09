@@ -8,7 +8,7 @@ using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Common.Serialization;
 using MadMaps.Terrains.Lookups;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using System.Linq;
 
@@ -106,30 +106,60 @@ namespace MadMaps.Terrains
 
         public override void PrepareApply(TerrainWrapper terrainWrapper, int index)
         {
-            if(index == terrainWrapper.Layers.Count - 1)
+            if (index == terrainWrapper.Layers.Count - 1)
             {
-                if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && terrainWrapper.Terrain.terrainData.heightmapResolution != Heights.Width)
+                BlendMode = TerrainLayer.ETerrainLayerBlendMode.Set;
+            }
+            else
+            {
+                BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
+            }
+
+            int bestRes = 0;
+            if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && terrainWrapper.Terrain.terrainData.heightmapResolution != Heights.Width)
+            {
+                if(index == terrainWrapper.Layers.Count - 1)
                 {
                     terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
                 }
-                if(DetailData.Count > 0)
+                bestRes = Heights.Width;
+            }
+            if(DetailData.Count > 0)
+            {
+                var firstMap = DetailData.First();
+                var detailRes = firstMap.Value.Width;
+                if(index == terrainWrapper.Layers.Count - 1)
                 {
-                    var firstMap = DetailData.First();
-                    var detailRes = firstMap.Value.Width;
                     if(detailRes != terrainWrapper.Terrain.terrainData.detailResolution)
                     {
                         terrainWrapper.Terrain.terrainData.SetDetailResolution (detailRes, 
                             terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
-                    }                    
+                    }
                 }
-                if(SplatData.Count > 0)
+                if(bestRes == 0)
                 {
-                    var splatRes = SplatData.First().Value.Width;
+                    bestRes = detailRes + 1;
+                }
+            }
+            if(SplatData.Count > 0)
+            {
+                var splatRes = SplatData.First().Value.Width;
+                if(index == terrainWrapper.Layers.Count - 1)
+                {
                     if(terrainWrapper.Terrain.terrainData.alphamapResolution != splatRes)
                     {
                         terrainWrapper.Terrain.terrainData.alphamapResolution = splatRes;
-                    }                    
+                    }
                 }
+                if(bestRes == 0)
+                {
+                    bestRes = splatRes + 1;
+                }
+            }
+                        
+            if(bestRes > 0 && (Stencil == null || Stencil.Width != bestRes || Stencil.Height != bestRes))
+            {
+                Stencil = new Stencil(bestRes, bestRes);
             }
         }
 
@@ -261,7 +291,7 @@ namespace MadMaps.Terrains
 
             var terrain = wrapper.Terrain;
             var splatRes = terrain.terrainData.alphamapResolution;
-
+            var stencilSize = new Common.Coord(Stencil.Width, Stencil.Height);
             if (BlendMode == ETerrainLayerBlendMode.Stencil)
             {
                 // Remove Stencil Values
@@ -269,7 +299,7 @@ namespace MadMaps.Terrains
                 {
                     var data = pair.Value;
                     BlendTerrainLayerUtility.StencilEraseArray(ref data, Stencil, Common.Coord.Zero, new Common.Coord(splatRes, splatRes),
-                        new Common.Coord(splatRes, splatRes), false, false);
+                        stencilSize, false, false);
                 }
             }
             
@@ -296,7 +326,7 @@ namespace MadMaps.Terrains
 
                 BlendTerrainLayerUtility.BlendArray(ref data, readData,
                         IsValidStencil(Stencil) ? Stencil : null,
-                        BlendMode, Common.Coord.Zero, new Common.Coord(splatRes, splatRes));
+                        BlendMode, Common.Coord.Zero, stencilSize);
 
                 wrapper.CompoundTerrainData.SplatData[splatPrototypeWrapper] = data;
             }

@@ -4,10 +4,11 @@ using System.Collections;
 using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
+using MadMaps.Terrains;
 using MapMagic;
 using UnityEngine;
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
     [System.Serializable]
     [GeneratorMenu(menu = "Mad Maps", name = "MadMaps Stencil", disengageable = true)]

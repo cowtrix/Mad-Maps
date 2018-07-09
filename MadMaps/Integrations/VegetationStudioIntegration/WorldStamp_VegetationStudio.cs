@@ -9,8 +9,9 @@ using MadMaps.Roads;
 using MadMaps.Terrains;
 using UnityEngine;
 using UnityEngine.Serialization;
+using MadMaps.Integration.VegetationStudio;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     public partial class WorldStamp
     {
@@ -19,8 +20,15 @@ namespace MadMaps.WorldStamp
         public bool RemoveExistingVSData = true;
         public VegetationStudioPrototypePicker IgnoredVSPrototypes = new VegetationStudioPrototypePicker();
 
-        public void StampVegetationStudio(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessVegetationStudio(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            
             var tSize = terrainWrapper.Terrain.terrainData.size;
             var tPos = terrainWrapper.transform.position;
 

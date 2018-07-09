@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
+using MadMaps.Terrains;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -210,8 +211,10 @@ namespace MadMaps.Roads
                         wordWrap = true,
                         alignment = TextAnchor.MiddleCenter,
                         fontStyle = FontStyle.Bold,
+                        font = GUIResources.OpenSans_ExtraBold,
+                        fontSize = 12,
                     };
-
+                    GUI.color = Color.black.WithAlpha(.3f);
                     if (config == _currentConfiguration)
                     {
                         GUILayout.Label(GUIResources.RoadConfigurationIcon, EditorStyles.helpBox, GUILayout.Width(64), GUILayout.Height(64));
@@ -220,12 +223,24 @@ namespace MadMaps.Roads
                     {
                         GUILayout.Label(GUIResources.RoadConfigurationIcon, GUILayout.Width(64), GUILayout.Height(64));
                     }
+                    GUI.color = Color.white;
                     var buttonRect = GUILayoutUtility.GetLastRect();
 
                     var configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), Color.black.ToHexString());
-                    GUI.Label(buttonRect, configName, textStyle);
+                    const float outlineSize = 1;
+                    var buttonRect1 = buttonRect;
+                    buttonRect1.x += outlineSize;                    
+                    GUI.Label(buttonRect1, configName, textStyle);
+                    buttonRect1.x -= outlineSize * 2;                    
+                    GUI.Label(buttonRect1, configName, textStyle);
+                    buttonRect1.x += outlineSize; 
+                    buttonRect1.y += outlineSize;                   
+                    GUI.Label(buttonRect1, configName, textStyle);
+                    buttonRect1.y -= outlineSize * 2;                    
+                    GUI.Label(buttonRect1, configName, textStyle);
+
+
                     configName = string.Format("<color={1}>{0}</color>", config.name.SplitCamelCase(), config.PreviewColor.ToHexString());
-                    buttonRect.y += 2;
                     var deleteRect = new Rect(buttonRect.max.x - 20, buttonRect.y+2, 24, 24);
                     var content = GenericEditor.DeleteContent;
                     content.tooltip = "Remove From List";
@@ -367,7 +382,7 @@ namespace MadMaps.Roads
             //FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
             FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
-            FocusedRoadNetwork.RecalculateTerrain = EditorGUILayout.Toggle("Recalculate Terrain", FocusedRoadNetwork.RecalculateTerrain);
+            TerrainWrapper.RecalculateTerrain.Value = EditorGUILayout.Toggle("Recalculate Terrain", TerrainWrapper.RecalculateTerrain.Value);
 
             EditorGUILayout.BeginHorizontal();
             _configurationIgnoredTypesExpanded.Value = EditorGUILayout.Foldout(_configurationIgnoredTypesExpanded,

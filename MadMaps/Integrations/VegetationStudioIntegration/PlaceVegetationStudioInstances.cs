@@ -10,11 +10,13 @@ using Random = System.Random;
 using AwesomeTechnologies.Vegetation.PersistentStorage;
 using System.Reflection;
 using MadMaps.Common.GenericEditor;
+using MadMaps.Roads;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace MadMaps.Roads
+namespace MadMaps.Integration.VegetationStudio
 {
 #if UNITY_EDITOR
     public class VegetationStudioPrototypePickerDrawer : GenericDrawer<VegetationStudioPrototypePicker>
@@ -74,7 +76,7 @@ namespace MadMaps.Roads
         }
     }
 
-    public class PlaceVegetationStudioInstances : ConnectionComponent, IOnBakeCallback
+    public class PlaceVegetationStudioInstances : ConnectionComponent
     {
         [Name("Vegetation Studio/Place Vegetation")]
         public class Config : ConnectionConfigurationBase
@@ -111,32 +113,26 @@ namespace MadMaps.Roads
             }
         }
 
-        public int LastPlantCount = 0;
 
-        public void OnBake()
+        public override void ProcessVegetationStudio(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             var config = Configuration.GetConfig<Config>();
             var spline = NodeConnection.GetSpline();
             var rand = new Random(NodeConnection.ThisNode.Seed);
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(spline.GetApproximateXZObjectBounds());
-            for (int i = 0; i < terrainWrappers.Count; i++)
-            {
-                var wrapper = terrainWrappers[i];
-                ProcessWrapper(wrapper, spline, config, rand);
-            }
-        }
-
-        private void ProcessWrapper(TerrainWrapper wrapper, SplineSegment spline, Config config, Random rand)
-        {
             if(config.Prototypes.SelectedIDs.Count == 0 || config.Prototypes.Package == null)
             {
                 return;
             }
             
-            LastPlantCount = 0;
             var length = spline.Length;
             var step = config.StepDistance;
-            var layer = Network.GetLayer(wrapper);
             var tSize = wrapper.Terrain.terrainData.size;
 
             for (var i = 0f; i < length; i += step.GetRand(rand))
@@ -176,7 +172,6 @@ namespace MadMaps.Roads
                     Package = config.Prototypes.Package,
                 };
                 layer.VSInstances.Add(newInstance);
-                LastPlantCount++;
             }
         }
     }

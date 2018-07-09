@@ -10,7 +10,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class SplatDataCreator : WorldStampCreatorLayer

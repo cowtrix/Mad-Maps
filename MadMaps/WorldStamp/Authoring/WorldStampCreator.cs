@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using EditorGUILayoutX = MadMaps.Common.EditorGUILayoutX;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     public class WorldStampCreator : SceneViewEditorWindow
     {
@@ -117,6 +117,8 @@ namespace MadMaps.WorldStamp.Authoring
             if (GUILayout.Button("Create Stamp Template"))
             {
                 CreateTemplate();
+                GUIUtility.ExitGUI();
+                return;
             }
 
             GUILayout.BeginHorizontal();
@@ -125,7 +127,9 @@ namespace MadMaps.WorldStamp.Authoring
             GUI.enabled = TargetInjectionTemplate;
             if (GUILayout.Button("Replace Existing Stamp Template", GUILayout.Width(220)))
             {
-                CreateTemplate(TargetInjectionTemplate);          
+                CreateTemplate(TargetInjectionTemplate);
+                GUIUtility.ExitGUI();
+                return;
             }
 
             GUI.enabled = true;
@@ -137,6 +141,8 @@ namespace MadMaps.WorldStamp.Authoring
             if (GUILayout.Button("Create New Stamp"))
             {
                 CreateStamp();
+                GUIUtility.ExitGUI();
+                return;
             }
             EditorGUILayout.BeginHorizontal();
             TargetInjectionStamp = (WorldStamp) EditorGUILayout.ObjectField(TargetInjectionStamp, typeof (WorldStamp), true);
@@ -144,6 +150,8 @@ namespace MadMaps.WorldStamp.Authoring
             if (GUILayout.Button("Replace Existing Stamp", GUILayout.Width(220)))
             {
                 CreateStamp(TargetInjectionStamp);
+                GUIUtility.ExitGUI();
+                return;
             }
             GUI.enabled = true;
             EditorGUILayout.EndHorizontal();

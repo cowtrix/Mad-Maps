@@ -167,7 +167,7 @@ namespace MadMaps.Terrains
 
         private void DrawLayerHeader(TerrainLayer layer, Rect infoRect)
         {
-            layer.BlendMode = (TerrainLayer.ETerrainLayerBlendMode)EditorGUI.EnumPopup(infoRect, layer.BlendMode);
+            //layer.BlendMode = (TerrainLayer.ETerrainLayerBlendMode)EditorGUI.EnumPopup(infoRect, layer.BlendMode);
         }
 
         public static LayerBase DrawExpandedGUI(TerrainWrapper wrapper, LayerBase layer)

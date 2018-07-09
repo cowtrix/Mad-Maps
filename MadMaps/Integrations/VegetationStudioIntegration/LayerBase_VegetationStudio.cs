@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 
 #if VEGETATION_STUDIO

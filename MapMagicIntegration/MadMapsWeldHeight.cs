@@ -5,8 +5,9 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Linq;
+using MadMaps.Terrains;
 
-namespace MadMaps.Terrains.MapMagicIntegration
+namespace MadMaps.Integration.MapMagicIntegration
 {
 
 	public class WeldTerrains

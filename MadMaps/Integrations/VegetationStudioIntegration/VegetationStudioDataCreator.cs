@@ -5,6 +5,8 @@ using MadMaps.Common;
 using MadMaps.Roads;
 using UnityEngine;
 using System.Linq;
+using MadMaps.WorldStamps.Authoring;
+using MadMaps.WorldStamps;
 
 #if VEGETATION_STUDIO
 
@@ -14,7 +16,7 @@ using AwesomeTechnologies.Vegetation.PersistentStorage;
 using UnityEditor;
 #endif
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.Integration.VegetationStudio
 {
     [Serializable]
     public class VegetationStudioDataCreator : WorldStampCreatorLayer

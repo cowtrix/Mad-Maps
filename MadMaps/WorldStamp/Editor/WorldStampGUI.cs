@@ -15,7 +15,7 @@ using IBrush = MadMaps.Common.Painter.IBrush;
 using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 #endif
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [CustomEditor(typeof (WorldStamp))]
     [CanEditMultipleObjects]
@@ -75,7 +75,7 @@ namespace MadMaps.WorldStamp
             _removeExistingVSData = serializedObject.FindProperty("RemoveExistingVSData");
             #endif
 
-            _size = serializedObject.FindProperty("Size");
+            _size = serializedObject.FindProperty("ExplicitSize");
             _snapToTerrain = serializedObject.FindProperty("SnapToTerrainHeight");
             _snapToTerrainOffset = serializedObject.FindProperty("SnapToTerrainHeightOffset");
             _priority = serializedObject.FindProperty("Priority");
@@ -179,7 +179,7 @@ namespace MadMaps.WorldStamp
             EditorGUILayout.BeginVertical(GUILayout.Width(100));
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Recalculate Terrain", GUILayout.Width(150));
-            EditorPrefs.SetBool("worldStamp_DirtyOnStamp", EditorGUILayout.Toggle(EditorPrefs.GetBool("worldStamp_DirtyOnStamp", true), GUILayout.Width(30)));
+            TerrainWrapper.RecalculateTerrain.Value = EditorGUILayout.Toggle(TerrainWrapper.RecalculateTerrain.Value, GUILayout.Width(30));
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
@@ -206,7 +206,7 @@ namespace MadMaps.WorldStamp
             
             // Scale
             EditorGUILayout.BeginHorizontal();
-            _size = serializedObject.FindProperty("Size");
+            _size = serializedObject.FindProperty("ExplicitSize");
             EditorGUILayout.PropertyField(_size);
             GUI.enabled = !_editingMask && (_size.hasMultipleDifferentValues ? true : _size.vector3Value != (target as WorldStamp).Data.Size);
             if (GUILayout.Button("Reset", GUILayout.Width(70)))
@@ -214,7 +214,7 @@ namespace MadMaps.WorldStamp
                 foreach (var obj in targets)
                 {
                     var worldStamp = obj as WorldStamp;
-                    worldStamp.Size = worldStamp.Data.Size;
+                    worldStamp.ExplicitSize = worldStamp.Data.Size;
                 }
                 _size = serializedObject.FindProperty("Size");
                 SceneView.RepaintAll();
@@ -572,7 +572,7 @@ namespace MadMaps.WorldStamp
             }
             foreach (var terrainWrapper in wrappers)
             {
-                WorldStampApplyManager.ApplyAllStamps(terrainWrapper, layerFilter);
+                LayerComponentApplyManager.ApplyAllLayerComponents(terrainWrapper, layerFilter);
                 terrainWrapper.ApplyAllLayers();
             }
         }
@@ -860,14 +860,16 @@ namespace MadMaps.WorldStamp
             {
                 var rotatedMatrix = Handles.matrix * Matrix4x4.TRS(worldStamp.transform.position, worldStamp.transform.rotation, worldStamp.transform.lossyScale);
                 _boxBoundsHandle.center = Vector3.up * (worldStamp.Size.y / 2);
-                _boxBoundsHandle.size = worldStamp.Size;
+                _boxBoundsHandle.size = worldStamp.ExplicitSize;
                 using (new Handles.DrawingScope(rotatedMatrix))
                 {
                     _boxBoundsHandle.DrawHandle();
                 }
                 if (worldStamp.Size != _boxBoundsHandle.size)
                 {
-                    worldStamp.Size = _boxBoundsHandle.size;
+                    //var scaled = _boxBoundsHandle.size;
+                    //scaled.Scale(worldStamp.transform.lossyScale.Inverse());
+                    worldStamp.ExplicitSize = _boxBoundsHandle.size;
                     SceneView.RepaintAll();
                 }
 

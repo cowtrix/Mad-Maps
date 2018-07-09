@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MadMaps.Common.Collections;
 using MadMaps.Common;
+using MadMaps.Terrains;
 using UnityEngine;
 
 namespace MadMaps.Roads
@@ -19,7 +20,7 @@ namespace MadMaps.Roads
     [StripComponentOnBuild]
     [ExecuteInEditMode]
 #endif
-    public class NodeConnection : sBehaviour, IOnPrebakeCallback
+    public class NodeConnection : LayerComponentBase
     {
         public Node ThisNode;
         public Node NextNode;
@@ -150,6 +151,24 @@ namespace MadMaps.Roads
             _spline.Recalculate();
         }
 
+        public SplineSegment GetSplineCopy()
+        {
+            if(_spline.IsDirty())
+            {
+                RecalculateSpline();
+            }
+            return _spline.JSONClone();
+        }
+
+        public Bounds GetSplineBounds()
+        {
+            if(_spline.IsDirty())
+            {
+                RecalculateSpline();
+            }
+            return _spline.GetApproximateBounds();
+        }
+
         public bool IsValid()
         {
             return ThisNode != null && NextNode != null;
@@ -207,12 +226,34 @@ namespace MadMaps.Roads
             __dataContainers.Clear();
         }
 
-        public int GetPriority()
+        public override int GetPriority()
         {
-            return 0;
+            return 1;
         }
 
-        public void OnPrebake()
+        public override void SetPriority(int priority)
+        {
+            Debug.LogWarning("This is not supported for Node Objects", this);
+        }
+
+        public override string GetLayerName()
+        {
+            return RoadNetwork.LAYER_NAME;
+        }
+
+        public override Type GetLayerType(){
+            return typeof(TerrainLayer);
+        }
+
+        public override Vector3 Size
+        {
+            get
+            {
+                return GetSplineBounds().size;
+            }
+        }
+
+        public override void OnPreBake()
         {
             if (Configuration == null)
             {

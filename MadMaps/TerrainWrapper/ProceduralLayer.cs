@@ -5,7 +5,7 @@ using MadMaps.Common.GenericEditor;
 using MadMaps.Common.Serialization;
 using MadMaps.Roads;
 using MadMaps.Terrains.Lookups;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;

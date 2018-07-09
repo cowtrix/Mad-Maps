@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 using AwesomeTechnologies.Vegetation.PersistentStorage;

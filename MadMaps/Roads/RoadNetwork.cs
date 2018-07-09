@@ -16,6 +16,7 @@ namespace MadMaps.Roads
     [HelpURL("http://lrtw.net/madmaps/index.php?title=Road_Network")]
     public class RoadNetwork : MonoBehaviour
     {
+        public const string LAYER_NAME = "Road Network";
         public static HashSet<Node> ThinkCache = new HashSet<Node>();
 
         [Serializable]
@@ -25,7 +26,6 @@ namespace MadMaps.Roads
         public float SplineResolution = 1; 
         //public float Curviness = 60;
         public float BreakAngle = 90;
-        public bool RecalculateTerrain = true;
         public List<Node> Nodes = new List<Node>();
         public List<string> IgnoredTypes = new List<string>();
         public List<GameObject> IntersectionHistory = new List<GameObject>();
@@ -129,7 +129,7 @@ namespace MadMaps.Roads
             CollectAllNodes();
             foreach (var node in Nodes)
             {
-                node.OnPreForceThink();
+                node.Snap();
             }
             var enumerator = Think(true);
             enumerator.MoveNext();
@@ -210,114 +210,22 @@ namespace MadMaps.Roads
         public void RebakeAllNodes()
         {
             ForceThink();
-
-            BlendTerrainLayerUtility.UseCount = 0;
-            
-            if (RecalculateTerrain)
+            var terrains = FindObjectsOfType<Terrain>();
+            foreach (var terrain in terrains)
             {
-                var terrains = FindObjectsOfType<Terrain>();
-                foreach (var terrain in terrains)
+                if(!terrain)
                 {
-                    if(!terrain)
-                    {
-                        continue;
-                    }
-                    var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-                    if(!wrapper)
-                    {
-                        continue;
-                    }
-
-                    var layer = GetLayer(wrapper, true);
-                    layer.Clear(wrapper);
-                    
-                    var sRes = wrapper.Terrain.terrainData.heightmapResolution;
-                    if (layer.Stencil == null || layer.Stencil.Width != sRes || layer.Stencil.Height != sRes)
-                    {
-                        layer.Stencil = new Stencil(sRes, sRes);
-                    }
-                    wrapper.CopyCompoundToLayer(layer);
-                    //WorldStamp.WorldStamp.ApplyAllStamps(wrapper, "sRoads");
-                }
-            }
-
-            {
-                var onPrebakeCallbacks = Collect<IOnPrebakeCallback>()
-                    .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
-                    .OrderBy(callback => callback.GetPriority()).ToList();
-                for (int i = 0; i < onPrebakeCallbacks.Count; i++)
-                {
-                    var rebakeCallback = onPrebakeCallbacks[i];
-                    MiscUtilities.ProgressBar("Processing Road Components (PreBake)",
-                        string.Format("{2}\n{0}/{1}", i, onPrebakeCallbacks.Count, onPrebakeCallbacks[i]),
-                        i/(float) onPrebakeCallbacks.Count);
-                    rebakeCallback.OnPrebake();
-                }
-                //Debug.LogFormat("Processed {0} PreBake components", onPrebakeCallbacks.Count);
-            }
-
-            {
-                var onBakeCallbacks = Collect<IOnBakeCallback>()
-                    .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
-                    .OrderBy(callback => callback.GetPriority()).ToList();
-                for (int i = 0; i < onBakeCallbacks.Count; i++)
-                {
-                    var rebakeCallback = onBakeCallbacks[i];
-                    MiscUtilities.ProgressBar("Processing Road Components (Bake)",
-                        string.Format("{2}\n{0}/{1}", i, onBakeCallbacks.Count, onBakeCallbacks[i]),
-                        i / (float)onBakeCallbacks.Count);
-                    rebakeCallback.OnBake();
-                }
-                //Debug.LogFormat("Processed {0} Bake components", onBakeCallbacks.Count);
-            }
-
-            {
-                var onPostBakeCallbacks = Collect<IOnPostBakeCallback>()
-                    .Where(callback => !IgnoredTypes.Contains(callback.GetType().AssemblyQualifiedName))
-                    .OrderBy(callback => callback.GetPriority()).ToList();
-                for (int i = 0; i < onPostBakeCallbacks.Count; i++)
-                {
-                    var rebakeCallback = onPostBakeCallbacks[i];
-                    MiscUtilities.ProgressBar("Processing Road Components (PostBake)",
-                        string.Format("{2}\n{0}/{1}", i, onPostBakeCallbacks.Count, onPostBakeCallbacks[i]),
-                        i / (float)onPostBakeCallbacks.Count);
-                    rebakeCallback.OnPostBake();
-                }
-                //Debug.LogFormat("Processed {0} Postbake components", onPostBakeCallbacks.Count);
-            }
-
-            MiscUtilities.ClearProgressBar();
-            FinalizeBake();
-
-            ComputeShaderPool.ClearPool();
-            //Debug.Log(string.Format("Hit Compute Shaders {0} times", BlendTerrainLayerUtility.UseCount));
-        }
-
-        void FinalizeBake()
-        {
-            List<TerrainWrapper> toRemove = new List<TerrainWrapper>();
-            foreach (var layer in LayerMapping)
-            {
-                if (layer.Value == null)
-                {
-                    toRemove.Add(layer.Key);
                     continue;
                 }
-                //MiscUtilities.ColoriseStencil(layer.Value.Stencil);
-#if UNITY_EDITOR
-                UnityEditor.EditorUtility.SetDirty(layer.Value);
-#endif
-                if (RecalculateTerrain)
+                var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
+                if(!wrapper)
                 {
-                    layer.Key.ApplyAllLayers();
+                    continue;
                 }
-                layer.Key.ClearCompoundCache(layer.Value);
-            }
-            foreach (var terrainWrapper in toRemove)
-            {
-                LayerMapping.Remove(terrainWrapper);
-            }
+                LayerComponentApplyManager.ApplyAllLayerComponents(wrapper, LAYER_NAME);
+            }                      
         }
+
 
         public void CollectAllNodes()
         {

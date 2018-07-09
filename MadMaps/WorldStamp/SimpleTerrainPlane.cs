@@ -5,14 +5,15 @@ using MadMaps.Common.GenericEditor;
 using MadMaps.Roads;
 using MadMaps.Terrains;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [ExecuteInEditMode]
 #if HURTWORLDSDK
     [StripComponentOnBuild]
 #endif
-    public class SimpleTerrainPlane : NodeComponent, IOnBakeCallback
+    public class SimpleTerrainPlane : NodeComponent
     {
         public enum BoundsFalloffMode
         {
@@ -34,7 +35,6 @@ namespace MadMaps.WorldStamp
         public AnimationCurve Falloff;
         public Texture2D FalloffTexture;
         public BoundsFalloffMode FalloffMode;
-        public string LayerName = "Road Network";
         public Vector3 Offset;
 
         public bool RemoveObjects = true;
@@ -44,51 +44,31 @@ namespace MadMaps.WorldStamp
         public SplatPrototypeWrapper Splat;
         [Range(0, 1)]
         public float SplatStrength = 1;
-        public Vector2 Size;
-        [Min(1)]
-        public int Priority;
-
-        public void OnBake()
+        [FormerlySerializedAs("Size")]
+        public Vector2 AreaSize;
+        
+        public override Vector3 Size
         {
-            Priority = Mathf.Max(1, Priority);
-
-            var objectBounds = GetObjectBounds();
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(objectBounds);
-            var stencilKey = GetPriority();
-
-            foreach (var terrainWrapper in terrainWrappers)
+            get
             {
-                try
-                {
-                    ProcessHeight(objectBounds, stencilKey, terrainWrapper);
-                    if (RemoveTrees)
-                    {
-                        ProcessTrees(objectBounds, terrainWrapper);
-                    }
-                    if (RemoveObjects)
-                    {
-                        ProcessObjects(objectBounds, terrainWrapper);
-                    }
-                    if (RemoveGrass)
-                    {
-                        ProcessGrass(objectBounds, terrainWrapper);
-                    }
-                    if(SetSplat && Splat != null && SplatStrength > 0)
-                    {
-                        SetSplats(objectBounds, terrainWrapper);
-                    }
-                }
-                catch (Exception)
-                {
-                    Debug.LogError("SimpleTerrainPlane thew exception! " + name, this);
-                    throw;
-                }
+                return GetObjectBounds().size;
             }
         }
 
-        private void SetSplats(ObjectBounds objectBounds, TerrainWrapper terrainWrapper)
+        public override void ProcessSplats(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            if(!SetSplat || Splat == null || SplatStrength == 0)
+            {
+                return;
+            }
+            stencilKey = GetPriority();
+            var objectBounds = GetObjectBounds();
             var aRes = terrainWrapper.Terrain.terrainData.alphamapResolution;
             var axisBounds = objectBounds.Flatten().ToAxisBounds();
 
@@ -99,7 +79,7 @@ namespace MadMaps.WorldStamp
             matrixMax = new Common.Coord(Mathf.Clamp(matrixMax.x, 0, aRes), Mathf.Clamp(matrixMax.z, 0, aRes));
 
             var arraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
-
+            
             var existingSplats = layer.GetSplatMaps(matrixMin.x, matrixMin.z, arraySize.x, arraySize.z, aRes);
             for (var dx = 0; dx < arraySize.x; ++dx)
             {
@@ -139,9 +119,16 @@ namespace MadMaps.WorldStamp
             }
         }
 
-        private void ProcessGrass(ObjectBounds objectBounds, TerrainWrapper terrainWrapper)
+        public override void ProcessDetails(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            stencilKey = GetPriority();
+            var objectBounds = GetObjectBounds();            
             var dRes = terrainWrapper.Terrain.terrainData.detailResolution;
             var axisBounds = objectBounds.Flatten().ToAxisBounds();
 
@@ -204,9 +191,16 @@ namespace MadMaps.WorldStamp
             return 1;
         }
 
-        private void ProcessTrees(ObjectBounds objectBounds, TerrainWrapper terrainWrapper)
+        public override void ProcessTrees(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            var objectBounds = GetObjectBounds();
+            stencilKey = GetPriority();
             var trees = terrainWrapper.GetCompoundTrees(layer, true);
             objectBounds = new ObjectBounds(objectBounds.center,
                 new Vector3(objectBounds.extents.x, 5000,
@@ -218,7 +212,7 @@ namespace MadMaps.WorldStamp
                 {
                     continue;
                 }
-                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + Size/2 - Offset.xz();
+                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + AreaSize/2 - Offset.xz();
                 localPos = new Vector2(localPos.x / Size.x, localPos.y / Size.y);
                 var falloff = GetFalloff(localPos);
                 if (falloff > .5f)
@@ -228,9 +222,17 @@ namespace MadMaps.WorldStamp
             }
         }
 
-        private void ProcessObjects(ObjectBounds objectBounds, TerrainWrapper terrainWrapper)
+        public override void ProcessObjects(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
+            var objectBounds = GetObjectBounds();
+            stencilKey = GetPriority();
             var objects = terrainWrapper.GetCompoundObjects(layer);
             objectBounds = new ObjectBounds(objectBounds.center, new Vector3(objectBounds.extents.x, 5000, objectBounds.extents.z), objectBounds.Rotation);
             foreach (var prefabObjectData in objects)
@@ -240,7 +242,7 @@ namespace MadMaps.WorldStamp
                 {
                     continue;
                 }
-                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + Size / 2 - Offset.xz();
+                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + AreaSize / 2 - Offset.xz();
                 localPos = new Vector2(localPos.x / Size.x, localPos.y / Size.y);
                 var falloff = GetFalloff(localPos);
                 if (falloff > .5f)
@@ -250,8 +252,16 @@ namespace MadMaps.WorldStamp
             }
         }
 
-        private void ProcessHeight(ObjectBounds objectBounds, int stencilKey, TerrainWrapper terrainWrapper)
+        public override void ProcessHeights(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+            stencilKey = GetPriority();
+            var objectBounds = GetObjectBounds();
             var flatObjBounds = objectBounds.Flatten();
             var flatBounds = flatObjBounds.ToAxisBounds();
             var terrainSize = terrainWrapper.Terrain.terrainData.size;
@@ -266,7 +276,7 @@ namespace MadMaps.WorldStamp
 
             var floatArraySize = new Common.Coord(matrixMax.x - matrixMin.x, matrixMax.z - matrixMin.z);
             
-            var layer = terrainWrapper.GetLayer<TerrainLayer>(LayerName, true, true);
+            
             layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
             
             if (layer.Stencil == null || layer.Stencil.Width != hRes || layer.Stencil.Height != hRes)
@@ -341,23 +351,23 @@ namespace MadMaps.WorldStamp
             layer.SetHeights(matrixMin.x, matrixMin.z, layerHeights, hRes);
         }
 
-        public int GetPriority()
-        {
-            return Priority;
-        }
-
         private Vector3 GetScaledSize()
         {
-            return new Vector3(transform.lossyScale.x*Size.x, 0, transform.lossyScale.z*Size.y);
+            try{
+                return new Vector3(transform.lossyScale.x*AreaSize.x, 0, transform.lossyScale.z*AreaSize.y);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+            }
+            return Vector3.one;
         }
 
         public void OnDrawGizmosSelected()
         {
-#if UNITY_EDITOR && HURTWORLDSDK
             var pos = transform.position;
             var rot = transform.rotation;
             GizmoExtensions.DrawWireCube(pos + rot*Offset, GetScaledSize(), rot, Color.white);
-#endif
         }
 
         private ObjectBounds GetObjectBounds()

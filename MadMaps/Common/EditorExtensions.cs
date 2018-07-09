@@ -136,10 +136,8 @@ namespace MadMaps.Common
 
         public static void Seperator()
         {
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.Space(EditorGUI.indentLevel * 16 + 6);
+            _seperator.margin.left = EditorGUI.indentLevel * 16 + 6;
             GUILayout.Box(GUIContent.none, _seperator, GUILayout.Height(1), GUILayout.ExpandWidth(true));
-            EditorGUILayout.EndHorizontal();
         }
         
 

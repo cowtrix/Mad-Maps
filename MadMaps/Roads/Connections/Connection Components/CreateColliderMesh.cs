@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using MadMaps.Common;
+using MadMaps.Terrains;
+
 using MadMaps.Common.GenericEditor;
 
 namespace MadMaps.Roads.Connections
 {
     [Serializable]
-    public class CreateColliderMesh : ConnectionComponent, IOnBakeCallback
+    public class CreateColliderMesh : ConnectionComponent
     {
         [Name("Mesh/Create Collider Mesh")]
         public class Config : ConnectionConfigurationBase
@@ -53,7 +55,7 @@ namespace MadMaps.Roads.Connections
         }
 
         public List<BakeResult> Results = new List<BakeResult>();
-        public void OnBake()
+        public override void OnPostBake()
         {
             // Setup
             if (!Network || Configuration == null || !NodeConnection)

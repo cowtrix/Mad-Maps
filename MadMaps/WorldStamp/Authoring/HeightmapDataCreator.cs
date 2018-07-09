@@ -6,7 +6,7 @@ using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class HeightmapDataCreator : WorldStampCreatorLayer
@@ -119,11 +119,12 @@ namespace MadMaps.WorldStamp.Authoring
             }
 
             EditorGUI.BeginChangeCheck();
-            AutoZeroLevel = EditorGUILayout.Toggle("Auto Zero Level", AutoZeroLevel);
+            var tHeight = parent.Template.Terrain.terrainData.size.y;
+            AutoZeroLevel = EditorGUILayout.Toggle("Auto Zero Level" + (AutoZeroLevel ? (ZeroLevel*tHeight).ToString() : string.Empty), AutoZeroLevel);
             if (!AutoZeroLevel)
             {
                 EditorGUI.indentLevel++;
-                var tHeight = parent.Template.Terrain.terrainData.size.y;
+                
                 var newHeightMin = EditorGUILayout.Slider("Zero Level", ZeroLevel * tHeight, 0, tHeight) / tHeight;
                 EditorGUI.indentLevel--;
                 if (newHeightMin != ZeroLevel)

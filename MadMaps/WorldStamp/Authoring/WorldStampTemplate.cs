@@ -2,7 +2,7 @@ using MadMaps.Common;
 using MadMaps.Common.Collections;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
 #if HURTWORLDSDK
     [StripComponentOnBuild(DestroyGameObject = true)]

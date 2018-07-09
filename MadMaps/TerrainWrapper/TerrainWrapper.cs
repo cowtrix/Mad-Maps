@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -20,13 +20,14 @@ namespace MadMaps.Terrains
         , ILevelPreBuildStepCallback
 #endif
     {
+        
         public Action<TerrainWrapper> OnPreRecalculate;
         public Action<TerrainWrapper> OnPreFinalise;
         public Action<TerrainWrapper> OnPostFinalise;
         public Action<TerrainWrapper> OnFrameAfterPostFinalise;
-
         private bool _needsPostRecalcInvokation;
 
+        public bool Locked = false;
         public bool WriteHeights = true;
         public bool WriteSplats = true;
         public bool WriteTrees = true;
@@ -280,23 +281,26 @@ namespace MadMaps.Terrains
                 }
 #if UNITY_EDITOR
                 var prefab = UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject;
+                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
+                
 #else
                 GameObject prefab = null;
 #endif
-                if (prefab == null)
+                if (prefab != null)
                 {
-                    DestroyImmediate(instantiatedObject.gameObject);
-                    continue;
+                    Queue<GameObject> queue;
+                    if (!cache.TryGetValue(prefab, out queue))
+                    {
+                        queue = new Queue<GameObject>();
+                        cache[prefab] = queue;
+                    }
+                    queue.Enqueue(instantiatedObject.gameObject);
+                    //Debug.Log(instantiatedObject, instantiatedObject);
                 }
-
-                Queue<GameObject> queue;
-                if (!cache.TryGetValue(prefab, out queue))
+                else
                 {
-                    queue = new Queue<GameObject>();
-                    cache[prefab] = queue;
-                }
-                queue.Enqueue(instantiatedObject.gameObject);
-                cache = GenerateObjectContainerCacheRecursvive(instantiatedObject, cache);
+                    cache = GenerateObjectContainerCacheRecursvive(instantiatedObject, cache);
+                }                
             }
             return cache;
         }
@@ -334,6 +338,7 @@ namespace MadMaps.Terrains
             // Objects
             MiscUtilities.ProgressBar("Applying Final Objects", "", 0.8f);
             var cache = GenerateObjectContainerCacheRecursvive(ObjectContainer.transform);
+            //Debug.Log(cache.Count);
             int missingCount = 0;
             //CompoundTerrainData.OwnedInstantiatedObjects.Clear();
             foreach (var keyValuePair in CompoundTerrainData.Objects)
@@ -429,6 +434,8 @@ namespace MadMaps.Terrains
             {
                 DestroyImmediate(destroyList[i]);
             }
+
+            GameObjectExtensions.DestroyEmptyObjectsInHierarchy(ObjectContainer.transform);
         }
 
         /// <summary>
@@ -657,16 +664,21 @@ namespace MadMaps.Terrains
 
         public T GetLayer<T>(string layerName, bool warnIfMissing = false, bool createIfMissing = false) where T:LayerBase
         {
+            return GetLayer(typeof(T), layerName, warnIfMissing, createIfMissing) as T;
+        }
+
+        public LayerBase GetLayer(Type t, string layerName, bool warnIfMissing = false, bool createIfMissing = false)
+        {
             foreach (var layer in Layers)
             {
-                if (layer != null && layer.name == layerName && layer is T)
+                if (layer != null && layer.name == layerName && layer.GetType().IsAssignableFrom(t))
                 {
-                    return layer as T;
+                    return layer;
                 }
             }
             if (createIfMissing)
             {
-                var layer = ScriptableObject.CreateInstance<T>();
+                var layer = ScriptableObject.CreateInstance(t) as LayerBase;
                 layer.name = layerName;
                 Layers.Insert(0, layer);
                 return layer;
@@ -1188,7 +1200,7 @@ namespace MadMaps.Terrains
             if(!WriteSplats)
             {
                 Debug.LogWarning("Refreshing splats, but Write Splats is disabled in the Info tab. This will have no effect.", this);
-                return null;
+                return new List<SplatPrototypeWrapper>();
             }
             var notNullSplats = SplatPrototypes.Where(wrapper => wrapper != null && wrapper.Texture != null).ToList();
             var sp = new SplatPrototype[notNullSplats.Count];
@@ -1207,7 +1219,7 @@ namespace MadMaps.Terrains
             if(!WriteDetails)
             {
                 Debug.LogWarning("Refreshing details, but Write Details is disabled in the Info tab. This will have no effect.", this);
-                return null;
+                return new List<DetailPrototypeWrapper>();
             }
             var notNullDetails = DetailPrototypes.Where(wrapper => wrapper != null ).ToList();
             var sp = new DetailPrototype[notNullDetails.Count];
@@ -1242,22 +1254,6 @@ namespace MadMaps.Terrains
                 }
             }
             return -1;
-        }
-
-        public void OnDestroy()
-        {
-            #if !HURTWORLDSDK
-            if(ObjectContainer)
-            {
-                #if UNITY_EDITOR
-                if(UnityEditor.EditorUtility.DisplayDialog("Delete Object Container?", 
-                    string.Format("Delete Object Container as well for Terrain Wrapper {0}?", name), "Yes", "No"))
-                {
-                    UnityEditor.Undo.DestroyObjectImmediate(ObjectContainer);
-                }
-                #endif
-            }
-            #endif
         }
 
         /// <summary>

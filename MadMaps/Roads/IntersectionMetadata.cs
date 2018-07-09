@@ -2,10 +2,47 @@ using UnityEngine;
 
 namespace MadMaps.Roads
 {
-    public class IntersectionMetadata : NodeComponent
+    public class IntersectionMetadata : MonoBehaviour
     {
+        [Header("> One Node Case")]
+        public Vector3 OneNodeRotation;
+        public Vector3 OneNodeOffset;
+
         [Header("> Two Node Case")]
         public Vector3 TwoNodeRotation;
+        public Vector3 TwoNodeOffset;
+
+        public Quaternion GetRotation(Node insertNode)
+        {
+            if (insertNode.ConnectionCount == 1)
+            {
+                return Quaternion.Euler(OneNodeRotation);
+            }
+            else if (insertNode.ConnectionCount > 1)
+            {
+                return Quaternion.Euler(TwoNodeRotation);
+            }
+            else
+            {
+                return Quaternion.identity;
+            }
+        }
+
+        public Vector3 GetOffset(Node insertNode)
+        {
+            if (insertNode.ConnectionCount == 1)
+            {
+                return OneNodeOffset;
+            }
+            else if (insertNode.ConnectionCount > 1)
+            {
+                return TwoNodeOffset;
+            }
+            else
+            {
+                return Vector3.zero;
+            }
+        }
 
         public void OnInsert(Node insertedNode)
         {
@@ -13,14 +50,12 @@ namespace MadMaps.Roads
             if (insertedNodeConnections.Count == 0)
             {
                 Debug.Log("Simple insertion case on no neighbours.");
-                Network.RemoveObject(insertedNode, false);
+                insertedNode.Network.RemoveObject(insertedNode, false);
                 return;
             }
 
-            if (insertedNodeConnections.Count > 1)
-            {
-                transform.rotation *= Quaternion.Euler(TwoNodeRotation);
-            }
+            transform.localRotation *= GetRotation(insertedNode);
+            transform.localPosition += transform.localRotation * GetOffset(insertedNode);
 
             var localNodes = GetComponents<Node>();
             if (insertedNodeConnections.Count > localNodes.Length)
@@ -48,36 +83,12 @@ namespace MadMaps.Roads
                 }
                 if (closestLocalNode != null)
                 {
-                    Network.ConnectNodes(neighbour, closestLocalNode, connection.Configuration);
+                    insertedNode.Network.ConnectNodes(neighbour, closestLocalNode, connection.Configuration);
                     insertedNodeConnections.RemoveAt(i);
                 }
             }
             insertedNode.Destroy();
             DestroyImmediate(insertedNode.gameObject);
-
-            /*if (neighbours.Count == 1)
-            {
-                Debug.Log("Insertion case on 1 neighbour.");
-
-                var singleNeighbour = neighbours[0];
-                var firstDist = Vector3.Distance(FirstLinkNode.NodePosition, insertedNode.NodePosition);
-                var secondDist = Vector3.Distance(SecondLinkNode.NodePosition, insertedNode.NodePosition);
-
-                Node bestToLink = firstDist < secondDist ? FirstLinkNode : SecondLinkNode;
-
-                insertedNode.Destroy();
-                DestroyImmediate(insertedNode.gameObject);
-
-                Network.ConnectNodes(singleNeighbour, bestToLink);
-
-                return;
-            }
-            if (neighbours.Count == 2)
-            {
-                Debug.Log("Insertion case on 2 neighbours.");
-
-                transform.rotation *= Quaternion.Euler(TwoNodeRotation);
-            }*/
         }
     }
 }

@@ -166,9 +166,9 @@ namespace MadMaps.Terrains
                 }
                 if(splatProtos.Count > 0)
                 {
-                    EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                    EditorGUILayout.BeginHorizontal("Box");
                     GUILayout.Label(string.Format("You have {0} splat{1} on your terrain that {2} not currently handled with Wrappers!", 
-                        splatProtos.Count, splatProtos.Count > 1 ? "s" : string.Empty, splatProtos.Count > 1 ? "are" : "is"));
+                        splatProtos.Count, splatProtos.Count > 1 ? "s" : string.Empty, splatProtos.Count > 1 ? "are" : "is"), GUILayout.MaxWidth(Screen.width - 100));
                     if(GUILayout.Button("Fix Now"))
                     {
                         var newSplats = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.splatPrototypes);
@@ -202,9 +202,9 @@ namespace MadMaps.Terrains
                 }
                 if(detailProtos.Count > 0)
                 {
-                    EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
+                    EditorGUILayout.BeginHorizontal("Box");
                     GUILayout.Label(string.Format("You have {0} detail{1} on your terrain that {2} not currently handled with Wrappers!", 
-                        detailProtos.Count, detailProtos.Count > 1 ? "s" : string.Empty, detailProtos.Count > 1 ? "are" : "is"));
+                        detailProtos.Count, detailProtos.Count > 1 ? "s" : string.Empty, detailProtos.Count > 1 ? "are" : "is"), GUILayout.MaxWidth(Screen.width - 100));
                     if(GUILayout.Button("Fix Now"))
                     {
                         var newDetails = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.detailPrototypes);

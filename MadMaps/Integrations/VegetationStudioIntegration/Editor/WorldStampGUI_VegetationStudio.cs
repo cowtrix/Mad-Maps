@@ -10,8 +10,9 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Roads;
+using MadMaps.Integration.VegetationStudio;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     public partial class WorldStampGUI
     {        

@@ -1,11 +1,11 @@
-using MadMaps.WorldStamp.Authoring;
+using MadMaps.WorldStamps.Authoring;
 using System.Linq;
 using MadMaps.Roads;
 using MadMaps.Common;
 using System;
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 #if UNITY_EDITOR
 using UnityEditor;

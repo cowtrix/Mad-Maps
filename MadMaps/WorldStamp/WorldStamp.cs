@@ -6,15 +6,16 @@ using MadMaps.Common.Collections;
 using MadMaps.Terrains;
 using UnityEngine;
 using UnityEngine.Serialization;
+using MadMaps.Common.GenericEditor;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [ExecuteInEditMode]
     [HelpURL("http://lrtw.net/madmaps/index.php?title=World_Stamps")]
     #if HURTWORLDSDK
     [StripComponentOnBuild()]
     #endif
-    public partial class WorldStamp : MonoBehaviour
+    public partial class WorldStamp : LayerComponentBase
     {
         public enum EHeightBlendMode
         {
@@ -44,15 +45,23 @@ namespace MadMaps.WorldStamp
         //======================================
         public WorldStampMask Mask;
         public bool HaveHeightsBeenFlipped = false;     // Legacy flag (old heights used to be ZX not XZ)
-        public int Priority = 0;
-        public Vector3 Size;
+        
+        [FormerlySerializedAs("Size")]
+        public Vector3 ExplicitSize;
+        public override Vector3 Size { get {
+            var copy = ExplicitSize;
+            copy.Scale(transform.lossyScale);
+            return copy;
+        }}
         public bool SnapPosition;
         public bool SnapRotation;
         public bool SnapToTerrainHeight;
         public float SnapToTerrainHeightOffset;
         public bool DisableStencil;
-
         public string LayerName = "StampLayer";
+        [Min(1)]
+        public int Priority = 1;
+        
 
         //======================================
         // Heights
@@ -170,7 +179,9 @@ namespace MadMaps.WorldStamp
 #if UNITY_EDITOR
             if (GizmosEnabled)
             {
-                GizmoExtensions.DrawWireCube(transform.position, Size.xz().x0z()/2, transform.rotation, GizmoColor);
+                var rectSize = Size.xz().x0z()/2;
+                //rectSize.Scale(transform.lossyScale);
+                GizmoExtensions.DrawWireCube(transform.position, rectSize, transform.rotation, GizmoColor);
                 Gizmos.color = GizmoColor;
                 var size = Mathf.Min(Size.MaxElement(), 10);                
                 var yOffset = Vector3.up * Size.y *.3f;
@@ -199,10 +210,20 @@ namespace MadMaps.WorldStamp
             {
                 _preview = new WorldStampPreview();
                 _preview.Invalidate(
-                    Data.Heights, () => Size, () => transform.position, () => transform.lossyScale,
+                    Data.Heights, () => Size, () => transform.position, () => Vector3.one,
                     () => transform.rotation, () => this.Data.Size, HaveHeightsBeenFlipped, GetMask(), Data.GridManager,
                     () => this && gameObject.activeInHierarchy, 32);
             }
+        }
+
+        public override Type GetLayerType()
+        {
+            return typeof(TerrainLayer);
+        }
+
+        public override void OnPreBake()
+        {
+            SnapStamp(true);
         }
 
         public void SnapStamp(bool force)
@@ -231,7 +252,7 @@ namespace MadMaps.WorldStamp
         public void SetData(WorldStampData data)
         {
             Data = data;
-            Size = Data.Size;
+            ExplicitSize = Data.Size;
         }
         
         private bool ShouldWriteHeights()
@@ -308,8 +329,15 @@ namespace MadMaps.WorldStamp
             return Mathf.Lerp(existingHeight, newHeight, maskValue);
         }
 
-        public void StampHeights(TerrainWrapper terrainWrapper, TerrainLayer layer)
+        public override void ProcessHeights(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             if (!ShouldWriteHeights())
             {
                 if (WriteHeights)
@@ -387,8 +415,20 @@ namespace MadMaps.WorldStamp
             UnityEngine.Profiling.Profiler.EndSample();
         }
 
-        public void StampStencil(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessStencil(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            if(DisableStencil)
+            {
+                return;
+            }
+
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             var res = terrainWrapper.Terrain.terrainData.heightmapResolution;
             if (layer.Stencil == null || layer.Stencil.Width != res || layer.Stencil.Height != res)
             {
@@ -487,10 +527,17 @@ namespace MadMaps.WorldStamp
             }
         }
 
-        public void StampSplats(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessSplats(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
             if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplats.Count == Data.SplatData.Count)
             {
+                return;
+            }
+
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
                 return;
             }
 
@@ -534,12 +581,13 @@ namespace MadMaps.WorldStamp
                     var normalisedStampPosition = Quaternion.Inverse(transform.rotation) * (wPos - transform.position) + (Size / 2);
                     var maskPos = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y, normalisedStampPosition.z / Size.z);
                     maskPos = new Vector3(maskPos.x * Data.Size.x, maskPos.y, maskPos.z * Data.Size.z);
+                    //maskPos += new Vector3((1 / (float)Data.Heights.Width) * Data.Size.x, 0, (1 / (float)Data.Heights.Height) * Data.Size.z) * 4;
                     var maskValue = GetMask().GetBilinear(Data.GridManager, maskPos);
 
                     if (StencilSplats)
                     {
                         var stencilPos = new Vector2(u / (float)(sRes + 1), v / (float)(sRes + 1));
-                        maskValue = layer.GetStencilStrength(stencilPos, stencilKey);
+                        maskValue *= layer.GetStencilStrength(stencilPos, stencilKey);
                     }
 
                     applyStencil[arrayU, arrayV] = maskValue > 0 ? 1 : 0;
@@ -551,7 +599,7 @@ namespace MadMaps.WorldStamp
                         continue;
                     }
 
-                    int sum = 0;
+                    int delta = 0;
                     foreach (var splatPair in Data.SplatData)
                     {
                         if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
@@ -567,7 +615,8 @@ namespace MadMaps.WorldStamp
                             thisLayerSplatData[splatPair.Wrapper] = layerData;
                         }
 
-                        var layerVal = layerData != null ? layerData[arrayU, arrayV] / 255f : 0;
+                        byte layerValByte =  (byte)(layerData != null ? layerData[arrayU, arrayV] : 0);
+                        var layerVal = layerValByte / 255f;
                             
                         float newValue = 0f;
                         switch (SplatBlendMode)
@@ -583,26 +632,42 @@ namespace MadMaps.WorldStamp
                                 stampValue *= maskValue;
                                 newValue = Mathf.Max(layerVal, stampValue);
                                 break;
+                            case ESplatBlendMode.Average:
+                                stampValue *= maskValue;
+                                newValue = (layerVal + stampValue) / 2;
+                                break;
                         }
                             
                         var byteAmount = (byte)Mathf.Clamp(newValue * 255, 0, 255);
                             
-                        sum += byteAmount;
+                        delta += byteAmount - layerValByte;
                         layerData[arrayU, arrayV] = byteAmount;
                     }
-
-                    float floatSum = sum/255f;
-                    if (floatSum > 0)
+                    
+                    if (delta != 0)
                     {
+                        float floatSum = delta/255f;
                         foreach (var serializable2DByteArray in thisLayerSplatData)
                         {
-                            if (Data.SplatData.Any(data => data.Wrapper == serializable2DByteArray.Key))
+                            if (!IgnoredSplats.Contains(serializable2DByteArray.Key) && Data.SplatData.Any(data => data.Wrapper == serializable2DByteArray.Key))
                             {
                                 continue;
                             }
 
-                            var read = serializable2DByteArray.Value[arrayU, arrayV] / 255f;
-                            if (floatSum < 1)
+                            var readByte = serializable2DByteArray.Value[arrayU, arrayV];
+                            if(readByte == 0)
+                            {
+                                continue;
+                            }
+                            var read = readByte / 255f;
+                            
+                            /*if(floatSum < 0)
+                            {
+                                var newCompoundVal = read * (1 - floatSum * -1);
+                                var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
+                                serializable2DByteArray.Value[arrayU, arrayV] = newCompoundByteVal;
+                            }
+                            else */if (floatSum < 1)
                             {
                                 var newCompoundVal = read * (1 - floatSum);
                                 var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
@@ -612,7 +677,9 @@ namespace MadMaps.WorldStamp
                             {
                                 serializable2DByteArray.Value[arrayU, arrayV] = 0;
                             }
+                            //Debug.Log(string.Format("Wrapper: {3} \t Delta: {0} \t Read: {1} \t New : {2}", floatSum, read, serializable2DByteArray.Value[arrayU, arrayV] / 255f, serializable2DByteArray.Key));
                         }
+                        layer.Stencil[u, v] = MiscUtilities.CompressStencil(stencilKey, 1);
                     }
                 }
             }
@@ -622,15 +689,22 @@ namespace MadMaps.WorldStamp
                 layer.SetSplatmap(pair.Key, targetMinCoord.x, targetMinCoord.z, pair.Value, sRes, applyStencil);
             }
 
-            MiscUtilities.AbsStencil(layer.Stencil, stencilKey);
+            //MiscUtilities.AbsStencil(layer.Stencil, stencilKey);
             UnityEngine.Profiling.Profiler.EndSample();
             UnityEngine.Profiling.Profiler.EndSample();
         }
 
-        public void StampDetails(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessDetails(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
             if (!WriteDetails&& !RemoveExistingDetails)
             {
+                return;
+            }
+
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
                 return;
             }
 
@@ -753,8 +827,15 @@ namespace MadMaps.WorldStamp
             UnityEngine.Profiling.Profiler.EndSample();
         }
 
-        public void StampTrees(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessTrees(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             UnityEngine.Profiling.Profiler.BeginSample("StampTrees");
             // Stamp trees
             var tSize = terrainWrapper.Terrain.terrainData.size;
@@ -840,8 +921,15 @@ namespace MadMaps.WorldStamp
             UnityEngine.Profiling.Profiler.EndSample();
         }
 
-        public void StampObjects(TerrainWrapper terrainWrapper, TerrainLayer layer, int stencilKey)
+        public override void ProcessObjects(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             UnityEngine.Profiling.Profiler.BeginSample("StampObjects");
             // Stamp objects
             var t = terrainWrapper.Terrain;
@@ -989,23 +1077,7 @@ namespace MadMaps.WorldStamp
             UnityEngine.Profiling.Profiler.EndSample();
         }
         
-        public List<TerrainWrapper> GetTerrainWrappers()
-        {
-            var result = new List<TerrainWrapper>();
-            var allT = FindObjectsOfType<TerrainWrapper>();
-            var stampBounds =
-                new ObjectBounds(transform.position + Vector3.up*(Size.y/2), Size/2, transform.rotation).ToAxisBounds();
-            foreach (var terrainWrapper in allT)
-            {
-                var b = terrainWrapper.GetComponent<TerrainCollider>().bounds;
-                b.Expand(Vector3.up*9999999);
-                if (b.Intersects(stampBounds))
-                {
-                    result.Add(terrainWrapper);
-                }
-            }
-            return result;
-        }
+        
 
         public void OnDestroy()
         {
@@ -1014,6 +1086,21 @@ namespace MadMaps.WorldStamp
                 _preview.Dispose();
                 _preview = null;
             }
+        }
+
+        public override int GetPriority()
+        {
+            return Priority;
+        }
+
+        public override string GetLayerName()
+        {
+            return LayerName;
+        }
+
+        public override void SetPriority(int priority)
+        {
+            Priority = priority;
         }
 
         public void Validate()
@@ -1038,6 +1125,12 @@ namespace MadMaps.WorldStamp
             {
                 WriteDetails = false;
             }
+            #if VEGETATION_STUDIO
+            if (Data.VSData.Count == 0)
+            {
+                VegetationStudioEnabled = false;
+            }
+            #endif
         }
     }
 }

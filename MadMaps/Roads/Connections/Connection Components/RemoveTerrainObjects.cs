@@ -3,11 +3,12 @@ using System.Text.RegularExpressions;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
+
 using UnityEngine;
 
 namespace MadMaps.Roads
 {
-    public class RemoveTerrainObjects : ConnectionComponent, IOnBakeCallback
+    public class RemoveTerrainObjects : ConnectionComponent
     {
         [Name("Terrain/Remove Objects")]
         public class Config : ConnectionConfigurationBase
@@ -28,8 +29,14 @@ namespace MadMaps.Roads
 
         public bool ShowDebug;
 
-        public void OnBake()
+        public override void ProcessObjects(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
             if (!Network)
             {
                 return;
@@ -45,17 +52,6 @@ namespace MadMaps.Roads
                 return;
             }
 
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            for (int i = 0; i < terrainWrappers.Count; i++)
-            {
-                var wrapper = terrainWrappers[i];
-                var layer = Network.GetLayer(wrapper, true);
-                ProcessTerrainObjects(config, wrapper, layer);
-            }
-        }
-
-        private void ProcessTerrainObjects(Config config, TerrainWrapper wrapper, TerrainLayer layer)
-        {
             var spline = NodeConnection.GetSpline();
             var bounds = spline.GetApproximateXZObjectBounds();
             bounds.Expand(new Vector3(config.ObjectRemoveDistance, 1000, config.ObjectRemoveDistance));

@@ -2,7 +2,11 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp.Authoring
+#if VEGETATION_STUDIO
+using MadMaps.Integration.VegetationStudio;
+#endif
+
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class WorldStampCaptureTemplate

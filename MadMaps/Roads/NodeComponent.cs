@@ -1,12 +1,16 @@
 using MadMaps.Common;
+using MadMaps.Terrains;
 using UnityEngine;
+using System;
 
 namespace MadMaps.Roads
 {
-    public abstract class NodeComponent : sBehaviour
+    public abstract class NodeComponent : LayerComponentBase
     {
         [HideInInspector]
         public Node Node;
+        public int Priority = 1;
+        public string LayerName = "New Layer";
 
         public RoadNetwork Network
         {
@@ -33,5 +37,10 @@ namespace MadMaps.Roads
         {
             Node = GetComponent<Node>();
         }
+
+        public override int GetPriority() { return Priority; }
+        public override void SetPriority(int priority) {Priority = priority;}
+        public override string GetLayerName() {return LayerName;}        
+        public override Type GetLayerType() {return typeof(TerrainLayer);}
     }
 }

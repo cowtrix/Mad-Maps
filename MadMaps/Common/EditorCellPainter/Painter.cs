@@ -34,6 +34,7 @@ namespace MadMaps.Common.Painter
         public Rect Rect = new Rect(Vector2.zero, Vector2.one*float.MaxValue);
         public CellColorDelegate TransmuteCellColor;
         public Matrix4x4 TRS = Matrix4x4.identity;
+        Dictionary<Type, IBrush> _brushCache = null;
 
         public Painter(MadMaps.Common.Painter.IPaintable canvas, MadMaps.Common.Painter.IGridManager gridManager)
         {
@@ -79,22 +80,6 @@ namespace MadMaps.Common.Painter
                         EditorPrefs.SetString("Painter_LastBrush", guid);
                     }
                 }
-            }
-        }
-
-        private MadMaps.Common.Painter.IBrush DefaultBrush
-        {
-            get
-            {
-                return new MadMaps.Common.Painter.DefaultBrush
-                {
-                    BrushShape = EBrushShape.Circle,
-                    BrushBlendMode = EBrushBlendMode.Add,
-                    Falloff = AnimationCurve.EaseInOut(0, 1, 1, 0),
-                    Flow = 1,
-                    Radius = 5,
-                    Strength = 1
-                };
             }
         }
 
@@ -173,25 +158,36 @@ namespace MadMaps.Common.Painter
                 return;
             }
 
-            if (EditorPrefs.HasKey("Painter_LastBrushJSON") && EditorPrefs.HasKey("Painter_LastBrushType"))
+            if(_brushCache == null)
             {
-                var type = Type.GetType(EditorPrefs.GetString("Painter_LastBrushType"));
-                var json = EditorPrefs.GetString("Painter_LastBrushJSON");
-                if (type != null && !string.IsNullOrEmpty(json))
+                _brushCache = new Dictionary<Type, IBrush>();
+                Type[] types = new Type[]
                 {
-                    try
+                    typeof(DefaultBrush),
+                    typeof(BlurBrush),
+                    typeof(ClusterBrush),
+                    typeof(FillBrush),
+                };
+                foreach(var type in types)
+                {
+                    var key = "Painter_Brush_" + type.AssemblyQualifiedName;
+                    if(EditorPrefs.HasKey(key))
                     {
-                        CurrentBrush = (MadMaps.Common.Painter.IBrush) JsonUtility.FromJson(json, type);
+                        var json = EditorPrefs.GetString(key);
+                        var brush = JsonUtility.FromJson(json, type) as MadMaps.Common.Painter.IBrush;
+                        _brushCache.Add(type, brush);
                     }
-                    catch (Exception)
+                    else
                     {
+                        _brushCache.Add(type, Activator.CreateInstance(type) as MadMaps.Common.Painter.IBrush);
                     }
                 }
+                
             }
 
             if (CurrentBrush == null)
             {
-                CurrentBrush = DefaultBrush;
+                CurrentBrush = _brushCache[typeof(DefaultBrush)];
             }
         }
 
@@ -306,6 +302,7 @@ namespace MadMaps.Common.Painter
             }
         }
 
+        
         private void DrawSceneControls()
         {
             if (Event.current.type == EventType.MouseMove)
@@ -365,9 +362,10 @@ namespace MadMaps.Common.Painter
             if (GUILayout.Button("...", EditorStyles.toolbarButton, GUILayout.Width(32)))
             {
                 var menu = new GenericMenu();
-                menu.AddItem(new GUIContent("New Paint Brush"), true, () => CurrentBrush = new DefaultBrush());
-                menu.AddItem(new GUIContent("New Blur Brush"), true, () => CurrentBrush = new BlurBrush());
-                menu.AddItem(new GUIContent("New Cluster Brush"), true, () => CurrentBrush = new ClusterBrush());
+                menu.AddItem(new GUIContent("Paint Brush"), true, () => CurrentBrush = new DefaultBrush());
+                menu.AddItem(new GUIContent("Blur Brush"), true, () => CurrentBrush = new BlurBrush());
+                menu.AddItem(new GUIContent("Cluster Brush"), true, () => CurrentBrush = new ClusterBrush());
+                menu.AddItem(new GUIContent("Fill Brush"), true, () => CurrentBrush = new FillBrush());
                 menu.ShowAsContext();
             }
 
@@ -389,11 +387,10 @@ namespace MadMaps.Common.Painter
             Handles.EndGUI();
 
             // Save brush
-            //EditorPrefs.HasKey("Painter_LastBrushJSON") && EditorPrefs.HasKey("Painter_LastBrushType")
             if (CurrentBrush != null)
             {
                 EditorPrefs.SetString("Painter_LastBrushType", CurrentBrush.GetType().AssemblyQualifiedName);
-                EditorPrefs.SetString("Painter_LastBrushJSON", JsonUtility.ToJson(CurrentBrush));
+                EditorPrefs.SetString("Painter_Brush_" + CurrentBrush.GetType().AssemblyQualifiedName, JsonUtility.ToJson(CurrentBrush));
             }
         }
 

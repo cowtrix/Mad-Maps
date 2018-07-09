@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [CustomEditor(typeof(WorldStampDataContainer))]
     [CanEditMultipleObjects]

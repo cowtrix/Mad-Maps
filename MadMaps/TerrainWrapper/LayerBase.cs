@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 
 namespace MadMaps.Terrains
@@ -12,10 +12,8 @@ namespace MadMaps.Terrains
         [HideInInspector]
         public Stencil Stencil;
 
-        public virtual bool UserOwned
-        {
-            get { return true; }
-        }
+        public bool Dirty;
+        public bool Locked;
 
         public virtual void Dispose(TerrainWrapper wrapper, bool destroyObjects)
         {

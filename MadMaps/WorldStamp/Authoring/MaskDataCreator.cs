@@ -12,7 +12,7 @@ using IBrush = MadMaps.Common.Painter.IBrush;
 using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 using UnityEditor;
 
-namespace MadMaps.WorldStamp.Authoring
+namespace MadMaps.WorldStamps.Authoring
 {
     [Serializable]
     public class MaskDataCreator : WorldStampCreatorLayer
@@ -68,9 +68,10 @@ namespace MadMaps.WorldStamp.Authoring
             LastBounds = bounds;
         }
 
-        private void FillMaskFromMinY(Bounds bounds, Serializable2DFloatArray heights)
+        private void FillMaskFromMinY(Bounds bounds, Serializable2DFloatArray heights, Vector2 minY)
         {
             Mask.Clear();
+            GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
             for (var u = GridSize / 2f; u < bounds.size.x; u += GridSize)
             {
                 for (var v = GridSize / 2f; v < bounds.size.z; v += GridSize)
@@ -83,8 +84,20 @@ namespace MadMaps.WorldStamp.Authoring
                         continue;
                     }
 
-                    var h = heights.BilinearSample(new Vector2(u / bounds.size.z, v / bounds.size.x));
-                    Mask.SetValue(cell, h > 0 ? 1 : 0);
+                    var h = heights.BilinearSample(new Vector2(u / bounds.size.z, v / bounds.size.x)) * bounds.size.y;
+                    if(h < minY.x)
+                    {
+                        Mask.SetValue(cell, 0);
+                    }
+                    else if(h <= minY.y)
+                    {
+                        Mask.SetValue(cell, (h - minY.x)/(minY.y - minY.x));
+                    }
+                    else
+                    {
+                        Mask.SetValue(cell, 1);
+                    }
+                    
                 }
             }
         }
@@ -205,16 +218,25 @@ namespace MadMaps.WorldStamp.Authoring
             }
         }
 
+        Vector2 _fillHeight = new Vector2(.5f, .5f);
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
             if (EditorGUILayoutX.IndentedButton("Reset"))
             {
                 ResetMask(parent.Template.Bounds);
             }
-            if (EditorGUILayoutX.IndentedButton("Fill From Zero Level"))
+            var width = parent.Template.Bounds.size.y.ToString().Length * 16;
+            EditorGUILayout.BeginHorizontal();
+            _fillHeight.x = EditorGUILayout.FloatField(_fillHeight.x, GUILayout.Width(width));
+            EditorGUILayout.MinMaxSlider(ref _fillHeight.x, ref _fillHeight.y, 0, parent.Template.Bounds.size.y);
+            _fillHeight.y = EditorGUILayout.FloatField(_fillHeight.y, GUILayout.Width(width));
+            //_fillHeight = new Vector2(Mathf.RoundToInt(_fillHeight.x), Mathf.RoundToInt(_fillHeight.y));
+            if (GUILayout.Button("Fill Below Height"))
             {
-                FillMaskFromMinY(parent.Template.Bounds, parent.GetCreator<HeightmapDataCreator>().Heights);
+                var hCreator = parent.GetCreator<HeightmapDataCreator>();
+                FillMaskFromMinY(parent.Template.Bounds, hCreator.Heights, _fillHeight - Vector2.one * (hCreator.ZeroLevel * parent.Template.Bounds.size.y));
             }
+            EditorGUILayout.EndHorizontal();
             if (EditorGUILayoutX.IndentedButton("Load From Texture"))
             {
                 LoadFromTexture(parent);

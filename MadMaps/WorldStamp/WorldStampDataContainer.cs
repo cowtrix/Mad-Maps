@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     #if HURTWORLDSDK
     [StripComponentOnBuild]

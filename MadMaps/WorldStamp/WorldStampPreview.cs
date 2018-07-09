@@ -4,7 +4,7 @@ using MadMaps.Common.Painter;
 using MadMaps.Common.Collections;
 using UnityEngine;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     public class WorldStampPreview
     {

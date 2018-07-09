@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
 using MadMaps.Terrains.Lookups;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 
 namespace MadMaps.Terrains

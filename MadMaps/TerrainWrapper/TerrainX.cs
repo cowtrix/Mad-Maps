@@ -94,6 +94,7 @@ namespace MadMaps.Common
             var terrainSize = terrain.terrainData.size;
             var resolution = terrain.terrainData.alphamapResolution;
 
+            worldPos -= new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
             worldPos -= terrain.GetPosition();
             worldPos = new Vector3(worldPos.x / terrainSize.x, worldPos.y / terrainSize.y, worldPos.z / terrainSize.z);
             worldPos = new Vector3(worldPos.x * resolution, 0, worldPos.z * resolution);

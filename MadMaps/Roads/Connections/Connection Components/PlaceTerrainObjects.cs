@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
+
 using UnityEngine;
 using Random = System.Random;
 
 namespace MadMaps.Roads.Connections
 {
     [Serializable]
-    public class PlaceTerrainObjects : ConnectionComponent, IOnBakeCallback
+    public class PlaceTerrainObjects : ConnectionComponent
     {
         [Name("Terrain/Place Objects")]
         public class Config : ConnectionConfigurationBase
@@ -36,8 +37,15 @@ namespace MadMaps.Roads.Connections
             }
         }
 
-        public void OnBake()
+        public override void ProcessObjects(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
+
             if(Configuration== null  || !Network)
             {
                 return;
@@ -58,19 +66,9 @@ namespace MadMaps.Roads.Connections
             var seed = NodeConnection.ThisNode.Seed;
             var rand = new Random(seed);
             
-            var wrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var terrainWrapper in wrappers)
-            {
-                ProcessWrapper(terrainWrapper, config, rand);
-            }
-        }
-
-        private void ProcessWrapper(TerrainWrapper wrapper, Config config, Random rand)
-        {
             var spline = NodeConnection.GetSpline();
             var length = spline.Length;
             var step = config.Distance;
-            var layer = Network.GetLayer(wrapper);
             var tSize = wrapper.Terrain.terrainData.size;
 
             for (var i = config.InitialOffset; i < length; i += step.GetRand(rand))

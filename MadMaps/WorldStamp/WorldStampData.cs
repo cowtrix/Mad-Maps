@@ -18,7 +18,7 @@ using EditorCellHelper = MadMaps.Common.Painter.EditorCellHelper;
 using AwesomeTechnologies;
 #endif
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [Serializable]
     public class WorldStampData

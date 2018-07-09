@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace MadMaps.WorldStamp
+namespace MadMaps.WorldStamps
 {
     [Serializable]
     public struct PrefabObjectData

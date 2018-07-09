@@ -4,10 +4,12 @@ using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Terrains;
 using UnityEngine;
+using MadMaps.Roads;
+using MadMaps.Roads.Connections;
 
-namespace MadMaps.Roads.Connections
+namespace MadMaps.Integration.VegetationStudio
 {
-    public class RemoveVegetationStudioInstancess : ConnectionComponent, IOnBakeCallback
+    public class RemoveVegetationStudioInstancess : ConnectionComponent
     {
         [Name("Vegetation Studio/Remove Vegetation")]
         public class Config : ConnectionConfigurationBase
@@ -21,15 +23,17 @@ namespace MadMaps.Roads.Connections
             }
         }
 
-        public void OnBake()
+        public override void ProcessVegetationStudio(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
+            var layer = baseLayer as TerrainLayer;
+            if(layer == null)
+            {
+                Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
+                return;
+            }
             if (!Network)
             {
                 Debug.LogError("Unable to find network! " + name, this);
-                return;
-            }
-            if (!Network.RecalculateTerrain)
-            {
                 return;
             }
             if (Configuration == null)
@@ -43,17 +47,6 @@ namespace MadMaps.Roads.Connections
                 return;
             }
 
-            var terrainWrappers = TerrainLayerUtilities.CollectWrappers(NodeConnection.GetSpline().GetApproximateXZObjectBounds());
-            foreach (var wrapper in terrainWrappers)
-            {
-                var layer = Network.GetLayer(wrapper, true);
-                layer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
-                ProcessTerrainTrees(config, wrapper, layer);
-            }
-        }
-
-        private void ProcessTerrainTrees(Config config, TerrainWrapper wrapper, TerrainLayer layer)
-        {
             var mainSpline = NodeConnection.GetSpline();
             var radius = config.InstanceRemoveDistance;
 

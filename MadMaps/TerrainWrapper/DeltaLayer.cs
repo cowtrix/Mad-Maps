@@ -8,7 +8,7 @@ using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
 using MadMaps.Common.Serialization;
 using MadMaps.Terrains.Lookups;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using System.Linq;
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.GenericEditor;
-using MadMaps.WorldStamp;
+using MadMaps.WorldStamps;
 using UnityEngine;
 using Random = System.Random;
 
