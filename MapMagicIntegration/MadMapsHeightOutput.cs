@@ -27,7 +27,7 @@ namespace MadMaps.Integration.MapMagicIntegration
 			UnityEditor.EditorApplication.update -= wrapper.Update;
 			UnityEditor.EditorApplication.update += wrapper.Update;
 			#endif
-            wrapper.Dirty = true;		
+            wrapper.Dirty = true;
         }
 	}
 
@@ -366,6 +366,9 @@ namespace MadMaps.Integration.MapMagicIntegration
 			terrainLayer.SetHeights(0, 0, heights2D, MapMagic.MapMagic.instance.resolution+1);
 			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+
+			wrapper.SetDirtyAbove(terrainLayer);
+
 			yield return null;
 		}
 

@@ -19,7 +19,7 @@ namespace MadMaps.WorldStamps
 {
     [CustomEditor(typeof (WorldStamp))]
     [CanEditMultipleObjects]
-    public partial class WorldStampGUI : Editor
+    public partial class WorldStampGUI : LayerComponentBaseGUI
     {
         BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle(-1);
         private SerializedProperty _size;
@@ -148,39 +148,11 @@ namespace MadMaps.WorldStamps
             }
 
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.BeginVertical();
-            GUI.enabled = !_editingMask && (!_layerName.hasMultipleDifferentValues);
-            var content = new GUIContent(string.Format("Stamp Layer '{0}'", _layerName.stringValue), "This will stamp only this layer.");
-            if (GUILayout.Button(content))
-            {
-                StampAll(_layerName.stringValue);
-                GUIUtility.ExitGUI();
-                return;
-            }
-            /*content = new GUIContent(string.Format("Stamp Up To Layer '{0}'", _layerName.stringValue), "This will stamp this layer, and all layers below.");
-            if (GUILayout.Button(content))
-            {
-                StampAll();
-                GUIUtility.ExitGUI();
-                return;
-            }*/
-            GUI.enabled = !_editingMask;
-            content = new GUIContent("Stamp All Layers", "This will stamp all layers on this Terrain.");
-            if (GUILayout.Button(content))
-            {
-                StampAll();
-                GUIUtility.ExitGUI();
-                return;
-            }
-            EditorGUILayout.EndVertical();
+            DoGenericUI(_layerName, !_editingMask);
 
             serializedObject.Update();
 
             EditorGUILayout.BeginVertical(GUILayout.Width(100));
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Recalculate Terrain", GUILayout.Width(150));
-            TerrainWrapper.RecalculateTerrain.Value = EditorGUILayout.Toggle(TerrainWrapper.RecalculateTerrain.Value, GUILayout.Width(30));
-            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Gizmos Enabled", GUILayout.Width(150));
@@ -553,30 +525,7 @@ namespace MadMaps.WorldStamps
                 EditorGUI.indentLevel--;
             }
         }
-
-        private void StampAll(string layerFilter = null)
-        {
-            HashSet<TerrainWrapper> wrappers = new HashSet<TerrainWrapper>();
-            foreach (var obj in targets)
-            {
-                var worldStamp = obj as WorldStamp;
-                var relevantWrappers = worldStamp.GetTerrainWrappers();
-                if (relevantWrappers.Count == 0)
-                {
-                    Debug.LogError("Unable to find any TerrainWrappers to write to. Do you need to add the TerrainWrapper component to your terrain?");
-                }
-                foreach (var relevantWrapper in relevantWrappers)
-                {
-                    wrappers.Add(relevantWrapper);
-                }
-            }
-            foreach (var terrainWrapper in wrappers)
-            {
-                LayerComponentApplyManager.ApplyAllLayerComponents(terrainWrapper, layerFilter);
-                terrainWrapper.ApplyAllLayers();
-            }
-        }
-
+      
         private void DoSingleInstanceInfo()
         {
             var stamp = target as WorldStamp;

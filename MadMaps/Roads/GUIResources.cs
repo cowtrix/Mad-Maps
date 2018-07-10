@@ -10,7 +10,7 @@ namespace MadMaps.Common
             {
                 if (__roadConfigurationIcon == null)
                 {
-                    __roadConfigurationIcon = Resources.Load<Texture2D>("RoadConfigurationIcon");
+                    __roadConfigurationIcon = Resources.Load<Texture2D>("MadMaps/RoadConfigurationIcon");
                 }
                 return __roadConfigurationIcon;
             }

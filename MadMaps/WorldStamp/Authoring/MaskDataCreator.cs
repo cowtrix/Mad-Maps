@@ -218,22 +218,24 @@ namespace MadMaps.WorldStamps.Authoring
             }
         }
 
-        Vector2 _fillHeight = new Vector2(.5f, .5f);
+        Vector2 _fillHeight = new Vector2(0, 10);
         protected override void OnExpandedGUI(WorldStampCreator parent)
         {
             if (EditorGUILayoutX.IndentedButton("Reset"))
             {
                 ResetMask(parent.Template.Bounds);
             }
+            var hCreator = parent.GetCreator<HeightmapDataCreator>();
+            var zLevel = hCreator.ZeroLevel * parent.Template.Bounds.size.y;
             var width = parent.Template.Bounds.size.y.ToString().Length * 16;
             EditorGUILayout.BeginHorizontal();
             _fillHeight.x = EditorGUILayout.FloatField(_fillHeight.x, GUILayout.Width(width));
-            EditorGUILayout.MinMaxSlider(ref _fillHeight.x, ref _fillHeight.y, 0, parent.Template.Bounds.size.y);
+            EditorGUILayout.MinMaxSlider(ref _fillHeight.x, ref _fillHeight.y, -zLevel, parent.Template.Bounds.size.y - zLevel);
             _fillHeight.y = EditorGUILayout.FloatField(_fillHeight.y, GUILayout.Width(width));
             //_fillHeight = new Vector2(Mathf.RoundToInt(_fillHeight.x), Mathf.RoundToInt(_fillHeight.y));
             if (GUILayout.Button("Fill Below Height"))
             {
-                var hCreator = parent.GetCreator<HeightmapDataCreator>();
+                
                 FillMaskFromMinY(parent.Template.Bounds, hCreator.Heights, _fillHeight - Vector2.one * (hCreator.ZeroLevel * parent.Template.Bounds.size.y));
             }
             EditorGUILayout.EndHorizontal();

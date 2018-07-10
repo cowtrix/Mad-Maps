@@ -83,7 +83,7 @@ namespace MadMaps.WorldStamps.Authoring
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Capture Area:", Template.Bounds.size.xz().ToString());
             if (GUILayout.Button(new GUIContent(BoundsLocked ? GUIResources.LockedIcon : GUIResources.UnlockedIcon, "Lock Bounds"), EditorStyles.label,
-                GUILayout.Width(18), GUILayout.Height(18)))
+                GUILayout.Width(24), GUILayout.Height(24)))
             {
                 BoundsLocked = !BoundsLocked;
             }

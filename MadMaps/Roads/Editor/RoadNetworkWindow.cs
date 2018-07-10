@@ -382,7 +382,7 @@ namespace MadMaps.Roads
             //FocusedRoadNetwork.Curviness = EditorGUILayout.FloatField("Curviness", FocusedRoadNetwork.Curviness);
             FocusedRoadNetwork.BreakAngle = EditorGUILayout.Slider("Break Angle", FocusedRoadNetwork.BreakAngle, 0, 90);
             FocusedRoadNetwork.NodePreviewSize = EditorGUILayout.IntSlider("Node Preview Size", (int)FocusedRoadNetwork.NodePreviewSize, 1, 10);
-            TerrainWrapper.RecalculateTerrain.Value = EditorGUILayout.Toggle("Recalculate Terrain", TerrainWrapper.RecalculateTerrain.Value);
+            //TerrainWrapper.RecalculateTerrain.Value = EditorGUILayout.Toggle("Recalculate Terrain", TerrainWrapper.RecalculateTerrain.Value);
 
             EditorGUILayout.BeginHorizontal();
             _configurationIgnoredTypesExpanded.Value = EditorGUILayout.Foldout(_configurationIgnoredTypesExpanded,

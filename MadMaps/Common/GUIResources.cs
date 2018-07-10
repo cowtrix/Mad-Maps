@@ -10,7 +10,7 @@ namespace MadMaps.Common
             {
                 if (__openSans_ExtraBold == null)
                 {
-                    __openSans_ExtraBold = Resources.Load<Font>("OpenSans/OpenSans-ExtraBold");
+                    __openSans_ExtraBold = Resources.Load<Font>("MadMaps/OpenSans/OpenSans-ExtraBold");
                 }
                 return __openSans_ExtraBold;
             }
@@ -22,12 +22,25 @@ namespace MadMaps.Common
             {
                 if (__popoutIcon == null)
                 {
-                    __popoutIcon = Resources.Load<Texture2D>("PopoutIcon");
+                    __popoutIcon = Resources.Load<Texture2D>("MadMaps/PopoutIcon");
                 }
                 return __popoutIcon;
             }
         }
         private static Texture2D __popoutIcon;
+
+        public static Texture2D WarningIcon
+        {
+            get
+            {
+                if (__warningIcon == null)
+                {
+                    __warningIcon = Resources.Load<Texture2D>("MadMaps/WarningIcon");
+                }
+                return __warningIcon;
+            }
+        }
+        private static Texture2D __warningIcon;
 
         public static Texture2D EyeOpenIcon
         {
@@ -35,7 +48,7 @@ namespace MadMaps.Common
             {
                 if (__eyeOpenIcon == null)
                 {
-                    __eyeOpenIcon = Resources.Load<Texture2D>("EyeOpenIcon");
+                    __eyeOpenIcon = Resources.Load<Texture2D>("MadMaps/EyeOpenIcon");
                 }
                 return __eyeOpenIcon;
             }
@@ -48,7 +61,7 @@ namespace MadMaps.Common
             {
                 if (__lockedIcon == null)
                 {
-                    __lockedIcon = Resources.Load<Texture2D>("LockedIcon");
+                    __lockedIcon = Resources.Load<Texture2D>("MadMaps/LockedIcon");
                 }
                 return __lockedIcon;
             }
@@ -61,7 +74,7 @@ namespace MadMaps.Common
             {
                 if (__unlockedIcon == null)
                 {
-                    __unlockedIcon = Resources.Load<Texture2D>("UnlockedIcon");
+                    __unlockedIcon = Resources.Load<Texture2D>("MadMaps/UnlockedIcon");
                 }
                 return __unlockedIcon;
             }

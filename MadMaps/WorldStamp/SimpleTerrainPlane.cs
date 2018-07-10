@@ -203,22 +203,32 @@ namespace MadMaps.WorldStamps
             stencilKey = GetPriority();
             var trees = terrainWrapper.GetCompoundTrees(layer, true);
             objectBounds = new ObjectBounds(objectBounds.center,
-                new Vector3(objectBounds.extents.x, 5000,
+                new Vector3(objectBounds.extents.x, 50000,
                     objectBounds.extents.z), objectBounds.Rotation);
+            //Debug.Log(Size);
             foreach (var hurtTreeInstance in trees)
             {
-                var wPos = terrainWrapper.Terrain.TreeToWorldPos(hurtTreeInstance.Position);
-                if (!objectBounds.Contains(wPos))
+                var worldPos = terrainWrapper.Terrain.TreeToWorldPos(hurtTreeInstance.Position);
+                worldPos = new Vector3(worldPos.x, objectBounds.center.y, worldPos.z);
+                if (!objectBounds.Contains(new Vector3(worldPos.x, objectBounds.center.y, worldPos.z)))
                 {
                     continue;
                 }
-                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + AreaSize/2 - Offset.xz();
-                localPos = new Vector2(localPos.x / Size.x, localPos.y / Size.y);
-                var falloff = GetFalloff(localPos);
+                
+                var localPos = Quaternion.Inverse(objectBounds.Rotation)*(worldPos - objectBounds.min);
+                var xDist = localPos.x/objectBounds.size.x;
+                var zDist = localPos.z/objectBounds.size.z;
+
+                float falloff = GetFalloff(new Vector2(xDist, zDist));
+                DebugHelper.DrawPoint(worldPos, 1, Color.white, 5);
                 if (falloff > .5f)
                 {
                     layer.TreeRemovals.Add(hurtTreeInstance.Guid);
+                    //Debug.DrawLine(worldPos, worldPos + Vector3.up * 10, Color.red, 5);
                 }
+                /*else{
+                    Debug.DrawLine(worldPos, worldPos + Vector3.up * 10, Color.green, 5);
+                }*/
             }
         }
 
@@ -237,14 +247,18 @@ namespace MadMaps.WorldStamps
             objectBounds = new ObjectBounds(objectBounds.center, new Vector3(objectBounds.extents.x, 5000, objectBounds.extents.z), objectBounds.Rotation);
             foreach (var prefabObjectData in objects)
             {
-                var wPos = terrainWrapper.Terrain.TreeToWorldPos(prefabObjectData.Position);
-                if (!objectBounds.Contains(wPos))
+                var worldPos = terrainWrapper.Terrain.TreeToWorldPos(prefabObjectData.Position);
+                worldPos = new Vector3(worldPos.x, objectBounds.center.y, worldPos.z);
+                if (!objectBounds.Contains(new Vector3(worldPos.x, objectBounds.center.y, worldPos.z)))
                 {
                     continue;
                 }
-                Vector2 localPos = transform.worldToLocalMatrix.MultiplyPoint3x4(wPos).xz() + AreaSize / 2 - Offset.xz();
-                localPos = new Vector2(localPos.x / Size.x, localPos.y / Size.y);
-                var falloff = GetFalloff(localPos);
+                
+                var localPos = Quaternion.Inverse(objectBounds.Rotation)*(worldPos - objectBounds.min);
+                var xDist = localPos.x/objectBounds.size.x;
+                var zDist = localPos.z/objectBounds.size.z;
+
+                float falloff = GetFalloff(new Vector2(xDist, zDist));
                 if (falloff > .5f)
                 {
                     layer.ObjectRemovals.Add(prefabObjectData.Guid);
@@ -353,14 +367,7 @@ namespace MadMaps.WorldStamps
 
         private Vector3 GetScaledSize()
         {
-            try{
-                return new Vector3(transform.lossyScale.x*AreaSize.x, 0, transform.lossyScale.z*AreaSize.y);
-            }
-            catch(Exception e)
-            {
-                Debug.LogException(e);
-            }
-            return Vector3.one;
+             return new Vector3(transform.lossyScale.x*AreaSize.x, 0, transform.lossyScale.z*AreaSize.y);
         }
 
         public void OnDrawGizmosSelected()

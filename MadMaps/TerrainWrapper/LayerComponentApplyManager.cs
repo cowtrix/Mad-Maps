@@ -40,6 +40,12 @@ namespace MadMaps.Terrains
                     continue;
                 }
 
+                if (!layerComponent.GetEnabled())
+                {
+                    allLayerComponents.RemoveAt(i);
+                    continue;
+                }
+
                 var stampBounds = new ObjectBounds(layerComponent.transform.position, layerComponent.Size / 2,
                     layerComponent.transform.rotation);
                 var axisStampBounds = stampBounds.ToAxisBounds();
@@ -100,11 +106,13 @@ namespace MadMaps.Terrains
                     }
                     cache.Add(layer);
 
-                    if(layer.Locked())
+                    if(layer.Locked)
                     {
                         Debug.LogWarningFormat(layer, "Attempted to write to layer {0} but it was locked!", layer.name);
+                        mappings.RemoveAt(i);
                         continue;
                     }
+
                     layer.Clear(wrapper);
                     layer.PrepareApply(wrapper, wrapper.GetLayerIndex(layer));
                 }
@@ -142,10 +150,11 @@ namespace MadMaps.Terrains
             mappings = SortComponents(wrapper, layerFilter);
             if(wrapper.Locked)
             {   
-                Debug.LogWarning(string.Format("Attempted to write to Terrain Wrapper {0} but it was locked.", name), this);
+                Debug.LogWarning(string.Format("Attempted to write to Terrain Wrapper {0} but it was locked.", wrapper.name), wrapper);
             }
             else
             {      
+                bool anyLayerWrittenTo = false;
                 // Okay, we've organised our Components in such a way so we can iterate through and execute them.
                 // Iterating the mappings here is equivalent to iterating through the TerrainWrapper layers and executing all the relevant Components for each layer.
                 for (int i = 0; i < mappings.Count; i++)
@@ -157,7 +166,9 @@ namespace MadMaps.Terrains
                     // A somewhat naive solution, but the best I have found after trying several out.
                     wrapper.CopyCompoundToLayer(layer);
 
-                    if(Wrapper.WriteHeights)
+                    anyLayerWrittenTo = true;
+
+                    if(wrapper.WriteHeights)
                     {
                         // Heights are a special type of layer, as layerComponents have the ability to compete with each other and determine who gets control of a point
                         // on the map through their height values. For this reason heights needed to be evaluated first, so winners can be determined.
@@ -208,20 +219,26 @@ namespace MadMaps.Terrains
                         }
 
                         #if VEGETATION_STUDIO
-                        if(wrapper.WriteVegetationStudios)
+                        if(wrapper.WriteVegetationStudio)
                         {
                             MiscUtilities.ProgressBar(String.Format("Applying Details for Component {0} : Layer {1}", layerStampMapping.Components[j].name, layer.name), String.Format("{0}/{1}", j, layerStampMapping.Components.Count), j / (float)layerStampMapping.Components.Count);
                             layerComponent.ProcessVegetationStudio(wrapper, layer, stencilKey);
                         }
                         #endif
-                    }                
-                    MiscUtilities.ColoriseStencil(layer.Stencil);
-                    wrapper.ClearCompoundCache(layer);
-                }
-    #if UNITY_EDITOR
-                    UnityEditor.EditorUtility.SetDirty(layer);
-    #endif
-                    wrapper.Dirty = true;
+
+                        layer.Dirty = false;
+                    }
+
+                    if(anyLayerWrittenTo)
+                    {
+                        wrapper.SetDirtyAbove(layer);
+                        MiscUtilities.ColoriseStencil(layer.Stencil);
+                        wrapper.ClearCompoundCache(layer);                
+        #if UNITY_EDITOR
+                        UnityEditor.EditorUtility.SetDirty(layer);
+        #endif
+                        wrapper.Dirty = true;
+                    }
                 }
             }
             for (int i = 0; i < mappings.Count; i++)

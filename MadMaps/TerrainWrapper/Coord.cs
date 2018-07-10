@@ -57,6 +57,11 @@ namespace MadMaps.Common
             return new Coord(first.x + second.x, first.z + second.z);
         }
 
+        public static Coord operator -(Coord first, Coord second)
+        {
+            return new Coord(first.x - second.x, first.z - second.z);
+        }
+
         public Coord Clamp(int p1, int p2)
         {
             return new Coord(Mathf.Clamp(x, p1, p2), Mathf.Clamp(z, p1, p2));

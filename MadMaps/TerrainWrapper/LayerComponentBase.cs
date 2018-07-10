@@ -31,7 +31,8 @@ namespace MadMaps.Terrains
         public abstract string GetLayerName();
         public abstract Vector3 Size { get; }
         public abstract Type GetLayerType();
-
+        public abstract bool GetEnabled();
+        public abstract void SetEnabled(bool value);
         public virtual void OnPreBake(){}
         public virtual void ProcessHeights(TerrainWrapper wrapper, LayerBase layer, int stencilKey){}
         public virtual void ProcessStencil(TerrainWrapper wrapper, LayerBase layer, int stencilKey){}

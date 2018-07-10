@@ -342,6 +342,7 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             }
             global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+			wrapper.SetDirtyAbove(terrainLayer);
             yield break;
         }
 

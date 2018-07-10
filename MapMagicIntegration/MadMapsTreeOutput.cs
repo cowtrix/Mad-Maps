@@ -273,6 +273,7 @@ namespace MadMaps.Integration.MapMagicIntegration
             }
             global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+			wrapper.SetDirtyAbove(terrainLayer);
 			yield return null;
 		}
 

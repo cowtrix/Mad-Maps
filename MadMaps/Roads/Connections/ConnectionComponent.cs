@@ -46,6 +46,21 @@ namespace MadMaps.Roads
         [Min(1)]
         public int Priority = 1;
 
+        public override bool GetEnabled()
+        {
+            if(!gameObject.activeInHierarchy || !enabled || Configuration == null)
+            {
+                return false;
+            }
+            var config = Configuration.GetConfig();
+            return config != null && config.Enabled;
+        }
+
+        public override void SetEnabled(bool value)
+        {
+            enabled = value;
+        }
+
         public override Vector3 Size
         {
             get

@@ -12,6 +12,16 @@ namespace MadMaps.Roads
         public int Priority = 1;
         public string LayerName = "New Layer";
 
+        public override bool GetEnabled()
+        {
+            return gameObject.activeInHierarchy && enabled;
+        }
+
+        public override void SetEnabled(bool value)
+        {
+            enabled = value;
+        }
+
         public RoadNetwork Network
         {
             get

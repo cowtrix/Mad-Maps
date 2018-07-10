@@ -12,7 +12,13 @@ v 0.1.3
 - Fixed incorrect handling of terrain layer objects, where occassionally their instances would not be pooled properly
 - Added the ability to lock both Terrain Wrappers and Layers, which will mean they will not alter their data
 - Added 'dirtiness' indicator for layers, indicating that they may need to be rebaked. A layer may become dirty when underlying data changes, or when certain events happen like a stamp is moved.
-
+- Removed Blend Mode dropdown from layer GUI. Currently there is no real scenario where this should be user defined.
+- Added the ability to recalculate all components (road networks, stamps, etc) through the terrain layer UI
+- Changed the "Fill From Zero Height" tool in the Mask tab of the World Stamp Creator window to be more flexible - now, define a range to fill a gradient based on the heightmap.
+- Added ability to change the control scheme of the Road Network for computers where middle mouse buttons were not available. Do this in the Configuration tab of the Road Network Window.
+- Fixed Simple Terrain Plane widget removing trees and objects
+- Changed "Stamp Layer 'X'" and "Stamp All Layers" with "Recalculate Layer 'X'" and "Recalculate All Layers". Recalculate All Layers will now also trigger a Road Network rebake.
+- Fixed issue where Set Terrain Height connection component didn't write the very edge of a terrain.
 
 == History ==
 

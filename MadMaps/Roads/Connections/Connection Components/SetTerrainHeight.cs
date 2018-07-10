@@ -85,8 +85,10 @@ namespace MadMaps.Roads.Connections
             }
 
             // Get matrix space min/max
-            var matrixMin = terrain.WorldToHeightmapCoord(bounds.min, TerrainX.RoundType.Floor);
-            var matrixMax = terrain.WorldToHeightmapCoord(bounds.max, TerrainX.RoundType.Ceil);
+            var matrixMin = terrain.WorldToHeightmapCoord(bounds.min, TerrainX.RoundType.Floor) - Coord.One;
+            matrixMin = matrixMin.Clamp(0, heightRes);
+            var matrixMax = terrain.WorldToHeightmapCoord(bounds.max, TerrainX.RoundType.Ceil) + Coord.One;
+            matrixMax = matrixMax.Clamp(0, heightRes);
 
             var xDelta = matrixMax.x - matrixMin.x;
             var zDelta = matrixMax.z - matrixMin.z;

@@ -174,6 +174,16 @@ namespace MadMaps.WorldStamps
             return Data.Mask;
         }
 
+        public override bool GetEnabled()
+        {
+            return gameObject.activeInHierarchy && enabled;
+        }
+
+        public override void SetEnabled(bool value)
+        {
+            enabled = value;
+        }
+
         public void OnDrawGizmos()
         {
 #if UNITY_EDITOR

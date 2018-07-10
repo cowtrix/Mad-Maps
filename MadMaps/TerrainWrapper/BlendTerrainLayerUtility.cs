@@ -29,7 +29,7 @@ namespace MadMaps.Terrains
             var height = baseData.Height;
             if (TerrainWrapper.ComputeShaders && ShouldCompute(baseData))
             {
-                var blendShader = ComputeShaderPool.GetShader("WorldStamp/ComputeShaders/BlendIntArray");
+                var blendShader = ComputeShaderPool.GetShader("MadMaps/WorldStamp/ComputeShaders/BlendIntArray");
                 int kernelHandle = blendShader.FindKernel("BlendInts");
 
                 var baseAsInt = baseData.Data.ConvertToIntArray();  // TODO hmmmmm
@@ -139,7 +139,7 @@ namespace MadMaps.Terrains
             var height = baseData.Height;
             if (TerrainWrapper.ComputeShaders && ShouldCompute(baseData))
             {
-                var blendShader = ComputeShaderPool.GetShader("WorldStamp/ComputeShaders/StencilIntArray");
+                var blendShader = ComputeShaderPool.GetShader("MadMaps/WorldStamp/ComputeShaders/StencilIntArray");
                 int kernelHandle = blendShader.FindKernel("StencilInts");
 
                 var dataAsInt = baseData.Data.ConvertToIntArray();
@@ -232,7 +232,7 @@ namespace MadMaps.Terrains
             var height = baseData.Height;
             if (TerrainWrapper.ComputeShaders && ShouldCompute(baseData))
             {
-                var blendShader = ComputeShaderPool.GetShader("WorldStamp/ComputeShaders/BlendFloatArray");
+                var blendShader = ComputeShaderPool.GetShader("MadMaps/WorldStamp/ComputeShaders/BlendFloatArray");
                 int kernelHandle = blendShader.FindKernel("BlendFloats");
 
                 //var baseBuffer = new ComputeBuffer(baseData.Width * baseData.Height, sizeof(float));

@@ -1,14 +1,18 @@
 ﻿using UnityEditor;
+using MadMaps.Common;
+using System.Collections.Generic;
 
 namespace MadMaps.Roads
 {
     [CustomEditor(typeof (ConnectionComponent), true)]
     [CanEditMultipleObjects]
-    public class ConnectionComponentGUI : Editor
+    public class ConnectionComponentGUI : LayerComponentBaseGUI
     {
         private SerializedProperty _overridePriority;
         private SerializedProperty _priority;
         private SerializedProperty _connection;
+
+        List<string> _layers = new List<string>();
 
         public void OnEnable()
         {
@@ -19,11 +23,19 @@ namespace MadMaps.Roads
 
         public override void OnInspectorGUI()
         {
+            _layers.Clear();
             foreach (var o in targets)
             {
                 var cc = o as ConnectionComponent;
+                var layer = cc.GetLayerName();
+                if(!_layers.Contains(layer))
+                {
+                    _layers.Add(layer);
+                }
                 cc.Think();
             }
+
+            DoGenericUI(_layers, true);
 
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();

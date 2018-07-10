@@ -29,6 +29,16 @@ namespace MadMaps.Roads
 
         private bool _isStripping;
 
+        public override bool GetEnabled()
+        {
+            return gameObject.activeInHierarchy && enabled;
+        }
+
+        public override void SetEnabled(bool value)
+        {
+            enabled = value;
+        }
+
         public RoadNetwork Network
         {
             get

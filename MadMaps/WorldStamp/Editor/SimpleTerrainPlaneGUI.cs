@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using MadMaps.WorldStamps;
+using MadMaps.Common;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace MadMaps.WorldStamps
 {
     [CustomEditor(typeof(SimpleTerrainPlane))]
     [CanEditMultipleObjects]
-    public class SimpleTerrainPlaneGUI : Editor
+    public class SimpleTerrainPlaneGUI : LayerComponentBaseGUI
     {
         private SerializedProperty _blendMode,
             _falloffMode,
@@ -45,6 +46,7 @@ namespace MadMaps.WorldStamps
 
         public override void OnInspectorGUI()
         {
+            DoGenericUI(_layerName, true);
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
 
@@ -60,8 +62,8 @@ namespace MadMaps.WorldStamps
             {
                 EditorGUILayout.PropertyField(_falloffTexture);
             }
-            EditorGUI.indentLevel--;
-
+            EditorGUI.indentLevel--;           
+            
             EditorGUILayout.PropertyField(_layerName);
             EditorGUILayout.PropertyField(_offset);
             EditorGUILayout.PropertyField(_size);

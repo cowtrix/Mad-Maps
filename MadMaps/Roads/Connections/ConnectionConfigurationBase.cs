@@ -8,6 +8,7 @@ namespace MadMaps.Roads
     {
         [Min(1)]
         public int Priority = 1;
+        public bool Enabled = true;
         
         public override string ToString()
         {

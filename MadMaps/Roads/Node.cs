@@ -65,6 +65,16 @@ namespace MadMaps.Roads
         public NodeConfiguration Configuration = new NodeConfiguration();
         public Vector3 Offset;
 
+        public override bool GetEnabled()
+        {
+            return gameObject.activeInHierarchy && enabled;
+        }
+
+        public override void SetEnabled(bool value)
+        {
+            enabled = value;
+        }
+
         public RoadNetwork Network
         {
             get
@@ -354,12 +364,12 @@ namespace MadMaps.Roads
                     }
                     else
                     {
-                        Debug.LogWarning("Node with a Wrapper snap setting on a terrain, but wrapper has no layers - this won't work.");
+                        Debug.LogWarning("Node with a Wrapper snap setting on a terrain, but wrapper has no layers - this won't work.", this);
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("Node with a Wrapper snap setting on a terrain without a TerrainWrapper component - this won't work.");
+                    Debug.LogWarning("Node with a Wrapper snap setting on a terrain without a TerrainWrapper component - this won't work.", this);
                 }
                 _lastSnapPosition = transform.position;
             }

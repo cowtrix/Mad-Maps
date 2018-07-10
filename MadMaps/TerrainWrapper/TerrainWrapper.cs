@@ -34,10 +34,6 @@ namespace MadMaps.Terrains
         public bool WriteDetails = true;
         public bool WriteObjects = true;
 
-        #if VEGETATION_STUDIO
-        public bool WriteVegetationStudio = true;
-        #endif
-
         public List<LayerBase> Layers = new List<LayerBase>();
 
         public List<SplatPrototypeWrapper> SplatPrototypes = new List<SplatPrototypeWrapper>();
@@ -569,10 +565,10 @@ namespace MadMaps.Terrains
 
                     var splats = new float[subRes, subRes, SplatPrototypes.Count];
 
-                    var combineShader = Resources.Load<ComputeShader>("WorldStamp/ComputeShaders/CombineSplats");
+                    var combineShader = Resources.Load<ComputeShader>("MadMaps/WorldStamp/ComputeShaders/CombineSplats");
                     var combineShaderKernel = combineShader.FindKernel("CombineSplats");
 
-                    var normalizeShader = Resources.Load<ComputeShader>("WorldStamp/ComputeShaders/NormalizeSplats");
+                    var normalizeShader = Resources.Load<ComputeShader>("MadMaps/WorldStamp/ComputeShaders/NormalizeSplats");
                     var normalizeShaderKernel = normalizeShader.FindKernel("Normalize");
 
                     var dataBuffer = new ComputeBuffer(subRes*subRes*SplatPrototypes.Count, sizeof (float));
@@ -1320,6 +1316,19 @@ namespace MadMaps.Terrains
 #endif
             DestroyImmediate(_compoundTerrainData);
             _compoundTerrainData = null;
+        }
+
+        public void SetDirtyAbove(LayerBase layer)
+        {
+            int layerIndex = GetLayerIndex(layer) - 1;
+            for(var j = layerIndex; j >= 0; --j)
+            {
+                var dirtyingLayer = Layers[j];
+                if(dirtyingLayer)
+                {
+                    dirtyingLayer.Dirty = true;
+                }
+            }
         }
     }
 }

@@ -151,24 +151,33 @@ namespace MadMaps.Terrains
             var layerNumberRect = new Rect(rect.x, rect.y, 20, headerHeight);
             EditorGUI.LabelField(layerNumberRect, (List.list.Count - index - 1).ToString());
 
-            var nameRect = new Rect(layerNumberRect.xMax + 4, rect.y, rect.width * .5f, headerHeight);
+            var nameRect = new Rect(layerNumberRect.xMax + 4, rect.y, rect.width - 120, headerHeight);
             layer.name = EditorGUI.TextField(nameRect, layer.name);
 
-            var terrainlayer = layer as TerrainLayer;
-            var infoRect = new Rect(nameRect.xMax + 4, rect.y, rect.width - 24 - nameRect.width - 28, headerHeight);
-            if (terrainlayer != null/* && !(terrainlayer is DeltaLayer)*/)
+            var lockedRect = new Rect(nameRect.xMax + 2, rect.y - 3, headerHeight + 7, headerHeight + 7);
+            if (GUI.Button(lockedRect, new GUIContent(layer.Locked ? GUIResources.LockedIcon : GUIResources.UnlockedIcon, "Lock Layer"), EditorStyles.label))
             {
-                DrawLayerHeader(terrainlayer, infoRect);
+                layer.Locked = !layer.Locked;
             }
+            GUI.enabled = !layer.Locked;
+            var reapplyRect = new Rect(lockedRect.xMax + 1, rect.y, headerHeight, headerHeight); 
+            if (GUI.Button(reapplyRect, EditorGUIUtility.IconContent("TreeEditor.Refresh", "Reapply all components on this layer."), "RL FooterButton"))
+            {
+                LayerComponentApplyManager.ApplyAllLayerComponents(_wrapper, layer.name);
+            }
+            GUI.enabled = true;
+            var dirtyRect = new Rect(reapplyRect.xMax+ 3, rect.y - 2, headerHeight + 4, headerHeight + 4);
+            GUI.color = layer.Dirty ? Color.white : Color.gray.WithAlpha(.1f);
+            if(GUI.Button(dirtyRect, new GUIContent(GUIResources.WarningIcon, layer.Dirty ? "This layer is dirty." : "This layer is not dirty."), EditorStyles.label))
+            {
+                layer.Dirty = false;
+            }
+            GUI.color = Color.white;
             
             var enabledRect = new Rect(rect.xMax - 20, rect.y, 20, rect.height);
             layer.Enabled = GUI.Toggle(enabledRect, layer.Enabled, GUIContent.none);
         }
 
-        private void DrawLayerHeader(TerrainLayer layer, Rect infoRect)
-        {
-            //layer.BlendMode = (TerrainLayer.ETerrainLayerBlendMode)EditorGUI.EnumPopup(infoRect, layer.BlendMode);
-        }
 
         public static LayerBase DrawExpandedGUI(TerrainWrapper wrapper, LayerBase layer)
         {

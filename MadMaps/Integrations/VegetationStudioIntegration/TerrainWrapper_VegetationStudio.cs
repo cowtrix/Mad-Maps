@@ -17,6 +17,8 @@ namespace MadMaps.Terrains
     public partial class TerrainWrapper 
     {
         public const byte VegetationStudio_ID = 123;
+
+        public bool WriteVegetationStudio = true;
         
         struct VegetationSystemData
         {
