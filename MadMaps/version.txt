@@ -2,6 +2,7 @@ Current Version:
 
 v 0.1.3
 
+- Added a new demo scene, with some stamps and roads on a terrain. More complexity and more scenes coming soon!
 - Road nodes will now update their snapping before rebaking
 - Added icons for Splat and Detail wrappers
 - Fixed replacing World Stamps from the World Stamp Creator when also capturing a road network

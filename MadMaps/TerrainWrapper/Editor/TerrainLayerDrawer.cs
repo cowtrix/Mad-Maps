@@ -91,8 +91,7 @@ namespace MadMaps.Terrains
         {
             var obj = list.list[list.index] as TerrainLayer;
             if (obj != null)
-            {
-                
+            {                
                 bool inLevel = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj));
                 if (!EditorUtility.DisplayDialog(
                     string.Format("Are you sure you want to delete layer {0}?", obj.name),
@@ -164,11 +163,13 @@ namespace MadMaps.Terrains
             if (GUI.Button(reapplyRect, EditorGUIUtility.IconContent("TreeEditor.Refresh", "Reapply all components on this layer."), "RL FooterButton"))
             {
                 LayerComponentApplyManager.ApplyAllLayerComponents(_wrapper, layer.name);
+                GUIUtility.ExitGUI();
+                return;
             }
             GUI.enabled = true;
             var dirtyRect = new Rect(reapplyRect.xMax+ 3, rect.y - 2, headerHeight + 4, headerHeight + 4);
             GUI.color = layer.Dirty ? Color.white : Color.gray.WithAlpha(.1f);
-            if(GUI.Button(dirtyRect, new GUIContent(GUIResources.WarningIcon, layer.Dirty ? "This layer is dirty." : "This layer is not dirty."), EditorStyles.label))
+            if(GUI.Button(dirtyRect, new GUIContent(GUIResources.WarningIcon, layer.Dirty ? "This layer is dirty. Click to manually reset this." : "This layer is not dirty."), EditorStyles.label))
             {
                 layer.Dirty = false;
             }

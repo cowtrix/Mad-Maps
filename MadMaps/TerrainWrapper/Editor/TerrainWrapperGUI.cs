@@ -110,8 +110,11 @@ namespace MadMaps.Terrains
             }*/
 
             EditorGUILayout.BeginHorizontal();            
-            CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20), GUILayout.Width(EditorGUIUtility.currentViewWidth - (IsPopout ? 12 : 40)));
-            
+            CurrentTab = GUILayout.Toolbar(CurrentTab, _tabs, GUILayout.Height(20), GUILayout.Width(EditorGUIUtility.currentViewWidth - (IsPopout ? 12 : 40) - 26));
+            if (GUILayout.Button(new GUIContent(Wrapper.Locked ? GUIResources.LockedIcon : GUIResources.UnlockedIcon, "Lock Wrapper"), EditorStyles.label, GUILayout.Width(24), GUILayout.Height(24)))
+            {
+                Wrapper.Locked = !Wrapper.Locked;
+            }
             if (!IsPopout && GUILayout.Button(new GUIContent(GUIResources.PopoutIcon, "Popout Inspector"), 
                 EditorStyles.label, GUILayout.Width(18), GUILayout.Height(18)))
             {
@@ -144,7 +147,7 @@ namespace MadMaps.Terrains
                 EditorGUILayout.Space();
             }
             else if (currentTabTitle == "Splats")
-            { 
+            {
                 _splatsDrawer.List.DoLayoutList();
                 var splatProtos = new List<SplatPrototype>(Wrapper.Terrain.terrainData.splatPrototypes);
                 foreach(var wrapper in Wrapper.SplatPrototypes)
