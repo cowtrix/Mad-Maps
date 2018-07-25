@@ -5,6 +5,7 @@ using MadMaps.Common;
 using UnityEditor;
 using UnityEngine;
 using EditorGUILayoutX = MadMaps.Common.EditorGUILayoutX;
+using MadMaps.Roads;
 
 namespace MadMaps.WorldStamps.Authoring
 {
@@ -179,7 +180,8 @@ namespace MadMaps.WorldStamps.Authoring
                 var prefabType = PrefabUtility.GetPrefabType(stampToReplace);
                 if(prefabType == PrefabType.Prefab)
                 {
-                    go = (GameObject)PrefabUtility.InstantiatePrefab(stampToReplace.gameObject);                    
+                    go = (GameObject)PrefabUtility.InstantiatePrefab(stampToReplace.gameObject);
+                    go.DestroyChildren();
                 }
                 else
                 {

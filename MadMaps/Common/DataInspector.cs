@@ -47,6 +47,11 @@ namespace MadMaps.Common
                 tex.SetPixel(x + 1, z, Color.white);
                 tex.SetPixel(x, z - 1, Color.white);
                 tex.SetPixel(x, z + 1, Color.white);
+
+                tex.SetPixel(x - 1, z - 1, Color.white);
+                tex.SetPixel(x + 1, z - 1, Color.white);
+                tex.SetPixel(x - 1, z + 1, Color.white);
+                tex.SetPixel(x + 1, z + 1, Color.white);
             }
             return tex;
         }

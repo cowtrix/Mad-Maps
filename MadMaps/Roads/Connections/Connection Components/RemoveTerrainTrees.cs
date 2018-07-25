@@ -60,6 +60,7 @@ namespace MadMaps.Roads.Connections
             GenerateSplinePlanes(0, mainSpline, out startPlane, out endPlane);
 
             var trees = wrapper.GetCompoundTrees(layer, true, flatCullbounds);
+            int removeCount = 0;
             for (int i = trees.Count - 1; i >= 0; i--)
             {
                 var treeInstance = trees[i];
@@ -76,8 +77,10 @@ namespace MadMaps.Roads.Connections
                 if (d.sqrMagnitude < config.TreeRemoveDistance * config.TreeRemoveDistance && !layer.TreeRemovals.Contains(treeInstance.Guid))
                 {
                     layer.TreeRemovals.Add(treeInstance.Guid);
+                    removeCount++;
                 }
             }
+            //Debug.Log(string.Format("{0} removed {1} trees.", this, removeCount), this);
         }
 
         private void GenerateSplinePlanes(float planeGive, SplineSegment mainSpline, out Plane startPlane, out Plane endPlane)

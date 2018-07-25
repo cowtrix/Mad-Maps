@@ -952,9 +952,8 @@ namespace MadMaps.WorldStamps
                 stampBounds.Expand(Vector3.up * 5000);
                 var compoundObjects = terrainWrapper.GetCompoundObjects(layer, true);
                 foreach (var prefabObjectData in compoundObjects)
-                {
+                {                    
                     var pos = prefabObjectData.Position;
-
                     //pos = Quaternion.Inverse(transform.rotation) * (pos - transform.position);
                     pos = new Vector3(pos.x * tSize.x, pos.y, pos.z * tSize.z) + t.GetPosition();
                     
@@ -964,7 +963,7 @@ namespace MadMaps.WorldStamps
                         var stencilPos = wPos - tPos;
                         stencilPos = new Vector2(stencilPos.x / tSize.x, stencilPos.z / tSize.z);
                         var stencilAmount = layer.GetStencilStrength(stencilPos, stencilKey);
-                        if (stencilAmount > 0.5f)
+                        if (stencilAmount > 0.5f && !prefabObjectData.Prefab.GetComponent<WorldStamp>())
                         {
                             layer.ObjectRemovals.Add(prefabObjectData.Guid);
                             //Debug.DrawLine(wPos, wPos + Vector3.up * stencilAmount * 20, Color.red, 30);

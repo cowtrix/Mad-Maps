@@ -11,7 +11,7 @@ using MapMagic;
 using MadMaps.Common;
 using MadMaps.Integration;
 using MadMaps.Terrains;
-using MadMaps.Integration.MapMagicIntegration;
+using MadMaps.Terrains.MapMagicIntegration;
 
 #if VEGETATION_STUDIO
 using AwesomeTechnologies.Vegetation.PersistentStorage;

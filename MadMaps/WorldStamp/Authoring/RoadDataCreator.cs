@@ -3,6 +3,7 @@ using MadMaps.Roads;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -23,7 +24,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         public override GUIContent Label
         {
-            get { return new GUIContent("Roads");}
+            get { return new GUIContent(string.Format("Roads ({0})", RoadNetworks.Count));}
         }
 
         protected override bool HasDataPreview
@@ -89,7 +90,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         protected override void CaptureInternal(Terrain terrain, Bounds bounds)
         {
-            RoadNetworks = new List<RoadNetwork>(UnityEngine.Object.FindObjectsOfType<RoadNetwork>());
+            RoadNetworks = new List<RoadNetwork>(UnityEngine.Object.FindObjectsOfType<RoadNetwork>().Where((rn) => bounds.Intersects(rn.GetBounds())));
         }
 
 #if UNITY_EDITOR

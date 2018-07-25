@@ -3,6 +3,39 @@ using UnityEngine;
 
 namespace MadMaps.WorldStamps
 {
+    [InitializeOnLoad]
+    public class WorldStampDataPreserver
+	{
+        static WorldStampDataPreserver()
+        {
+            UnityEditor.PrefabUtility.prefabInstanceUpdated += OnPrefabInstanceUpdate;
+        }
+
+	    static void OnPrefabInstanceUpdate(GameObject instance)
+		{
+            //UnityEngine.Debug.Log("[Callback] Prefab.Apply on instance named :" + instance.name);
+
+            GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(instance) as GameObject;
+            if(!prefab.GetComponent<WorldStamp>())
+            {
+                return;
+            }
+            var prefabData = prefab.GetComponentInChildren<WorldStampDataContainer>();
+            if(!prefabData)
+            {
+                Debug.LogError(string.Format("Couldn't find data for prefab {0} - it might be lost.", prefab), prefab);
+                return;
+            }
+            var instanceData = instance.GetComponentInChildren<WorldStampDataContainer>();
+            if(!instanceData)
+            {
+                Debug.LogError(string.Format("Couldn't find data for instance {0} - it might be lost.", instance), instance);
+                return;
+            }
+            instanceData.Data = prefabData.Data;
+        }
+	}
+
     [CustomEditor(typeof(WorldStampDataContainer))]
     [CanEditMultipleObjects]
     public class WorldStampDataContainerGUI : Editor

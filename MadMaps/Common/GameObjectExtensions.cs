@@ -388,7 +388,10 @@ namespace MadMaps.Common
         {
             foreach (Transform child in gameObject.transform)
             {
-                Object.Destroy(child.gameObject);
+                if(Application.isPlaying)
+                    Object.Destroy(child.gameObject);
+                else
+                    Object.DestroyImmediate(child.gameObject);
             }
 
         }

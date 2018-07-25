@@ -15,7 +15,7 @@ using uNature.Core.Extensions.MapMagicIntegration;
 using uNature.Core.FoliageClasses;
 #endif
 
-namespace MadMaps.Integration.MapMagicIntegration
+namespace MadMaps.Terrains.MapMagicIntegration
 {
 	public static class MapMagicIntegrationUtilities
 	{
@@ -44,7 +44,7 @@ namespace MadMaps.Integration.MapMagicIntegration
 		public float layer { get; set; }
 
 		//get static actions using instance
-		public override Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override MapMagic.Action<MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
 		public override Func<MapMagic.CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
 		public override Action<MapMagic.CoordRect, Terrain> GetPurge () { return Purge; }
 

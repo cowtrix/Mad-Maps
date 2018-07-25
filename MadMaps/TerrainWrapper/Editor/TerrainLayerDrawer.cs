@@ -33,7 +33,7 @@ namespace MadMaps.Terrains
             List.onAddCallback += OnLayerAddCallback;
             List.onRemoveCallback += OnLayerRemoveCallback;
 
-            _saveContent = new GUIContent(Resources.Load<Texture2D>("WorldStamp/bttSaveIcon"), "Save Asset");
+            _saveContent = new GUIContent(Resources.Load<Texture2D>("MadMaps/WorldStamp/bttSaveIcon"), "Save Asset");
         }
 
         private void DrawLayerHeaderCallback(Rect rect)
@@ -329,6 +329,35 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("➥Removals", layer.TreeRemovals != null ? string.Format("{0}", layer.TreeRemovals.Count) : "null");
+            if (layer.TreeRemovals != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var compoundTrees = wrapper.GetCompoundTrees(layer, false);
+                compoundTrees.AddRange(layer.Trees);
+                foreach (var guid in layer.TreeRemovals)
+                {
+                    MadMapsTreeInstance tree = null;
+                    foreach(var t in compoundTrees)
+                    {
+                        if(t.Guid == guid)
+                        {
+                            tree = t;
+                            break;
+                        }
+                    }
+                    if(tree == null)
+                    {
+                        Debug.LogError("Couldn't find tree removal " + guid, layer);
+                        continue;
+                    }
+                    if(!data.ContainsKey(tree.Prototype))
+                    {
+                        data[tree.Prototype] = new PositionList();
+                    }
+                    (data[tree.Prototype] as PositionList).Add(tree.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.TreeRemovals.Clear();
@@ -366,6 +395,35 @@ namespace MadMaps.Terrains
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("➥Removals", layer.VSRemovals != null ? string.Format("{0}", layer.VSRemovals.Count) : "null");
+            if (layer.VSRemovals != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var compoundVS = wrapper.GetCompoundVegetationStudioData(layer, false);
+                compoundVS.AddRange(layer.VSInstances);
+                foreach (var guid in layer.VSRemovals)
+                {
+                    VegetationStudioInstance vsInstance = null;
+                    foreach(var t in compoundVS)
+                    {
+                        if(t.Guid == guid)
+                        {
+                            vsInstance = t;
+                            break;
+                        }
+                    }
+                    if(vsInstance == null)
+                    {
+                        Debug.LogError("Couldn't find VS removal " + guid, layer);
+                        continue;
+                    }
+                    if(!data.ContainsKey(vsInstance.VSID))
+                    {
+                        data[vsInstance.VSID] = new PositionList();
+                    }
+                    (data[vsInstance.VSID] as PositionList).Add(vsInstance.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.VSRemovals.Clear();
@@ -402,6 +460,35 @@ namespace MadMaps.Terrains
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("➥Removals", layer.ObjectRemovals != null ? string.Format("{0}", layer.ObjectRemovals.Count) : "null");
+            if (layer.ObjectRemovals != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var compoundObjs = wrapper.GetCompoundObjects(layer, false);
+                compoundObjs.AddRange(layer.Objects);
+                foreach (var guid in layer.ObjectRemovals)
+                {
+                    WorldStamps.PrefabObjectData? obj = null;
+                    foreach(var t in compoundObjs)
+                    {
+                        if(t.Guid == guid)
+                        {
+                            obj = t;
+                            break;
+                        }
+                    }
+                    if(obj == null)
+                    {
+                        Debug.LogError("Couldn't find object removal " + guid, layer);
+                        continue;
+                    }
+                    if(!data.ContainsKey(obj.Value.Prefab))
+                    {
+                        data[obj.Value.Prefab] = new PositionList();
+                    }
+                    (data[obj.Value.Prefab] as PositionList).Add(obj.Value.Position);
+                }
+                DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
+            }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
                 layer.ObjectRemovals.Clear();

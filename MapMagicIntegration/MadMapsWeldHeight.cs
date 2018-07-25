@@ -7,7 +7,7 @@ using System.Collections;
 using System.Linq;
 using MadMaps.Terrains;
 
-namespace MadMaps.Integration.MapMagicIntegration
+namespace MadMaps.Terrains.MapMagicIntegration
 {
 
 	public class WeldTerrains

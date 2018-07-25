@@ -34,6 +34,28 @@ namespace MadMaps.Roads
         public bool SceneViewEnabled = true;
         public RoadLayerMapping LayerMapping = new RoadLayerMapping();
         private IEnumerator _slowThink;
+
+        public Bounds GetBounds()
+        {
+            Bounds? b = null;
+            for(var i = 0; i < Nodes.Count - 1; i++)
+            {
+                var n = Nodes[i];
+                for(var j = 0; j < n.OutConnections.Count - 1; j++)
+                {
+                    var sb = n.OutConnections[j].GetSplineBounds();
+                    if(b == null)
+                    {
+                        b = sb;
+                    }
+                    else
+                    {
+                        b.Value.Encapsulate(sb);
+                    }
+                }
+            }
+            return b.Value;
+        }
         
         public Node CreateNewNode(Vector3 position, Vector3 normal, Node previous, ConnectionConfiguration connectionConfig, NodeConfiguration nodeConfig)
         {

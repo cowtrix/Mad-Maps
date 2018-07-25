@@ -220,7 +220,7 @@ namespace MadMaps.WorldStamps
                 var zDist = localPos.z/objectBounds.size.z;
 
                 float falloff = GetFalloff(new Vector2(xDist, zDist));
-                DebugHelper.DrawPoint(worldPos, 1, Color.white, 5);
+                //DebugHelper.DrawPoint(worldPos, 1, Color.white, 5);
                 if (falloff > .5f)
                 {
                     layer.TreeRemovals.Add(hurtTreeInstance.Guid);

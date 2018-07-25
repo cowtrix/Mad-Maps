@@ -8,7 +8,7 @@ using MadMaps.Terrains;
 using MapMagic;
 using UnityEngine;
 
-namespace MadMaps.Integration.MapMagicIntegration
+namespace MadMaps.Terrains.MapMagicIntegration
 {
     [System.Serializable]
     [GeneratorMenu(menu = "Mad Maps", name = "MadMaps Stencil", disengageable = true)]

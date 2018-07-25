@@ -1,4 +1,19 @@
-Current Version:
+Current Version: v 0.1.4b
+
+- Fixed issue where Applying changes to a WorldStamp prefab instance would erase the WorldStamp data.
+- World stamps will no longer remove stamp objects in underlying layers.
+
+== History ==
+
+v 0.1.4a
+
+- Fixed MapMagic compilation errors when building with C# 4.0 and above.
+
+v 0.1.4
+
+- To reduce asset bloat, demo assets will now be a separate asset here: http://u3d.as/1fzM
+- You can now preview tree and object removals
+- Position based previewing should be easier to see now
 
 v 0.1.3
 
@@ -20,8 +35,6 @@ v 0.1.3
 - Fixed Simple Terrain Plane widget removing trees and objects
 - Changed "Stamp Layer 'X'" and "Stamp All Layers" with "Recalculate Layer 'X'" and "Recalculate All Layers". Recalculate All Layers will now also trigger a Road Network rebake.
 - Fixed issue where Set Terrain Height connection component didn't write the very edge of a terrain.
-
-== History ==
 
 v 0.1.2d
 
