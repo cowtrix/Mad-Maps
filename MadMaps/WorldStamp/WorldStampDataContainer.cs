@@ -1,4 +1,6 @@
 using UnityEngine;
+using MadMaps.Common;
+using System.Collections.Generic;
 
 namespace MadMaps.WorldStamps
 {
@@ -7,6 +9,8 @@ namespace MadMaps.WorldStamps
     #endif
     public class WorldStampDataContainer : MonoBehaviour
     {
+        public static HashSet<WorldStampData> Ignores = new HashSet<WorldStampData>();
+
         public WorldStampData GetData()
         {
             if (Redirect == this)
@@ -45,8 +49,22 @@ namespace MadMaps.WorldStamps
                 Debug.LogError("Unable to find data container on prefab");
                 return;
             }
-            Redirect = prefabWsdc;
-            Data = null;
+            if(Redirect == null || Redirect.Data != prefabWsdc.Data)
+            {
+                Redirect = prefabWsdc;
+                if(Ignores.Contains(Data))
+                {
+                    Ignores.Remove(Data);
+                    prefabWsdc.Data = Data.JSONClone();
+                }
+#if HURTWORLDSDK
+                if(!ReferenceEquals(Data, prefabWsdc.Data))
+                {
+                    //Debug.Log("Set data to null but this should be fine.");
+                    Data = null;
+                }
+#endif
+            }            
 #endif
         }
     }

@@ -1,9 +1,16 @@
-Current Version: v 0.1.4b
+Current Version: v 0.1.5
+
+- MapMagic Integration: The Mad Maps Object Output can now better place World Stamps. You now have a tickbox of whether you want to reapply stamps after mapmagic is done generating.
+- ProceduralTerrainModifier has been renamed to TerrainPlane (as it's not quite as simple anymore).
+- Added the ability for the TerrainPlane to selectively remove trees, details and objects.
+- The TerrainPlane will now have much more reasonable default values.
+
+== History ==
+
+v 0.1.4b
 
 - Fixed issue where Applying changes to a WorldStamp prefab instance would erase the WorldStamp data.
 - World stamps will no longer remove stamp objects in underlying layers.
-
-== History ==
 
 v 0.1.4a
 

@@ -24,6 +24,7 @@ namespace MadMaps.WorldStamps
     public class WorldStampData
     {
         public float GridSize = 1;
+        
         public Common.Painter.GridManagerInt GridManager
         {
             get

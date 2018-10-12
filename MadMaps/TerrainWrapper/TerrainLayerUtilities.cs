@@ -136,6 +136,11 @@ namespace MadMaps.Terrains
                     continue;
                 }
                 detailWrapperLookup.Add(unityProto, detailWrapper);
+                DetailPrototypeWrapper wrapper;
+                if (!detailWrapperLookup.TryGetValue(unityProto, out wrapper))
+                {
+                    Debug.LogError("Failed to add prototype");
+                }
             }
             for (var k = 0; k < prototypes.Length; ++k)
             {

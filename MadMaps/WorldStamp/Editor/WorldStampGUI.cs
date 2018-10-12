@@ -62,8 +62,6 @@ namespace MadMaps.WorldStamps
         //private SerializedProperty _overrideRelativeObjectMode;
         private SerializedProperty _relativeObjectMode;
 
-        
-
         private bool _editingMask = false;
         private Painter _painter;
 
@@ -517,10 +515,6 @@ namespace MadMaps.WorldStamps
                 }
                 EditorGUILayout.PropertyField(_layerHeightBlendMode, new GUIContent("Blend Mode"));
                 EditorGUILayout.PropertyField(_heightOffset);
-                /*if (_layerHeightBlendMode.enumValueIndex == 2)
-                {
-                    EditorGUILayout.PropertyField(_heightMin);
-                }*/
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
             }
@@ -529,7 +523,6 @@ namespace MadMaps.WorldStamps
         private void DoSingleInstanceInfo()
         {
             var stamp = target as WorldStamp;
-            
             EditorGUILayout.BeginVertical("Box");
 
             //FIX ISSUES
@@ -782,22 +775,6 @@ namespace MadMaps.WorldStamps
 
             EditorGUILayout.EndHorizontal();
             GUI.enabled = true;
-            
-            /*if (isPrefab && GUILayout.Button("Instantiate Proxy In Scene"))
-            {
-                var stampInstance = PrefabUtility.InstantiatePrefab(target) as WorldStamp;
-                if (stampInstance)
-                {
-
-                    var dcis = stampInstance.GetComponentInChildren<WorldStampDataContainer>();
-                    dcis.Data = null;
-                    dcis.Redirect = stamp.GetComponentInChildren<WorldStampDataContainer>();
-                }
-                else
-                {
-                    Debug.LogError("Failed to instantiate prefab " + stamp, stamp);
-                }
-            }*/
 
             EditorGUILayout.EndVertical();
         }
@@ -856,6 +833,8 @@ namespace MadMaps.WorldStamps
 
             _painter.PaintingEnabled = true;
             _painter.OnSceneGUI();
+
+
         }
     }
 }

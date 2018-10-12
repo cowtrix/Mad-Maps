@@ -6,6 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using EditorGUILayoutX = MadMaps.Common.EditorGUILayoutX;
 using MadMaps.Roads;
+using MadMaps.Common.Painter;
 
 namespace MadMaps.WorldStamps.Authoring
 {
@@ -27,6 +28,18 @@ namespace MadMaps.WorldStamps.Authoring
         /*
         private GUIContent _createStampTemplateContent = new GUIContent("Create Stamp Template", "Create an in-scene object to preserve stamp capture settings.");
         */
+
+        public static float GetMinGridSize(Bounds bounds, Terrain terrain)
+        {
+            const float MinMaskRes = 3.34f;
+            var hSize = terrain.terrainData.size.x / terrain.terrainData.heightmapResolution;
+            while(hSize < MinMaskRes)
+            {
+                hSize *= 2;
+            }
+            return hSize;
+        }
+
         void OnSelectionChange()
         {
             if (!Selection.activeGameObject)
@@ -103,6 +116,8 @@ namespace MadMaps.WorldStamps.Authoring
                     var worldStampCreatorLayer = Template.Creators[i];
                     worldStampCreatorLayer.Capture(Template.Terrain, Template.Bounds);
                 }
+                GUIUtility.ExitGUI();
+                return;
             }
             GUI.color = Color.white;
             EditorGUILayout.EndHorizontal();
@@ -275,17 +290,19 @@ namespace MadMaps.WorldStamps.Authoring
             Handles.DrawWireCube(Template.Terrain.GetPosition() + Template.Terrain.terrainData.size / 2, Template.Terrain.terrainData.size);
         }
 
-        public static Bounds ClampBounds(Terrain Terrain, Bounds b)
+        public static Bounds ClampBounds(Terrain terrain, Bounds b)
         {
-            var tb = Terrain.GetBounds();
+            var m = new GridManagerInt(GetMinGridSize(b, terrain));
+            var tb = terrain.GetBounds();
             
-            b.min = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.min, TerrainX.RoundType.Round)).xz().x0z(tb.min.y);
-            b.max = Terrain.HeightmapCoordToWorldPos(Terrain.WorldToHeightmapCoord(b.max, TerrainX.RoundType.Round)).xz().x0z(tb.min.y);
+            b.min = new Vector3(Mathf.Max(tb.min.x, m.GetCellMin(m.GetCell(b.min)).x), 0, Mathf.Max(tb.min.z, m.GetCellMin(m.GetCell(b.min)).y));
+            b.max = new Vector3(Mathf.Min(tb.max.x, m.GetCellMin(m.GetCell(b.max)).x), 0, Mathf.Min(tb.max.z, m.GetCellMin(m.GetCell(b.max)).y));
 
-            b.Encapsulate(b.center.xz().x0z(tb.max.y));
-            b.Encapsulate(b.center.xz().x0z(tb.min.y));
+            b.SetMinMax(b.min, b.max);
             
-            return b;
+            var newb = new Bounds(b.min.xz().x0z(tb.min.y), Vector3.zero);
+            newb.Encapsulate(b.max.xz().x0z(tb.max.y));
+            return newb;
         }
         
         private bool DoSetArea()

@@ -1,9 +1,10 @@
 using UnityEditor;
 using UnityEngine;
+using MadMaps.Common;
 
 namespace MadMaps.WorldStamps
 {
-    [InitializeOnLoad]
+    /*[InitializeOnLoad]
     public class WorldStampDataPreserver
 	{
         static WorldStampDataPreserver()
@@ -13,8 +14,6 @@ namespace MadMaps.WorldStamps
 
 	    static void OnPrefabInstanceUpdate(GameObject instance)
 		{
-            //UnityEngine.Debug.Log("[Callback] Prefab.Apply on instance named :" + instance.name);
-
             GameObject prefab = UnityEditor.PrefabUtility.GetPrefabParent(instance) as GameObject;
             if(!prefab.GetComponent<WorldStamp>())
             {
@@ -26,70 +25,28 @@ namespace MadMaps.WorldStamps
                 Debug.LogError(string.Format("Couldn't find data for prefab {0} - it might be lost.", prefab), prefab);
                 return;
             }
+            Debug.Log(string.Format("Prefab heights are: {0}", prefabData.Data.Heights.Width));
             var instanceData = instance.GetComponentInChildren<WorldStampDataContainer>();
             if(!instanceData)
             {
                 Debug.LogError(string.Format("Couldn't find data for instance {0} - it might be lost.", instance), instance);
                 return;
             }
-            instanceData.Data = prefabData.Data;
+            instanceData.Redirect = null;
+            instanceData.Data = prefabData.Data.JSONClone();
+            WorldStampDataContainer.Ignores.Add(instanceData.Data);
+            Debug.Log(string.Format("Set instance data to prefab data. Instance heights are: {0}", prefabData.Data.Heights.Width), instanceData);
         }
-	}
+	}*/
 
     [CustomEditor(typeof(WorldStampDataContainer))]
     [CanEditMultipleObjects]
     public class WorldStampDataContainerGUI : Editor
     {
-        /*public override void OnInspectorGUI()
-        {
-            var wsdc = target as WorldStampDataContainer;
-            DoDataGUI(wsdc);
-        }
-        
-        public static void DoDataGUI(WorldStampDataContainer wsdc)
-        {
-            if (PrefabUtility.GetPrefabType(wsdc) == PrefabType.Prefab)
-            {
-                return;
-            }
-            if (wsdc.Redirect == null)
-            {
-                wsdc.Redirect = null;
 
-                var prefabParent = PrefabUtility.GetPrefabParent(wsdc.transform.parent.gameObject);
-                if (prefabParent == null)
-                {
-                    EditorGUILayout.HelpBox("Null Prefab!", MessageType.Warning);
-                    return;
-                }
-                var prefabGo = prefabParent as GameObject;
-                if (prefabGo == null)
-                {
-                    return;
-                }
-                var prefabWsdc = prefabGo.GetComponentInChildren<WorldStampDataContainer>();
-                if (prefabWsdc == null)
-                {
-                    EditorGUILayout.HelpBox("Null Data On Prefab!", MessageType.Warning);
-                    return;
-                }
-                if (GUILayout.Button("Turn Into Proxy"))
-                {
-                    TurnIntoProxy(wsdc);
-                }
-            }
-            else
-            {
-                wsdc.Data = null;
-                if (GUILayout.Button("Turn Into Instance"))
-                {
-                    TurnIntoInstance(wsdc);
-                }
-            }
-        }
-        */
         public static void TurnIntoProxy(WorldStampDataContainer wsdc)
         {
+
             if (!EditorUtility.DisplayDialog("Are you sure?",
                 "This will delete any instance data you changed on this object.", "Yes", "No"))
             {
@@ -114,8 +71,22 @@ namespace MadMaps.WorldStamps
                 Debug.LogError("Unable to find data container on prefab");
                 return;
             }
-            wsdc.Redirect = prefabWsdc;
-            wsdc.Data = null;
+            if(wsdc.Redirect != prefabWsdc)
+            {
+                wsdc.Redirect = prefabWsdc;
+                if(WorldStampDataContainer.Ignores.Contains(wsdc.Data))
+                {
+                    WorldStampDataContainer.Ignores.Remove(wsdc.Data);
+                    prefabWsdc.Data = wsdc.Data.JSONClone();
+                }
+            }
+#if HURTWORLDSDK
+            if(wsdc.Redirect != null && !ReferenceEquals(wsdc.Redirect.Data, wsdc.Data))
+            {
+                //Debug.Log("Set instance data to null, but this should be fine.", wsdc);
+                wsdc.Data = null;
+            }
+#endif
         }
 
         public static void TurnIntoInstance(WorldStampDataContainer wsdc)

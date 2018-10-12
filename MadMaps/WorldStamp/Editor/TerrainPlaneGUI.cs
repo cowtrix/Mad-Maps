@@ -7,11 +7,12 @@ using UnityEngine;
 
 namespace MadMaps.WorldStamps
 {
-    [CustomEditor(typeof(SimpleTerrainPlane))]
+    [CustomEditor(typeof(TerrainPlane))]
     [CanEditMultipleObjects]
-    public class SimpleTerrainPlaneGUI : LayerComponentBaseGUI
+    public class TerrainPlaneGUI : LayerComponentBaseGUI
     {
-        private SerializedProperty _blendMode,
+        private SerializedProperty _setHeights,
+            _blendMode,
             _falloffMode,
             _falloffCurve,
             _falloffTexture,
@@ -19,8 +20,11 @@ namespace MadMaps.WorldStamps
             _offset,
             _size,
             _objectsEnabled,
+            _regex,
             _treesEnabled,
+            _ignoredTrees,
             _grassEnabled,
+            _ignoredDetails,
             _setSplat,
             _splat,
             _splatStrength,
@@ -28,6 +32,7 @@ namespace MadMaps.WorldStamps
 
         public void OnEnable()
         {
+            _setHeights = serializedObject.FindProperty("SetHeights");
             _blendMode = serializedObject.FindProperty("BlendMode");
             _falloffMode = serializedObject.FindProperty("FalloffMode");
             _falloffCurve = serializedObject.FindProperty("Falloff");
@@ -35,9 +40,16 @@ namespace MadMaps.WorldStamps
             _layerName = serializedObject.FindProperty("LayerName");
             _offset = serializedObject.FindProperty("Offset");
             _size = serializedObject.FindProperty("AreaSize");
+
             _objectsEnabled = serializedObject.FindProperty("RemoveObjects");
+            _regex = serializedObject.FindProperty("IgnoredObjectsRegex");
+
             _treesEnabled = serializedObject.FindProperty("RemoveTrees");
+            _ignoredTrees = serializedObject.FindProperty("IgnoredTrees");
+
             _grassEnabled = serializedObject.FindProperty("RemoveGrass");
+            _ignoredDetails = serializedObject.FindProperty("IgnoredDetails");
+
             _setSplat = serializedObject.FindProperty("SetSplat");
             _splat = serializedObject.FindProperty("Splat");
             _splatStrength = serializedObject.FindProperty("SplatStrength");
@@ -50,7 +62,10 @@ namespace MadMaps.WorldStamps
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
 
-            EditorGUILayout.PropertyField(_blendMode);
+            EditorGUILayout.PropertyField(_layerName);
+            EditorGUILayout.PropertyField(_priority);
+            EditorGUILayout.PropertyField(_offset);
+            EditorGUILayout.PropertyField(_size);
             EditorGUILayout.PropertyField(_falloffMode);
             EditorGUI.indentLevel++;
             if (_falloffMode.hasMultipleDifferentValues || _falloffMode.enumValueIndex == 0 ||
@@ -62,15 +77,45 @@ namespace MadMaps.WorldStamps
             {
                 EditorGUILayout.PropertyField(_falloffTexture);
             }
-            EditorGUI.indentLevel--;           
-            
-            EditorGUILayout.PropertyField(_layerName);
-            EditorGUILayout.PropertyField(_offset);
-            EditorGUILayout.PropertyField(_size);
-            EditorGUILayout.PropertyField(_objectsEnabled);
-            EditorGUILayout.PropertyField(_treesEnabled);
-            EditorGUILayout.PropertyField(_grassEnabled);
+            EditorGUI.indentLevel--;
 
+            EditorExtensions.Seperator();
+            EditorGUILayout.PropertyField(_setHeights);
+            if(_setHeights.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(_blendMode);
+                EditorGUI.indentLevel--;
+            }
+            
+            EditorExtensions.Seperator();
+            EditorGUILayout.PropertyField(_objectsEnabled);
+            if(_objectsEnabled.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(_regex);
+                EditorGUI.indentLevel--;
+            }
+
+            EditorExtensions.Seperator();
+            EditorGUILayout.PropertyField(_treesEnabled);
+            if(_treesEnabled.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(_ignoredTrees, true);
+                EditorGUI.indentLevel--;
+            }
+
+            EditorExtensions.Seperator();
+            EditorGUILayout.PropertyField(_grassEnabled);
+            if(_grassEnabled.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                EditorGUILayout.PropertyField(_ignoredDetails, true);
+                EditorGUI.indentLevel--;
+            }
+
+            EditorExtensions.Seperator();
             EditorGUILayout.PropertyField(_setSplat);
             if(_setSplat.boolValue)
             {
@@ -79,8 +124,6 @@ namespace MadMaps.WorldStamps
                 EditorGUILayout.PropertyField(_splatStrength);
                 EditorGUI.indentLevel--;
             }
-
-            EditorGUILayout.PropertyField(_priority);
 
             if (EditorGUI.EndChangeCheck())
             {

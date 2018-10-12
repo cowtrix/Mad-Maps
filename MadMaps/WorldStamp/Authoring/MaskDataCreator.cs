@@ -24,15 +24,12 @@ namespace MadMaps.WorldStamps.Authoring
         [NonSerialized]
         public WorldStampMask Mask = new WorldStampMask();
 
-        private static float MinMaskRes = 4;
-        private static float MaskResolution = 128;
-
         public override bool NeedsRecapture
         {
             get { return false; }
         }
 
-        private Common.Painter.GridManagerInt GridManager
+        public Common.Painter.GridManagerInt GridManager
         {
             get
             {
@@ -44,13 +41,12 @@ namespace MadMaps.WorldStamps.Authoring
             }
         }
         private Common.Painter.GridManagerInt __gridManager;
-
         private Painter _maskPainter;
         
-        private void ResetMask(Bounds bounds)
+        private void ResetMask(Bounds bounds, Terrain terrain)
         {
-            GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
             Mask.Clear();
+            GridSize = WorldStampCreator.GetMinGridSize(bounds, terrain);
             for (var u = GridSize / 2f; u < bounds.size.x; u += GridSize)
             {
                 for (var v = GridSize / 2f; v < bounds.size.z; v += GridSize)
@@ -67,11 +63,12 @@ namespace MadMaps.WorldStamps.Authoring
             }
             LastBounds = bounds;
         }
+  
 
-        private void FillMaskFromMinY(Bounds bounds, Serializable2DFloatArray heights, Vector2 minY)
+        private void FillMaskFromMinY(Bounds bounds, Terrain terrain, Serializable2DFloatArray heights, Vector2 minY)
         {
             Mask.Clear();
-            GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
+            GridSize = WorldStampCreator.GetMinGridSize(bounds, terrain);
             for (var u = GridSize / 2f; u < bounds.size.x; u += GridSize)
             {
                 for (var v = GridSize / 2f; v < bounds.size.z; v += GridSize)
@@ -121,7 +118,7 @@ namespace MadMaps.WorldStamps.Authoring
         {
             if (LastBounds != bounds)
             {
-                ResetMask(bounds);
+                ResetMask(bounds, terrain);
             }
         }
 
@@ -149,7 +146,7 @@ namespace MadMaps.WorldStamps.Authoring
             }
             else
             {
-                GridSize = Math.Max(MinMaskRes, Math.Max(bounds.size.x, bounds.size.z) / MaskResolution);
+                GridSize = WorldStampCreator.GetMinGridSize(bounds, parent.Template.Terrain);
                 _maskPainter.GridManager = GridManager;
                 _maskPainter.Canvas = Mask;
                 _maskPainter.MaxValue = 1;
@@ -175,7 +172,7 @@ namespace MadMaps.WorldStamps.Authoring
             }
             if (Mask.Count == 0 || LastBounds != parent.Template.Bounds)
             {
-                ResetMask(parent.Template.Bounds);
+                ResetMask(parent.Template.Bounds, parent.Template.Terrain);
             }
 
             EditorExtensions.Seperator();
@@ -195,7 +192,7 @@ namespace MadMaps.WorldStamps.Authoring
                 parent.SceneGUIOwner = parent.SceneGUIOwner == this ? null : this;
                 if ((parent.Template.Bounds.size - LastBounds.size).magnitude > 1)
                 {
-                    ResetMask(parent.Template.Bounds);
+                    ResetMask(parent.Template.Bounds, parent.Template.Terrain);
                 }
                 GUIUtility.ExitGUI();
                 return;
@@ -223,11 +220,16 @@ namespace MadMaps.WorldStamps.Authoring
         {
             if (EditorGUILayoutX.IndentedButton("Reset"))
             {
-                ResetMask(parent.Template.Bounds);
+                ResetMask(parent.Template.Bounds, parent.Template.Terrain);
             }
             var hCreator = parent.GetCreator<HeightmapDataCreator>();
             var zLevel = hCreator.ZeroLevel * parent.Template.Bounds.size.y;
-            var width = parent.Template.Bounds.size.y.ToString().Length * 16;
+            var width = Mathf.Clamp(parent.Template.Bounds.size.y.ToString().Length * 16, 32, 64);
+            if(_fillHeight.x == _fillHeight.y)
+            {
+                _fillHeight.y = _fillHeight.x + 0.001f;
+            }
+            _fillHeight = new Vector2(Mathf.Clamp(_fillHeight.x, -zLevel, parent.Template.Bounds.size.y - zLevel), Mathf.Clamp(_fillHeight.y, -zLevel, parent.Template.Bounds.size.y - zLevel));
             EditorGUILayout.BeginHorizontal();
             _fillHeight.x = EditorGUILayout.FloatField(_fillHeight.x, GUILayout.Width(width));
             EditorGUILayout.MinMaxSlider(ref _fillHeight.x, ref _fillHeight.y, -zLevel, parent.Template.Bounds.size.y - zLevel);
@@ -236,7 +238,7 @@ namespace MadMaps.WorldStamps.Authoring
             if (GUILayout.Button("Fill Below Height"))
             {
                 
-                FillMaskFromMinY(parent.Template.Bounds, hCreator.Heights, _fillHeight - Vector2.one * (hCreator.ZeroLevel * parent.Template.Bounds.size.y));
+                FillMaskFromMinY(parent.Template.Bounds, parent.Template.Terrain, hCreator.Heights, _fillHeight - Vector2.one * (hCreator.ZeroLevel * parent.Template.Bounds.size.y));
             }
             EditorGUILayout.EndHorizontal();
             if (EditorGUILayoutX.IndentedButton("Load From Texture"))
@@ -247,7 +249,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         public Texture2D GetTextureFromMask(WorldStampCreator parent)
         {
-            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            GridSize = WorldStampCreator.GetMinGridSize(parent.Template.Bounds, parent.Template.Terrain);
             var bounds = parent.Template.Bounds;
             var width = Mathf.CeilToInt(bounds.size.x/GridSize);
             var height = Mathf.CeilToInt(bounds.size.z/GridSize);
@@ -275,7 +277,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         public Serializable2DFloatArray GetArrayFromMask(WorldStampCreator parent)
         {
-            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            GridSize = WorldStampCreator.GetMinGridSize(parent.Template.Bounds, parent.Template.Terrain);
             var bounds = parent.Template.Bounds;
             var width = Mathf.CeilToInt(bounds.size.x / GridSize);
             var height = Mathf.CeilToInt(bounds.size.z / GridSize);
@@ -302,7 +304,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         public void SetMaskFromArray(WorldStampCreator parent, Serializable2DFloatArray mask)
         {
-            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            GridSize = WorldStampCreator.GetMinGridSize(parent.Template.Bounds, parent.Template.Terrain);
             Mask.Clear();
             for (var u = GridSize/2f; u < parent.Template.Bounds.size.x; u += GridSize)
             {
@@ -323,7 +325,7 @@ namespace MadMaps.WorldStamps.Authoring
 
         public void SetMaskFromTexture(WorldStampCreator parent, Texture2D tex)
         {
-            GridSize = Math.Max(MinMaskRes, Math.Max(parent.Template.Bounds.size.x, parent.Template.Bounds.size.z) / MaskResolution);
+            GridSize = WorldStampCreator.GetMinGridSize(parent.Template.Bounds, parent.Template.Terrain);
             Mask.Clear();
             for (var u = 0f; u < parent.Template.Bounds.size.x; u += GridSize)
             {

@@ -319,6 +319,8 @@ namespace MadMaps.Common.Painter
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField(EditorCellHelper.UseCPU() ? "Using CPU Painting" : "Using GPU Painting");
+            EditorGUILayout.LabelField(string.Format("Grid Size: {0}", GridManager.GetGridSize().ToString("n2")));
+            
             var offset = EditorPrefs.GetFloat("Painter_PlaneOffset", 0);
             offset = EditorGUILayout.FloatField("Plane Offset", offset);
             if (!Mathf.Approximately(PlaneOffset, offset))

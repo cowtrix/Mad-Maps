@@ -44,7 +44,7 @@ namespace MadMaps.WorldStamps
             }
             if (_material == null)
             {
-                _material = Resources.Load<Material>("WorldStamp/WorldStampPreviewMaterial");
+                _material = Resources.Load<Material>("MadMaps/WorldStamp/WorldStampPreviewMaterial");
             }
             var verts = new Vector3[(res+1) * (res+1)];
             var uv = new Vector2[verts.Length];

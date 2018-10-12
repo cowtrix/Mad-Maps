@@ -30,7 +30,7 @@ namespace MadMaps.Common.Painter
         public int GetCell(Vector3 position)
         {
             return Mathf.FloorToInt(position.x / GRID_SIZE) + GRID_MAX
-                   + ((Mathf.FloorToInt(position.z / GRID_SIZE) + GRID_MAX) * UNSIGNED_GRID_MAX) + GLOBAL_OFFSET;
+                   + (Mathf.RoundToInt(Mathf.Floor(position.z / GRID_SIZE) + GRID_MAX) * UNSIGNED_GRID_MAX) + GLOBAL_OFFSET;
         }
 
         public Vector2 GetCellMax(Vector3 pos)

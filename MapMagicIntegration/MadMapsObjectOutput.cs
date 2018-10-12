@@ -20,6 +20,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 	public class MadMapsObjectOutput : OutputGenerator
 	{
 		public string LayerName = "MapMagic";
+		public bool ApplyStamps = true;
 
 		//layer
 		public class Layer
@@ -321,7 +322,6 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             {
                 Transform prefab = kvp.Key;
                 List<ObjectPool.Transition> transitionsList = kvp.Value;
-
                 foreach (var transition in transitionsList)
                 {
                     var terrainSpacePos = transition.pos - terrain.transform.localPosition /*- terrainSize/2*/;
@@ -343,9 +343,50 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
             }
             global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
+
+			wrapper.OnPostFinalise -= ApplyStampsToTerrain;
+			if(ApplyStamps)
+			{				
+            	wrapper.OnPostFinalise += ApplyStampsToTerrain;
+			}
+
 			wrapper.SetDirtyAbove(terrainLayer);
             yield break;
         }
+
+		public void ApplyStampsToTerrain(TerrainWrapper wrapper)
+		{
+			wrapper.OnPostFinalise -= ApplyStampsToTerrain;
+			if(!ApplyStamps)
+			{
+				return;
+			}
+			//Debug.Log("ApplyStampsToTerrain");
+			if(!wrapper.ObjectContainer)
+			{
+				return;
+			}
+			var ws = wrapper.ObjectContainer.transform.FindTransformInChildren(LayerName);
+			if(!ws)
+			{
+				return;
+			}
+			var stamps = ws.GetComponentsInChildren<WorldStamp>();
+			List<string> layers = new List<string>();
+			foreach(var s in stamps)
+			{
+				if(layers.Contains(s.LayerName))
+				{
+					continue;
+				}
+				layers.Add(s.LayerName);
+			}
+			layers = layers.OrderBy((x) => wrapper.Layers.FindIndex(0, (y) => x == y.name)).ToList();
+			for(var i = 0; i < layers.Count; ++i)
+			{
+				LayerComponentApplyManager.ApplyAllLayerComponents(wrapper, layers[i]);
+			}
+		}
 
 		public void Purge(global::MapMagic.CoordRect rect, Terrain terrain)
         {
@@ -368,6 +409,8 @@ var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
 			layout.fieldSize = .6f;
             layout.Field(ref LayerName, "Layer");
             layout.fieldSize = .5f;
+
+			layout.Field(ref ApplyStamps, "Apply Stamps");
 
 			//layer buttons
 			layout.Par();

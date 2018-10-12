@@ -51,6 +51,11 @@ namespace MadMaps.WorldStamps
         public override Vector3 Size { get {
             var copy = ExplicitSize;
             copy.Scale(transform.lossyScale);
+            if(copy.IsNan() || copy.magnitude == 0)
+            {
+                Debug.LogError(string.Format("Stamp {0} size was invalid!", this), this);
+                return Vector3.one;
+            }
             return copy;
         }}
         public bool SnapPosition;
@@ -274,6 +279,7 @@ namespace MadMaps.WorldStamps
         {
             float newHeight = 0;
             float sampleHeight = 0;
+         
 
             var normalisedStampPosition = Quaternion.Inverse(transform.rotation) * (wPos - transform.position);
             normalisedStampPosition = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y,
