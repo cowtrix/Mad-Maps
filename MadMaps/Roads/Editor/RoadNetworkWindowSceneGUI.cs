@@ -38,7 +38,7 @@ namespace MadMaps.Roads
             wantsMouseMove = true;
             EditorApplication.update -= Update;
             EditorApplication.update += Update;
-            if (Event.current.type == EventType.keyDown)
+            if (Event.current.type == EventType.KeyDown)
             {
                 if(Event.current.keyCode == KeyCode.Tab)
                 {

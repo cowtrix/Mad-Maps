@@ -24,7 +24,7 @@ namespace MadMaps.Roads.Connections
 
         public override void ProcessDetails(TerrainWrapper wrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);

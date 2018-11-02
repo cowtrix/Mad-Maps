@@ -136,7 +136,7 @@ namespace MadMaps.Terrains
             layer.DetailData.Clear();
             var prototypes = terrain.terrainData.detailPrototypes;
             var dRes = terrain.terrainData.detailResolution;
-            var wrapperLookup = TerrainLayerUtilities.ResolvePrototypes(prototypes);
+            var wrapperLookup = MMTerrainLayerUtilities.ResolvePrototypes(prototypes);
             for (var i = 0; i < prototypes.Length; i++)
             {
                 DetailPrototypeWrapper wrapper;
@@ -173,7 +173,7 @@ namespace MadMaps.Terrains
                 terrain.terrainData.alphamapHeight);
             layer.SplatData.Clear();
 
-            var splatWrapperLookup = TerrainLayerUtilities.ResolvePrototypes(terrain.terrainData.splatPrototypes);
+            var splatWrapperLookup = MMTerrainLayerUtilities.ResolvePrototypes(terrain.terrainData.splatPrototypes);
 
             for (var k = 0; k < rawSplats.GetLength(2); ++k)
             {

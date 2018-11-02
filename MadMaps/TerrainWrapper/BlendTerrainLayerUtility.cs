@@ -5,14 +5,14 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    public static class BlendTerrainLayerUtility
+    public static class BlendMMTerrainLayerUtility
     {
         public static int UseCount = 0;
 
         public static void BlendArray(ref Serializable2DByteArray baseData,
             Serializable2DByteArray blendingData,
             Serializable2DFloatArray stencil,
-            TerrainLayer.ETerrainLayerBlendMode blendMode,
+            MMTerrainLayer.EMMTerrainLayerBlendMode blendMode,
             Common.Coord offset, Common.Coord size)
         {
             if (blendingData == null)
@@ -99,13 +99,13 @@ namespace MadMaps.Terrains
 
                         switch (blendMode)
                         {
-                            case TerrainLayer.ETerrainLayerBlendMode.Set:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Set:
                                 baseData[dx, dz] = blendingVal;
                                 break;
-                            case TerrainLayer.ETerrainLayerBlendMode.Additive:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Additive:
                                 baseData[dx, dz] += blendingVal;
                                 break;
-                            case TerrainLayer.ETerrainLayerBlendMode.Stencil:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Stencil:
                                 var xF = (offset.x + dx) / (float)size.x;
                                 var zF = (offset.z + dz) / (float)size.z;
                                 float strength;
@@ -215,7 +215,7 @@ namespace MadMaps.Terrains
         public static void BlendArray(ref Serializable2DFloatArray baseData,
             Serializable2DFloatArray blendingData,
             Serializable2DFloatArray stencil,
-            TerrainLayer.ETerrainLayerBlendMode blendMode,
+            MMTerrainLayer.EMMTerrainLayerBlendMode blendMode,
             Common.Coord offset, Common.Coord max, Common.Coord originalSize)
         {
             if (blendingData == null)
@@ -296,13 +296,13 @@ namespace MadMaps.Terrains
                         var baseValue = baseData[dx, dz];
                         switch (blendMode)
                         {
-                            case TerrainLayer.ETerrainLayerBlendMode.Set:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Set:
                                 baseData[dx, dz] = blendingVal;
                                 break;
-                            case TerrainLayer.ETerrainLayerBlendMode.Additive:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Additive:
                                 baseData[dx, dz] += blendingVal;
                                 break;
-                            case TerrainLayer.ETerrainLayerBlendMode.Stencil:
+                            case MMTerrainLayer.EMMTerrainLayerBlendMode.Stencil:
                                 var xF = (dx + offset.x) / (float)originalSize.x;
                                 var zF = (dz + offset.z) / (float)originalSize.z;
                                 float strength;

@@ -78,12 +78,12 @@ namespace MadMaps.Terrains
             var infoRect = new Rect(layerNumberRect.xMax + 4, rect.y + headerHeight, objFieldWidth, rect.height - headerHeight);
             bool any = false;
             StringBuilder sb = new StringBuilder("Written to by: ");
-            foreach (var terrainLayer in _wrapper.Layers)
+            foreach (var MMTerrainLayer in _wrapper.Layers)
             {
-                var wrappers = terrainLayer.GetDetailPrototypeWrappers();
+                var wrappers = MMTerrainLayer.GetDetailPrototypeWrappers();
                 if (wrappers != null && wrappers.Contains(_wrapper.DetailPrototypes[index]))
                 {
-                    sb.Append(terrainLayer.name);
+                    sb.Append(MMTerrainLayer.name);
                     sb.Append("    ");
                     any = true;
                 }

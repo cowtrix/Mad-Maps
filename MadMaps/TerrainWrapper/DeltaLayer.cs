@@ -16,7 +16,7 @@ using System.Linq;
 namespace MadMaps.Terrains
 {
     [Name("Delta Layer")]
-    public partial class DeltaLayer : TerrainLayer
+    public partial class DeltaLayer : MMTerrainLayer
     {
         public virtual void SnapshotTerrain(Terrain terrain)
         {

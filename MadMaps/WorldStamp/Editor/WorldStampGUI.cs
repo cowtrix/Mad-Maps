@@ -519,6 +519,15 @@ namespace MadMaps.WorldStamps
                 EditorGUI.indentLevel--;
             }
         }
+
+        UnityEngine.Object GetPrefab(UnityEngine.Object source)
+        {
+#if UNITY_2018_2_OR_NEWER
+            return PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(source) as GameObject);
+#else
+            return PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(source) as GameObject);
+#endif
+        }
       
         private void DoSingleInstanceInfo()
         {
@@ -536,7 +545,7 @@ namespace MadMaps.WorldStamps
                     stamp.Data.Objects.RemoveAll(data => data.Prefab == null);
                     Debug.Log(string.Format("Removed {0} missing prefabs from stamp {1}", (prevCount - stamp.Data.Objects.Count), stamp.name), stamp);
                     EditorUtility.SetDirty(stamp);
-                    var prefab = PrefabUtility.GetPrefabParent(stamp);
+                    var prefab = GetPrefab(stamp);
                     if (prefab != null)
                     {
                         EditorUtility.SetDirty(prefab);
@@ -556,7 +565,7 @@ namespace MadMaps.WorldStamps
                         obj.Scale = new Vector3(Mathf.Abs(stamp.Data.Objects[i].Scale.x), Mathf.Abs(stamp.Data.Objects[i].Scale.y), Mathf.Abs(stamp.Data.Objects[i].Scale.z));
                         stamp.Data.Objects[i] = obj;
                         EditorUtility.SetDirty(stamp);
-                        var prefab = PrefabUtility.GetPrefabParent(stamp);
+                        var prefab = GetPrefab(stamp);
                         if (prefab != null)
                         {
                             EditorUtility.SetDirty(prefab);
@@ -577,7 +586,7 @@ namespace MadMaps.WorldStamps
                         obj.Prefab = PrefabUtility.FindPrefabRoot(obj.Prefab);
                         stamp.Data.Objects[i] = obj;
                         EditorUtility.SetDirty(stamp);
-                        var prefab = PrefabUtility.GetPrefabParent(stamp);
+                        var prefab = GetPrefab(stamp);
                         if (prefab != null)
                         {
                             EditorUtility.SetDirty(prefab);
@@ -756,7 +765,7 @@ namespace MadMaps.WorldStamps
             {
                 stamp.Mask.OnBeforeSerialize();
                 stamp.Data.Mask = JsonUtility.FromJson<WorldStampMask>(JsonUtility.ToJson(stamp.Mask));
-                var prefab = PrefabUtility.GetPrefabParent(stamp);
+                var prefab = GetPrefab(stamp);
                 if (prefab != null)
                 {
                     Debug.Log("Wrote mask back to prefab");

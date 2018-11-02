@@ -316,9 +316,9 @@ namespace MadMaps.Integration
 
 			var instances = (List<VegetationStudioInstance>)dataBox;
 			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
-            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
-            terrainLayer.VSInstances = instances;
-			terrainLayer.VSRemovals.Clear();
+            var MMTerrainLayer = wrapper.GetLayer<MMTerrainLayer>(LayerName, false, true);
+            MMTerrainLayer.VSInstances = instances;
+			MMTerrainLayer.VSRemovals.Clear();
 			Profiler.EndSample();
 
 			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
@@ -338,9 +338,9 @@ namespace MadMaps.Integration
 			{
 				return;
 			}
-            var terrainLayer = wrapper.GetLayer<TerrainLayer>(LayerName, false, true);
-            terrainLayer.VSInstances.Clear();
-			terrainLayer.VSRemovals.Clear();
+            var MMTerrainLayer = wrapper.GetLayer<MMTerrainLayer>(LayerName, false, true);
+            MMTerrainLayer.VSInstances.Clear();
+			MMTerrainLayer.VSRemovals.Clear();
 		}
 
 

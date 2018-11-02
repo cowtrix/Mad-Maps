@@ -233,7 +233,7 @@ namespace MadMaps.WorldStamps
 
         public override Type GetLayerType()
         {
-            return typeof(TerrainLayer);
+            return typeof(MMTerrainLayer);
         }
 
         public override void OnPreBake()
@@ -256,7 +256,7 @@ namespace MadMaps.WorldStamps
                 if (allWrappers.Count > 0)
                 {
                     var sample = allWrappers[0].transform.position.y +
-                                 allWrappers[0].GetCompoundHeight(allWrappers[0].GetLayer<TerrainLayer>(LayerName),
+                                 allWrappers[0].GetCompoundHeight(allWrappers[0].GetLayer<MMTerrainLayer>(LayerName),
                                      transform.position) * allWrappers[0].Terrain.terrainData.size.y;
                     transform.position = new Vector3(transform.position.x, sample, transform.position.z) + Vector3.up * SnapToTerrainHeightOffset;
                 }
@@ -347,7 +347,7 @@ namespace MadMaps.WorldStamps
 
         public override void ProcessHeights(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
@@ -438,7 +438,7 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
@@ -550,7 +550,7 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
@@ -717,7 +717,7 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
@@ -845,7 +845,7 @@ namespace MadMaps.WorldStamps
 
         public override void ProcessTrees(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);
@@ -939,7 +939,7 @@ namespace MadMaps.WorldStamps
 
         public override void ProcessObjects(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
-            var layer = baseLayer as TerrainLayer;
+            var layer = baseLayer as MMTerrainLayer;
             if(layer == null)
             {
                 Debug.LogWarning(string.Format("Attempted to write {0} to incorrect layer type! Expected Layer {1} to be {2}, but it was {3}", name, baseLayer.name, GetLayerType(), baseLayer.GetType()), this);

@@ -4,6 +4,8 @@ Current Version: v 0.1.5
 - ProceduralTerrainModifier has been renamed to TerrainPlane (as it's not quite as simple anymore).
 - Added the ability for the TerrainPlane to selectively remove trees, details and objects.
 - The TerrainPlane will now have much more reasonable default values.
+- Fixed compatibility with 2018.2+
+- Fixed compatibility with 2018.3+ (this required renaming the TerrainLayer class to MMTerrainLayer)
 
 == History ==
 

@@ -252,7 +252,7 @@ namespace MadMaps.Roads
         }
 
         public override Type GetLayerType(){
-            return typeof(TerrainLayer);
+            return typeof(MMTerrainLayer);
         }
 
         public override Vector3 Size

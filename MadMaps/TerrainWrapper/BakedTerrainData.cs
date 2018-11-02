@@ -58,7 +58,7 @@ namespace MadMaps.Terrains
         }
     }
 
-    public class CompoundTerrainLayer
+    public class CompoundMMTerrainLayer
     {
         public Serializable2DFloatArray Heights;
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();

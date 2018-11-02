@@ -130,7 +130,7 @@ namespace MadMaps.Terrains
             return result;
         }
 
-        public static void SnapshotVegetationStudioData(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotVegetationStudioData(this MMTerrainLayer layer, Terrain terrain)
         {
             layer.VSRemovals.Clear();
             layer.VSInstances.Clear();
@@ -227,7 +227,7 @@ namespace MadMaps.Terrains
         }
     }
   
-    public partial class TerrainLayer : LayerBase
+    public partial class MMTerrainLayer : LayerBase
     {
         
         public List<VegetationStudioInstance> VSInstances = new List<VegetationStudioInstance>();
@@ -249,7 +249,7 @@ namespace MadMaps.Terrains
         private void WriteVegetationStudioToTerrain(TerrainWrapper wrapper, Bounds bounds)
         {
             var existingVSData = wrapper.CompoundTerrainData.VegetationStudio;
-            if (BlendMode == ETerrainLayerBlendMode.Set)
+            if (BlendMode == EMMTerrainLayerBlendMode.Set)
             {
                 existingVSData.Clear();
             }

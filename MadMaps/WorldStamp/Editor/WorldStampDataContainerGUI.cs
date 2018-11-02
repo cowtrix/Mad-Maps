@@ -53,7 +53,11 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
-            var prefabParent = PrefabUtility.GetPrefabParent(wsdc.transform.parent.gameObject);
+#if UNITY_2018_2_OR_NEWER
+            var prefabParent = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(wsdc.transform.parent.gameObject);
+#else
+            var prefabParent = UnityEditor.PrefabUtility.GetPrefabParent(wsdc.transform.parent.gameObject);
+#endif
             if (prefabParent == null)
             {
                 Debug.LogError("Unable to find prefab");

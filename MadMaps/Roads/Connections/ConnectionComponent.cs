@@ -93,7 +93,7 @@ namespace MadMaps.Roads
 
         public override Type GetLayerType()
         {
-            return typeof(TerrainLayer);
+            return typeof(MMTerrainLayer);
         }
 
         public virtual void Think()

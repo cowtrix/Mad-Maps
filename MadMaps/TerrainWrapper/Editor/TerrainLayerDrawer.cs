@@ -11,14 +11,14 @@ using UnityEngine;
 
 namespace MadMaps.Terrains
 {
-    public class TerrainLayerDrawer
+    public class MMTerrainLayerDrawer
     {
         public ReorderableList List;
         private TerrainWrapper _wrapper;
 
         private static GUIContent _saveContent;
 
-        public TerrainLayerDrawer(TerrainWrapper wrapper)
+        public MMTerrainLayerDrawer(TerrainWrapper wrapper)
         {
             if (wrapper == null)
             {
@@ -89,7 +89,7 @@ namespace MadMaps.Terrains
 
         private void OnLayerRemoveCallback(ReorderableList list)
         {
-            var obj = list.list[list.index] as TerrainLayer;
+            var obj = list.list[list.index] as MMTerrainLayer;
             if (obj != null)
             {                
                 bool inLevel = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj));
@@ -129,7 +129,7 @@ namespace MadMaps.Terrains
                 /*var dLayer = newLayer as DeltaLayer;
                 if(dLayer)
                 {
-                    dLayer.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Additive;
+                    dLayer.BlendMode = MMTerrainLayer.EMMTerrainLayerBlendMode.Additive;
                 }*/
             });
             menu.ShowAsContext();
@@ -188,13 +188,13 @@ namespace MadMaps.Terrains
             }
 
             //var deltaLayer = layer as DeltaLayer;
-            var terrainLayer = layer as TerrainLayer;
+            var MMTerrainLayer = layer as MMTerrainLayer;
             var procLayer = layer as ProceduralLayer;
             EditorGUILayout.BeginVertical("Box");
             EditorGUI.indentLevel++;
-            if (terrainLayer != null)
+            if (MMTerrainLayer != null)
             {
-                layer = DrawExpandedGUI(wrapper, terrainLayer);
+                layer = DrawExpandedGUI(wrapper, MMTerrainLayer);
             }            
             else if (procLayer != null)
             {
@@ -212,11 +212,11 @@ namespace MadMaps.Terrains
             return layer;
         }
 
-        public static TerrainLayer DrawExpandedGUI(TerrainWrapper wrapper, TerrainLayer layer)
+        public static MMTerrainLayer DrawExpandedGUI(TerrainWrapper wrapper, MMTerrainLayer layer)
         {
             bool isInScene = layer != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(layer));
             EditorGUILayout.BeginHorizontal();
-            layer = (TerrainLayer)EditorGUILayout.ObjectField(isInScene ? "Asset (In-Scene)" : "Asset", layer, typeof(TerrainLayer), true);
+            layer = (MMTerrainLayer)EditorGUILayout.ObjectField(isInScene ? "Asset (In-Scene)" : "Asset", layer, typeof(MMTerrainLayer), true);
             if (layer != null && isInScene && GUILayout.Button(_saveContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
                 var path = EditorUtility.SaveFilePanel("Save Terrain Layer", "Assets", layer.name, "asset");
@@ -232,7 +232,7 @@ namespace MadMaps.Terrains
                 EditorGUILayout.HelpBox("Snapshot is Null!", MessageType.Error);
                 if (GUILayout.Button("Create Snapshot", EditorStyles.toolbarButton))
                 {
-                    layer = ScriptableObject.CreateInstance<TerrainLayer>();
+                    layer = ScriptableObject.CreateInstance<MMTerrainLayer>();
                     GUIUtility.ExitGUI();
                     return layer;
                 }

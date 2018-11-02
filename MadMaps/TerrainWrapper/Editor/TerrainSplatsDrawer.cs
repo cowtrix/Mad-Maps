@@ -36,9 +36,9 @@ namespace MadMaps.Terrains
             {
                 return true;
             }
-            foreach (var terrainLayer in _wrapper.Layers)
+            foreach (var MMTerrainLayer in _wrapper.Layers)
             {
-                if (terrainLayer.SplatData.ContainsKey(splat))
+                if (MMTerrainLayer.SplatData.ContainsKey(splat))
                 {
                     return false;
                 }

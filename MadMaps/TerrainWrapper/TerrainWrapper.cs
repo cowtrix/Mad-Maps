@@ -44,8 +44,8 @@ namespace MadMaps.Terrains
 
         public GameObject ObjectContainer; // The container for prefab objects
 
-        private Dictionary<LayerBase, CompoundTerrainLayer> _compoundDataCache =
-            new Dictionary<LayerBase, CompoundTerrainLayer>();
+        private Dictionary<LayerBase, CompoundMMTerrainLayer> _compoundDataCache =
+            new Dictionary<LayerBase, CompoundMMTerrainLayer>();
 
         public BakedTerrainData CompoundTerrainData
         {
@@ -152,7 +152,7 @@ namespace MadMaps.Terrains
             ComputeShaderPool.ClearPool();
 
             Debug.Log(string.Format("Applied all layers at {0} (took {1}) (Compute Shaders {2})",
-                DateTime.Now.ToShortTimeString(), sw.Elapsed, (ComputeShaders && BlendTerrainLayerUtility.ShouldCompute()) ? "ON" : "OFF"));
+                DateTime.Now.ToShortTimeString(), sw.Elapsed, (ComputeShaders && BlendMMTerrainLayerUtility.ShouldCompute()) ? "ON" : "OFF"));
 
             _needsPostRecalcInvokation = true;
         }
@@ -174,11 +174,11 @@ namespace MadMaps.Terrains
 
             /*var lastSetLayer = Layers.Last((layer) => 
             {
-                if(!(layer is TerrainLayer))
+                if(!(layer is MMTerrainLayer))
                 {
                     return false;
                 }
-                return (layer as TerrainLayer).BlendMode == TerrainLayer.ETerrainLayerBlendMode.Set;
+                return (layer as MMTerrainLayer).BlendMode == MMTerrainLayer.EMMTerrainLayerBlendMode.Set;
             });
             Debug.Log(lastSetLayer);
             if(lastSetLayer.Heights != null)
@@ -276,7 +276,11 @@ namespace MadMaps.Terrains
                     continue;
                 }
 #if UNITY_EDITOR
-                var prefab = UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject;
+#if UNITY_2018_2_OR_NEWER
+                var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(instantiatedObject.gameObject) as GameObject);
+#else
+                var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject);
+#endif
                 UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
                 
 #else
@@ -557,7 +561,7 @@ namespace MadMaps.Terrains
             if (CompoundTerrainData.SplatData.Count > 0 && SplatPrototypes.Count > 0)
             {
                 var aRes = CompoundTerrainData.SplatData.GetValues().First().Width;
-                if (ComputeShaders && BlendTerrainLayerUtility.ShouldCompute())
+                if (ComputeShaders && BlendMMTerrainLayerUtility.ShouldCompute())
                 {
                     const int maxChunkSize = 2048*2048*4;
                     var subdivisions = Mathf.CeilToInt((aRes*aRes*SplatPrototypes.Count)/(float) maxChunkSize);
@@ -703,8 +707,8 @@ namespace MadMaps.Terrains
             return null;
         }
 
-        public static void WeldHeights(Serializable2DFloatArray heights, TerrainLayer prevX, TerrainLayer nextZ,
-            TerrainLayer nextX, TerrainLayer prevZ, int margin)
+        public static void WeldHeights(Serializable2DFloatArray heights, MMTerrainLayer prevX, MMTerrainLayer nextZ,
+            MMTerrainLayer nextX, MMTerrainLayer prevZ, int margin)
         {
             if (heights == null)
             {
@@ -1259,7 +1263,7 @@ namespace MadMaps.Terrains
         public void CreateCompoundCache(LayerBase layer)
         {
             _compoundDataCache.Remove(layer);
-            CompoundTerrainLayer result = new CompoundTerrainLayer();
+            CompoundMMTerrainLayer result = new CompoundMMTerrainLayer();
 
             var hRes = Terrain.terrainData.heightmapResolution;
             var aRes = Terrain.terrainData.alphamapResolution;
@@ -1278,7 +1282,7 @@ namespace MadMaps.Terrains
             _compoundDataCache.Remove(layer);
         }
 
-        public void CopyCompoundToLayer(TerrainLayer layer)
+        public void CopyCompoundToLayer(MMTerrainLayer layer)
         {
             var hRes = Terrain.terrainData.heightmapResolution;
             layer.SetHeights(0, 0, GetCompoundHeights(layer, 0, 0, hRes, hRes, hRes), hRes);

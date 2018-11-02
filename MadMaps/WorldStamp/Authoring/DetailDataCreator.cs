@@ -47,7 +47,7 @@ namespace MadMaps.WorldStamps.Authoring
             int height = max.z - min.z;
 
             var prototypes = terrain.terrainData.detailPrototypes;
-            var wrappers = TerrainLayerUtilities.ResolvePrototypes(prototypes);
+            var wrappers = MMTerrainLayerUtilities.ResolvePrototypes(prototypes);
             
             for (var i = 0; i < prototypes.Length; ++i)
             {

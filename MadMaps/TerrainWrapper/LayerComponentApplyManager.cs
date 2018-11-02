@@ -160,7 +160,7 @@ namespace MadMaps.Terrains
                 for (int i = 0; i < mappings.Count; i++)
                 {
                     var layerStampMapping = mappings[i];
-                    var layer = wrapper.GetLayer<TerrainLayer>(layerStampMapping.LayerName, false, true);   // Is this redundant or just cautious? See line 100
+                    var layer = wrapper.GetLayer<MMTerrainLayer>(layerStampMapping.LayerName, false, true);   // Is this redundant or just cautious? See line 100
                     
                     // Here, we copy the flattened information of all layers below this layer to the current layer, to easily blend new data with old data. 
                     // A somewhat naive solution, but the best I have found after trying several out.

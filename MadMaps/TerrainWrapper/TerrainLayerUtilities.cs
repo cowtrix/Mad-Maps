@@ -13,7 +13,7 @@ using UnityEditor;
 
 namespace MadMaps.Terrains
 {
-    public static class TerrainLayerUtilities
+    public static class MMTerrainLayerUtilities
     {
         public static List<TerrainWrapper> CollectWrappers(ObjectBounds bounds)
         {
@@ -195,7 +195,7 @@ namespace MadMaps.Terrains
             return ret;
         }
         
-        public static void SnapshotObjects(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotObjects(this MMTerrainLayer layer, Terrain terrain)
         {
 #if UNITY_EDITOR
             var terrainSize = terrain.terrainData.size;
@@ -262,7 +262,11 @@ namespace MadMaps.Terrains
                     continue;
                 }
 
+#if UNITY_2018_2_OR_NEWER
+                var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
+#else
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
+#endif
                 var rootInScene = PrefabUtility.FindPrefabRoot(go);
                 
                 var relativePos = rootInScene.transform.position - terrainPos;
@@ -290,7 +294,7 @@ namespace MadMaps.Terrains
 #endif
         }
 
-        public static void SnapshotTrees(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotTrees(this MMTerrainLayer layer, Terrain terrain)
         {
             layer.Trees.Clear();
             var tSize = terrain.terrainData.size;
@@ -306,7 +310,7 @@ namespace MadMaps.Terrains
             }
         }
 
-        public static void SnapshotDetails(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotDetails(this MMTerrainLayer layer, Terrain terrain)
         {
             layer.DetailData.Clear();
             var prototypes = terrain.terrainData.detailPrototypes;
@@ -342,7 +346,7 @@ namespace MadMaps.Terrains
             }
         }
 
-        public static void SnapshotSplats(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotSplats(this MMTerrainLayer layer, Terrain terrain)
         {
             var rawSplats = terrain.terrainData.GetAlphamaps(0, 0, terrain.terrainData.alphamapWidth,
                 terrain.terrainData.alphamapHeight);
@@ -377,7 +381,7 @@ namespace MadMaps.Terrains
             }
         }
 
-        public static void SnapshotHeights(this TerrainLayer layer, Terrain terrain)
+        public static void SnapshotHeights(this MMTerrainLayer layer, Terrain terrain)
         {
             layer.Heights =
                 new Serializable2DFloatArray(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth,

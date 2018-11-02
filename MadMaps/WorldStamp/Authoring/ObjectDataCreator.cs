@@ -107,7 +107,11 @@ namespace MadMaps.WorldStamps.Authoring
                     done.Add(childTransform);
                 }
 
+#if UNITY_2018_2_OR_NEWER
+                var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
+#else
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
+#endif
                 var root = PrefabUtility.FindPrefabRoot(go);
 
                 var relativePos = root.transform.position - bounds.min;

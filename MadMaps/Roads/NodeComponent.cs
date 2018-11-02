@@ -51,6 +51,6 @@ namespace MadMaps.Roads
         public override int GetPriority() { return Priority; }
         public override void SetPriority(int priority) {Priority = priority;}
         public override string GetLayerName() {return LayerName;}        
-        public override Type GetLayerType() {return typeof(TerrainLayer);}
+        public override Type GetLayerType() {return typeof(MMTerrainLayer);}
     }
 }

@@ -20,7 +20,7 @@ namespace MadMaps.Roads
         public static HashSet<Node> ThinkCache = new HashSet<Node>();
 
         [Serializable]
-        public class RoadLayerMapping : MadMaps.Common.Collections.CompositionDictionary<TerrainWrapper, TerrainLayer> { }
+        public class RoadLayerMapping : MadMaps.Common.Collections.CompositionDictionary<TerrainWrapper, MMTerrainLayer> { }
         
         public float NodePreviewSize = 5;
         public float SplineResolution = 1; 
@@ -301,16 +301,16 @@ namespace MadMaps.Roads
             _slowThink.MoveNext();
         }
 
-        public TerrainLayer GetLayer(TerrainWrapper terrainWrapper, bool createIfMissing = false)
+        public MMTerrainLayer GetLayer(TerrainWrapper terrainWrapper, bool createIfMissing = false)
         {
-            TerrainLayer snapshot;
+            MMTerrainLayer snapshot;
             if ((!LayerMapping.TryGetValue(terrainWrapper, out snapshot) || snapshot == null) && createIfMissing)
             {
-                snapshot = ScriptableObject.CreateInstance<TerrainLayer>();
+                snapshot = ScriptableObject.CreateInstance<MMTerrainLayer>();
                 snapshot.name = "Road Network";
                 LayerMapping[terrainWrapper] = snapshot;
                 terrainWrapper.Layers.Insert(0, snapshot);
-                snapshot.BlendMode = TerrainLayer.ETerrainLayerBlendMode.Stencil;
+                snapshot.BlendMode = MMTerrainLayer.EMMTerrainLayerBlendMode.Stencil;
             }
             return snapshot;
         }

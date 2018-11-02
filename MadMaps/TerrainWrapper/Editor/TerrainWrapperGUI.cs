@@ -18,7 +18,7 @@ namespace MadMaps.Terrains
             Help.BrowseURL("http://lrtw.net/madmaps/");
         }
 
-        public static TerrainLayer StencilLayerDisplay
+        public static MMTerrainLayer StencilLayerDisplay
         {
             get { return __stencilLayerDisplay; }
             set
@@ -27,7 +27,7 @@ namespace MadMaps.Terrains
                 _stencilDisplayDirty = true;
             }
         }
-        public static TerrainLayer __stencilLayerDisplay;
+        public static MMTerrainLayer __stencilLayerDisplay;
         public static bool _stencilDisplayDirty;
         
         public int CurrentTab;
@@ -35,7 +35,7 @@ namespace MadMaps.Terrains
 
         public TerrainWrapper Wrapper;
 
-        private TerrainLayerDrawer _layerDrawer;
+        private MMTerrainLayerDrawer _layerDrawer;
         private TerrainSplatsDrawer _splatsDrawer;
         private TerrainDetailsDrawer _detailsDrawer;
         private static GUIContent[] _tabs;
@@ -50,7 +50,7 @@ namespace MadMaps.Terrains
                 }
                 Wrapper = target as TerrainWrapper;
             }
-            _layerDrawer = new TerrainLayerDrawer(Wrapper);
+            _layerDrawer = new MMTerrainLayerDrawer(Wrapper);
             _splatsDrawer = new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = new TerrainDetailsDrawer(Wrapper);
             _tabs = new[]
@@ -91,11 +91,11 @@ namespace MadMaps.Terrains
                 }
             }
 
-            _layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            _layerDrawer = _layerDrawer ?? new MMTerrainLayerDrawer(Wrapper);
             _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
 
-            /*_layerDrawer = _layerDrawer ?? new TerrainLayerDrawer(Wrapper);
+            /*_layerDrawer = _layerDrawer ?? new MMTerrainLayerDrawer(Wrapper);
             _splatsDrawer = _splatsDrawer ?? new TerrainSplatsDrawer(Wrapper);
             _detailsDrawer = _detailsDrawer ?? new TerrainDetailsDrawer(Wrapper);
             if(_tabs == null)
@@ -138,7 +138,7 @@ namespace MadMaps.Terrains
                 if (_layerDrawer.List.index >= 0 && Wrapper.Layers.Count > 0 && _layerDrawer.List.index < Wrapper.Layers.Count)
                 {
                     var selected = Wrapper.Layers[_layerDrawer.List.index];
-                    Wrapper.Layers[_layerDrawer.List.index] = TerrainLayerDrawer.DrawExpandedGUI(Wrapper, selected);
+                    Wrapper.Layers[_layerDrawer.List.index] = MMTerrainLayerDrawer.DrawExpandedGUI(Wrapper, selected);
                 }
                 else
                 {
@@ -174,7 +174,7 @@ namespace MadMaps.Terrains
                         splatProtos.Count, splatProtos.Count > 1 ? "s" : string.Empty, splatProtos.Count > 1 ? "are" : "is"), GUILayout.MaxWidth(Screen.width - 100));
                     if(GUILayout.Button("Fix Now"))
                     {
-                        var newSplats = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.splatPrototypes);
+                        var newSplats = MMTerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.splatPrototypes);
                         Wrapper.SplatPrototypes = newSplats.Values.ToList();
                         GUIUtility.ExitGUI();
                         return;
@@ -210,7 +210,7 @@ namespace MadMaps.Terrains
                         detailProtos.Count, detailProtos.Count > 1 ? "s" : string.Empty, detailProtos.Count > 1 ? "are" : "is"), GUILayout.MaxWidth(Screen.width - 100));
                     if(GUILayout.Button("Fix Now"))
                     {
-                        var newDetails = TerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.detailPrototypes);
+                        var newDetails = MMTerrainLayerUtilities.ResolvePrototypes(Wrapper.Terrain.terrainData.detailPrototypes);
                         Wrapper.DetailPrototypes = newDetails.Values.ToList();
                         GUIUtility.ExitGUI();
                         return;

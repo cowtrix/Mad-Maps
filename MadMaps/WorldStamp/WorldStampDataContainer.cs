@@ -31,7 +31,11 @@ namespace MadMaps.WorldStamps
         public void LinkToPrefab()
         {
 #if UNITY_EDITOR
+#if UNITY_2018_2_OR_NEWER
+            var prefabParent = UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(transform.parent.gameObject);
+#else
             var prefabParent = UnityEditor.PrefabUtility.GetPrefabParent(transform.parent.gameObject);
+#endif
             if (prefabParent == null)
             {
                 //Debug.LogError("Unable to find prefab");
