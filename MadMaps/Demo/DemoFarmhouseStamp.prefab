@@ -50,7 +50,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1813820917628000}
   m_LocalRotation: {x: 0, y: 0.44731164, z: 0, w: 0.8943782}
-  m_LocalPosition: {x: 128.65497, y: 0, z: -928.6549}
+  m_LocalPosition: {x: 531, y: 70.24304, z: 665}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4464128789472556}
@@ -89,7 +89,7 @@ MonoBehaviour:
   SnapPosition: 0
   SnapRotation: 0
   SnapToTerrainHeight: 1
-  SnapToTerrainHeightOffset: 0
+  SnapToTerrainHeightOffset: -10
   DisableStencil: 0
   LayerName: Farmhouse
   Priority: 1
@@ -117,7 +117,7 @@ MonoBehaviour:
   PreviewEnabled: 0
   GizmosEnabled: 1
   GizmoColor: {r: 1, g: 1, b: 1, a: 0.3}
-  _lastSnapPosition: {x: 531, y: 30.642374, z: 665}
+  _lastSnapPosition: {x: 531, y: 70.24304, z: 665}
 --- !u!114 &114545491492527718
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2702,4 +2702,4 @@ MonoBehaviour:
         _dirty: 0
         Height: 179
         Width: 179
-  Redirect: {fileID: 0}
+  Redirect: {fileID: 114545491492527718}

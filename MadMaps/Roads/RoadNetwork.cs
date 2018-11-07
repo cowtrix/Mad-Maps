@@ -38,6 +38,10 @@ namespace MadMaps.Roads
         public Bounds GetBounds()
         {
             Bounds? b = null;
+            if(Nodes.IsNullOrEmpty())
+            {
+                return new Bounds(transform.position, Vector3.zero);
+            }
             for(var i = 0; i < Nodes.Count - 1; i++)
             {
                 var n = Nodes[i];

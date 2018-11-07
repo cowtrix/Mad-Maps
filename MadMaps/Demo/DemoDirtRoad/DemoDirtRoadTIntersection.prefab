@@ -238,7 +238,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  FalloffTexture: {fileID: 2800000, guid: 31439b7a82c3e48b6adc87a85210c959, type: 3}
+  FalloffTexture: {fileID: 2800000, guid: d4606ccaa31550741a8816cd1be31ff6, type: 3}
   FalloffMode: 2
   Offset: {x: -7, y: -0.2, z: 0}
   SetHeights: 1
