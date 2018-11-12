@@ -6,21 +6,17 @@ Current Version: v 0.1.5
 - The TerrainPlane will now have much more reasonable default values.
 - Fixed compatibility with 2018.2+
 - Fixed compatibility with 2018.3+ (this required renaming the TerrainLayer class to MMTerrainLayer)
+- Fixed MapMagic compilation errors when building with C# 4.0 and above.
+- Fixed issue where Applying changes to a WorldStamp prefab instance would erase the WorldStamp data.
+- World stamps will no longer remove stamp objects in underlying layers.
+- Added startup window with links to demo assets, support email, and online documentation.
+- Fixed issue where terrain managed objects could be duplicated occasionally
 
 == History ==
 
-v 0.1.4b
-
-- Fixed issue where Applying changes to a WorldStamp prefab instance would erase the WorldStamp data.
-- World stamps will no longer remove stamp objects in underlying layers.
-
-v 0.1.4a
-
-- Fixed MapMagic compilation errors when building with C# 4.0 and above.
-
 v 0.1.4
 
-- To reduce asset bloat, demo assets will now be a separate asset here: http://u3d.as/1fzM
+- To reduce asset bloat, demo assets will now be a separate asset here: http://www.lrtw.net/madmaps/demo/MadMapsDemoAssets.unitypackage
 - You can now preview tree and object removals
 - Position based previewing should be easier to see now
 
