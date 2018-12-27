@@ -7,6 +7,15 @@ namespace MadMaps.Common
 {
     public static class ListExtensions
     {
+        public static void SetOrAdd<T>(this List<T> list, int i, T value)
+        {
+            while(list.Count - 1 > i)
+            {
+                list.Add(default(T));
+            }
+            list[i] = value;
+        }
+
         public static bool IsNullOrEmpty(this IList list)
         {
             if (list == null || list.Count == 0)

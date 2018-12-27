@@ -249,7 +249,16 @@ namespace MadMaps.Terrains
             }
             if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
             {
-                layer.Heights.Clear();
+                var tRes = wrapper.Terrain.terrainData.heightmapResolution;
+                if (layer.Heights.Width == tRes && layer.Heights.Height == tRes)
+                {
+                    layer.Heights.Clear();
+                }
+                else
+                {
+                    layer.Heights = new Serializable2DFloatArray(tRes, tRes);
+                }
+                
                 EditorUtility.SetDirty(layer);
                 EditorGUIUtility.ExitGUI();
                 return layer;

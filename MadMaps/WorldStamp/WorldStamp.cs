@@ -581,7 +581,7 @@ namespace MadMaps.WorldStamps
             targetMinCoord = targetMinCoord.Clamp(0, sRes - 1);
             targetMaxCoord = targetMaxCoord.Clamp(0, sRes - 1);
             var arraySize = new Common.Coord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
-
+            var layerIndex = terrainWrapper.GetLayerIndex(baseLayer);
             var thisLayerSplatData = layer.GetSplatMaps(targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, sRes);
             UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
             Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z);
@@ -628,7 +628,15 @@ namespace MadMaps.WorldStamps
                         if (!thisLayerSplatData.TryGetValue(splatPair.Wrapper, out layerData))
                         {
                             layerData = new Serializable2DByteArray(arraySize.x, arraySize.z);
-                            thisLayerSplatData[splatPair.Wrapper] = layerData;
+                            //Debug.LogFormat("Created new splat in splatdata {0} {1}", layer.name, splatPair.Wrapper);
+                            if(layerIndex == terrainWrapper.Layers.Count - 1 && layer.SplatData.Count == 0)
+                            {
+                                // We're adding the first splat on the first layer, so fill it
+                                var data = new Serializable2DByteArray(sRes, sRes);
+                                data.Fill(255);
+                                layer.SplatData.Add(splatPair.Wrapper, data);
+                            }
+                            thisLayerSplatData[splatPair.Wrapper] = layerData;                            
                         }
 
                         byte layerValByte =  (byte)(layerData != null ? layerData[arrayU, arrayV] : 0);
@@ -665,7 +673,8 @@ namespace MadMaps.WorldStamps
                         float floatSum = delta/255f;
                         foreach (var serializable2DByteArray in thisLayerSplatData)
                         {
-                            if (!IgnoredSplats.Contains(serializable2DByteArray.Key) && Data.SplatData.Any(data => data.Wrapper == serializable2DByteArray.Key))
+                            if (!IgnoredSplats.Contains(serializable2DByteArray.Key) 
+                                && Data.SplatData.Any(data => data.Wrapper == serializable2DByteArray.Key))
                             {
                                 continue;
                             }
@@ -677,13 +686,7 @@ namespace MadMaps.WorldStamps
                             }
                             var read = readByte / 255f;
                             
-                            /*if(floatSum < 0)
-                            {
-                                var newCompoundVal = read * (1 - floatSum * -1);
-                                var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
-                                serializable2DByteArray.Value[arrayU, arrayV] = newCompoundByteVal;
-                            }
-                            else */if (floatSum < 1)
+                            if (floatSum < 1)
                             {
                                 var newCompoundVal = read * (1 - floatSum);
                                 var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
@@ -693,7 +696,7 @@ namespace MadMaps.WorldStamps
                             {
                                 serializable2DByteArray.Value[arrayU, arrayV] = 0;
                             }
-                            //Debug.Log(string.Format("Wrapper: {3} \t Delta: {0} \t Read: {1} \t New : {2}", floatSum, read, serializable2DByteArray.Value[arrayU, arrayV] / 255f, serializable2DByteArray.Key));
+                            //DebugHelper.DrawPoint(wPos, 1, Color.white * floatSum, 10);
                         }
                         layer.Stencil[u, v] = MiscUtilities.CompressStencil(stencilKey, 1);
                     }

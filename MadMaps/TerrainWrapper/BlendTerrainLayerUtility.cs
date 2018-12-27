@@ -195,7 +195,7 @@ namespace MadMaps.Terrains
                         var newValue = existingValue;
                         if (absolute)
                         {
-                            newValue = (byte)(value > 0 ? existingValue : 0);
+                            newValue = (byte)(value > 0 ? 0 : existingValue);
                         }
                         else
                         {

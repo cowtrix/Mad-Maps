@@ -172,20 +172,6 @@ namespace MadMaps.Terrains
 
             CompoundTerrainData.Clear(this);
 
-            /*var lastSetLayer = Layers.Last((layer) => 
-            {
-                if(!(layer is MMTerrainLayer))
-                {
-                    return false;
-                }
-                return (layer as MMTerrainLayer).BlendMode == MMTerrainLayer.EMMTerrainLayerBlendMode.Set;
-            });
-            Debug.Log(lastSetLayer);
-            if(lastSetLayer.Heights != null)
-            {
-                Terrain.Layer
-            }*/
-
             for (var i = 0; i < Layers.Count; ++i)
             {
                 if(Layers[i])

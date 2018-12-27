@@ -37,10 +37,10 @@ namespace MadMaps.Common
         public static Coord WorldToHeightmapCoord(this Terrain terrain, Vector3 worldPos, RoundType rounding)
         {
             var terrainSize = terrain.terrainData.size;
-            var resolution = terrain.terrainData.heightmapResolution - 1;
+            var resolution = terrain.terrainData.heightmapResolution;
 
             worldPos -= terrain.GetPosition();
-            //worldPos -= new Vector3(0, 0, terrainSize.z / resolution) / 2;
+            //worldPos -= new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
             worldPos = new Vector3(worldPos.x / terrainSize.x, worldPos.y / terrainSize.y, worldPos.z / terrainSize.z);
             worldPos = new Vector3(worldPos.x * resolution, 0, worldPos.z * resolution);
             
@@ -74,20 +74,17 @@ namespace MadMaps.Common
         public static Vector3 HeightmapCoordToWorldPos(this Terrain terrain, Coord terrainPos)
         {
             var terrainSize = terrain.terrainData.size;
-            var resolution = terrain.terrainData.heightmapResolution - 1;
+            var resolution = terrain.terrainData.heightmapResolution;
             var terrainSpaceCoordPos = new Vector3(terrainPos.x, 0, terrainPos.z);
             var normalizedPos = new Vector3(terrainSpaceCoordPos.x / (float)resolution, 0,
                 (float)terrainSpaceCoordPos.z / resolution);
             var terrainSizePos = new Vector3(normalizedPos.x * terrainSize.x, 0, normalizedPos.z * terrainSize.z);
             terrainSizePos.y = terrain.SampleHeight(terrainSizePos);
-
-            //terrainSizePos += new Vector3(0, 0, terrainSize.z / resolution) / 2;
+            //terrainSizePos += new Vector3((1f / (float)resolution) * terrainSize.x, 0, (1f / resolution) * terrainSize.z) / 2f;
             terrainSizePos += terrain.GetPosition();
 
             return terrainSizePos;
         }
-
-
 
         public static Coord WorldToSplatCoord(this Terrain terrain, Vector3 worldPos, RoundType rounding = RoundType.Round)
         {

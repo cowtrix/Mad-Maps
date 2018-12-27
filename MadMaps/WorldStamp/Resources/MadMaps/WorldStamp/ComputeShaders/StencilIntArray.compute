@@ -16,10 +16,12 @@ bool _Absolute;
 void StencilInts (uint3 id : SV_DispatchThreadID)
 {
 	int index = id.x + id.y * _BaseSize.x;
-
-	float ux = (id.x + _MinMax.x) / _TotalSize.x;
-	float uy = (id.y + _MinMax.y) / _TotalSize.y;
-
+	float xOffset = .5;
+	float yOffset = .5;
+	int xSizeOffset = 0;
+	int ySizeOffset = 0;
+	float ux = (id.x + xOffset) / (_BaseSize.x + xSizeOffset);
+	float uy = (id.y + yOffset) / (_BaseSize.y + ySizeOffset);
 	float stencilVal = StencilBilinearSample(_Stencil, _StencilSize.x, _StencilSize.y, ux, uy);
 
 	int key = 0;
@@ -28,7 +30,7 @@ void StencilInts (uint3 id : SV_DispatchThreadID)
 	
 	if(_Absolute)
 	{
-		_Base[index] = val > 0 ? _Base[index] : 0;
+		_Base[index] = val > 0 ? 0 : _Base[index];
 		return;
 	}	
 	if(_Invert)

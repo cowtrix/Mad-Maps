@@ -116,7 +116,8 @@ namespace MadMaps.Terrains
             }
 
             int bestRes = 0;
-            if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && terrainWrapper.Terrain.terrainData.heightmapResolution != Heights.Width)
+            var hRes = terrainWrapper.Terrain.terrainData.heightmapResolution;
+            if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && hRes != Heights.Width)
             {
                 if(index == terrainWrapper.Layers.Count - 1)
                 {
@@ -124,6 +125,11 @@ namespace MadMaps.Terrains
                 }
                 bestRes = Heights.Width;
             }
+            else
+            {
+                bestRes = hRes;
+            }
+
             if(DetailData.Count > 0)
             {
                 var firstMap = DetailData.First();
@@ -136,10 +142,6 @@ namespace MadMaps.Terrains
                             terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
                     }
                 }
-                if(bestRes == 0)
-                {
-                    bestRes = detailRes + 1;
-                }
             }
             if(SplatData.Count > 0)
             {
@@ -150,10 +152,6 @@ namespace MadMaps.Terrains
                     {
                         terrainWrapper.Terrain.terrainData.alphamapResolution = splatRes;
                     }
-                }
-                if(bestRes == 0)
-                {
-                    bestRes = splatRes + 1;
                 }
             }
                         
@@ -287,6 +285,11 @@ namespace MadMaps.Terrains
             if (BlendMode == EMMTerrainLayerBlendMode.Set)
             {
                 wrapper.CompoundTerrainData.SplatData.Clear();
+                /*if(SplatData.Count > 0)
+                {
+                    var firstSplat = SplatData.First();
+                    SplatData[firstSplat] = new Serializable2DByteArray()
+                }    */             
             }
 
             var terrain = wrapper.Terrain;
@@ -299,10 +302,10 @@ namespace MadMaps.Terrains
                 {
                     var data = pair.Value;
                     BlendMMTerrainLayerUtility.StencilEraseArray(ref data, Stencil, Common.Coord.Zero, new Common.Coord(splatRes, splatRes),
-                        stencilSize, false, false);
+                        stencilSize, false, true);
                 }
             }
-            
+
             foreach (var keyValuePair in SplatData)
             {
                 var splatPrototypeWrapper = keyValuePair.Key;
@@ -321,7 +324,7 @@ namespace MadMaps.Terrains
                 if (!wrapper.CompoundTerrainData.SplatData.TryGetValue(splatPrototypeWrapper, out data)
                     || data.Width != splatRes || data.Height != splatRes)
                 {
-                    data = new Serializable2DByteArray(splatRes, splatRes);
+                    data = new Serializable2DByteArray(splatRes, splatRes);                    
                 }
 
                 BlendMMTerrainLayerUtility.BlendArray(ref data, readData,
@@ -583,7 +586,22 @@ namespace MadMaps.Terrains
                     Heights = new Serializable2DFloatArray(tRes, tRes);
                 }
             }
+            SplatPrototypeWrapper firstSplat = null;            
+            if(BlendMode == EMMTerrainLayerBlendMode.Set)
+            {
+                if(SplatData.Count > 0)
+                {
+                    firstSplat = SplatData.First().Key;
+                }
+            }
             SplatData.Clear();
+            if(firstSplat && BlendMode == EMMTerrainLayerBlendMode.Set)
+            {
+                var aRes = wrapper.Terrain.terrainData.alphamapResolution;
+                var data = new Serializable2DByteArray(aRes, aRes);
+                data.Fill(255);
+                SplatData.Add(firstSplat, data);
+            }
 
             Objects.Clear();
             ObjectRemovals.Clear();
@@ -591,7 +609,6 @@ namespace MadMaps.Terrains
             {
                 DetailData.Clear();
             }
-
 
             if (Stencil != null)
             {
