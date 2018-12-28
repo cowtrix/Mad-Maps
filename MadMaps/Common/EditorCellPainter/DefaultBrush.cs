@@ -31,7 +31,10 @@ namespace MadMaps.Common.Painter
         public int Radius = 2;
         public float Strength = 1;
 
-        public override bool Paint(float dt, MadMaps.Common.Painter.IPaintable canvas, MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
+        public override bool Paint(float dt, MadMaps.Common.Painter.IPaintable canvas, 
+            MadMaps.Common.Painter.IGridManager gridManager, 
+            MadMaps.Common.Painter.Painter.InputState inputState, float minVal, 
+            float maxVal, Rect rect, Matrix4x4 TRS)
         {
             var dirty = false;
             var brushBlendMode = BrushBlendMode;
@@ -110,39 +113,43 @@ namespace MadMaps.Common.Painter
             }
         }
 
-        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IPaintable canvas, 
+            MadMaps.Common.Painter.IGridManager gridManager, 
+            MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             Radius = Mathf.Clamp(Radius, 0, 32);
-            //var scaledRad = gridManager.GetGridSize()*Radius;
+            Handles.matrix = TRS;
+            var scaledRad = /*gridManager.GetGridSize()*/Radius;
 
-            var translatedPlanePos = TRS.MultiplyPoint(inputState.PlanePosition);
-            var translatedGridPos = TRS.MultiplyPoint(inputState.GridPosition);
-            var planeUp = TRS.GetRotation()*Vector3.up;
-            var planeForward = TRS.GetRotation()*Vector3.forward;
+            var translatedPlanePos = /*TRS.MultiplyPoint */(inputState.PlanePosition);
+            var translatedGridPos = /*TRS.MultiplyPoint */(inputState.GridPosition);
+            var planeUp = /*TRS.GetRotation()**/Vector3.up;
+            var planeForward = /*TRS.GetRotation()**/Vector3.forward;
             var planeRot = Quaternion.LookRotation(planeUp, planeForward);
 
             Handles.color = Color.white*0.5f;
             if (BrushShape == EBrushShape.Circle)
             {
                 Handles.CircleHandleCap(-1, translatedPlanePos, planeRot,
-                    gridManager.GetGridSize()*Radius, EventType.Repaint);
+                    gridManager.GetGridSize()*scaledRad, EventType.Repaint);
             }
             else
             {
                 Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
-                    gridManager.GetGridSize()*Radius, EventType.Repaint);
+                    gridManager.GetGridSize()*scaledRad, EventType.Repaint);
             }
             Handles.color = Color.white;
             if (BrushShape == EBrushShape.Circle)
             {
                 Handles.CircleHandleCap(-1, translatedGridPos, planeRot,
-                    gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
+                    gridManager.GetGridSize()*Mathf.Max(.5f, scaledRad), EventType.Repaint);
             }
             else
             {
                 Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
-                    gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
+                    gridManager.GetGridSize()*Mathf.Max(.5f, scaledRad), EventType.Repaint);
             }
+            Handles.matrix = Matrix4x4.identity;
         }
     }
 }

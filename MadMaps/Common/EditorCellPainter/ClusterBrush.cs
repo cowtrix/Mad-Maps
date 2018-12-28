@@ -9,20 +9,23 @@ namespace MadMaps.Common.Painter
     {
         public int Radius = 1;
         public float Strength = 1;
-        public float Flow = 3;
+        public float Flow = .1f;
         public int Iterations = 1;
         public AnimationCurve Falloff = new AnimationCurve(new[] { new Keyframe(0, 1), new Keyframe(1, 1) });
 
         public override void DrawSpecificGUI()
         {
-            Strength = Mathf.Max(0, EditorGUILayout.Slider("Strength", Strength, 0, 1));
+            Strength = Mathf.Clamp(EditorGUILayout.FloatField("Strength", Strength), 0, 1);
             Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
-            Radius = Mathf.Max(0, EditorGUILayoutX.IntSlider("Radius", Radius, 0, 10));
+            Radius = Mathf.Clamp(EditorGUILayout.IntField("Radius", Radius), 0, 10);
         }
 
-        protected override void DrawSceneGizmos(IGridManager gridManager, Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IPaintable canvas, 
+            MadMaps.Common.Painter.IGridManager gridManager, 
+            MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             var gridSize = gridManager.GetGridSize();
+            Handles.matrix = TRS;
             Handles.color = Color.white * 0.5f;
             Handles.CircleHandleCap(-1, inputState.PlanePosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
             var scaledRad = gridSize * Radius;
@@ -41,6 +44,7 @@ namespace MadMaps.Common.Painter
             }
             Handles.color = Color.white;
             Handles.CircleHandleCap(-1, inputState.GridPosition, Quaternion.LookRotation(Vector3.up), gridSize * Radius, EventType.Repaint);
+            Handles.matrix = Matrix4x4.identity;
         }
 
         public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)

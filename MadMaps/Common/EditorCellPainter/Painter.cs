@@ -249,7 +249,6 @@ namespace MadMaps.Common.Painter
                 return;
             }
 
-            DrawSceneControls();
             for (var i = 0; i < 5; ++i)
             {
                 var scale = TRS.GetScale();
@@ -257,11 +256,13 @@ namespace MadMaps.Common.Painter
                 var rectPos = TRS.MultiplyPoint(Rect.min.x0z(PlaneOffset) + Vector3.up*i + Rect.size.x0z()/2);
                 HandleExtensions.DrawWireCube(rectPos, scale/2, TRS.GetRotation(), Color.cyan.WithAlpha(1 - i/5f));
             }
+            DrawSceneControls();
+            
             Handles.color = Color.white;
 
             if (CurrentBrush != null)
             {
-                CurrentBrush.DrawGizmos(GridManager, _currentInputState, Rect, TRS);
+                CurrentBrush.DrawGizmos(Canvas, GridManager, _currentInputState, Rect, TRS);
             }
 
             var cellColor = Color.white;
@@ -297,7 +298,6 @@ namespace MadMaps.Common.Painter
                         EditorCellHelper.AddCell(cellPos, cellColor);
                     }
                 }
-                EditorCellHelper.Invalidate();
                 _repaint = false;
             }
         }
@@ -318,7 +318,7 @@ namespace MadMaps.Common.Painter
             GUILayout.BeginArea(new Rect(0, 0, 240, Screen.height));
 
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            EditorGUILayout.LabelField(EditorCellHelper.UseCPU() ? "Using CPU Painting" : "Using GPU Painting");
+            EditorGUILayout.LabelField(EditorCellHelper.UseCPU ? "Using CPU Painting" : "Using GPU Painting");
             EditorGUILayout.LabelField(string.Format("Grid Size: {0}", GridManager.GetGridSize().ToString("n2")));
             
             var offset = EditorPrefs.GetFloat("Painter_PlaneOffset", 0);

@@ -835,9 +835,9 @@ namespace MadMaps.WorldStamps
             _painter.TRS = Matrix4x4.TRS(worldStamp.transform.position - worldStamp.transform.rotation * worldStamp.Size.xz().x0z()/2,
                 worldStamp.transform.rotation, 
                 new Vector3(
-                    worldStamp.transform.lossyScale.x * (worldStamp.Size.x / worldStamp.Data.Size.x),
-                    worldStamp.transform.lossyScale.y * (worldStamp.Size.y / worldStamp.Data.Size.y),
-                    worldStamp.transform.lossyScale.z * (worldStamp.Size.z / worldStamp.Data.Size.z))
+                    worldStamp.transform.localScale.x/* * (worldStamp.Size.x / worldStamp.Data.Size.x) */,
+                    worldStamp.transform.localScale.y/* * (worldStamp.Size.y / worldStamp.Data.Size.y) */,
+                    worldStamp.transform.localScale.z/* * (worldStamp.Size.z / worldStamp.Data.Size.z) */)
                     );
 
             _painter.PaintingEnabled = true;

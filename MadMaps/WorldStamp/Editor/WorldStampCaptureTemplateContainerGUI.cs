@@ -72,7 +72,6 @@ namespace MadMaps.WorldStamps.Authoring
                     Common.Painter.EditorCellHelper.AddCell(pos, Color.Lerp(Color.black, Color.clear, val));
                 }
             }
-            Common.Painter.EditorCellHelper.Invalidate(); 
         }
     }
 }

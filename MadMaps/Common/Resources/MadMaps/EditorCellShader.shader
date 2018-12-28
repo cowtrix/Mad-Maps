@@ -99,7 +99,7 @@ SubShader {
 				// Fragment Shader -----------------------------------------------
 				float4 FS_Main(FS_INPUT input) : COLOR
 				{
-					half threshold = 0.1;
+					half threshold = 0.02;
 					half2 wrapTex = abs((input.tex0 / 2) - 0.5);
 					if(wrapTex.x < threshold || wrapTex.y < threshold)
 						return saturate(1 - input.color);

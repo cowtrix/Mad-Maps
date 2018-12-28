@@ -382,7 +382,6 @@ namespace MadMaps.Terrains
                     //counter++;
                 }
             }
-            EditorCellHelper.Invalidate();
         }
 
     }

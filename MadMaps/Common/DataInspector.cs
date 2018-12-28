@@ -157,7 +157,7 @@ namespace MadMaps.Common
                 var windowSize = this.position.size;
                 var size = Math.Min(windowSize.x, windowSize.y);
                 var scaledSizeFactor = 1f;
-                float margin = 180;
+                float margin = 64;
                 if (entry.Texture.width > entry.Texture.height)
                 {
                     scaledSizeFactor = 1 / (size * (1 / aspect) / windowSize.y);
@@ -170,7 +170,7 @@ namespace MadMaps.Common
                 _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.Width(size), GUILayout.ExpandHeight(true));
                 EditorGUILayout.BeginVertical(GUILayout.Width(size), GUILayout.ExpandHeight(true));
 
-                GUILayout.Box("", GUILayout.Width(size - 25), GUILayout.Height(size * aspect - 25));
+                GUILayout.Box("", GUILayout.Width(size - 25), GUILayout.Height(size * aspect - margin));
                 var lastRect = GUILayoutUtility.GetLastRect();
                 lastRect.position += Vector2.one * 4;
                 lastRect.size -= Vector2.one * 8;

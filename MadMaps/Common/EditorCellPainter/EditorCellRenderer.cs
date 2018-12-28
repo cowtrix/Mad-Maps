@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Profiling;
 
 namespace MadMaps.Common.Painter
 {
@@ -24,8 +25,6 @@ namespace MadMaps.Common.Painter
         private List<Vector2> _uvs = new List<Vector2>();
         double _lastAliveTime;
 
-        
-
         public void SetAlive()
         {
             #if UNITY_EDITOR
@@ -37,6 +36,7 @@ namespace MadMaps.Common.Painter
 
         public void Initialise()
         {
+            Profiler.BeginSample("Initialise");
             if (Mesh == null)
             {
                 Mesh = new Mesh();
@@ -52,13 +52,15 @@ namespace MadMaps.Common.Painter
             {
                 Renderer = gameObject.AddComponent<MeshRenderer>();
             }
-            EditorCellHelper.Register(this);
             gameObject.hideFlags = HideFlags.HideAndDontSave;
+            EditorCellHelper.Register(this);
+            Profiler.EndSample();
         }
 
         public void QueueCell(EditorCellHelper.Cell cell)
         {
-            if(EditorCellHelper.UseCPU())
+            Profiler.BeginSample("QueueCell");
+            if(EditorCellHelper.UseCPU)
             {
                 var cellSize = EditorCellHelper.CellSize;
                 int index = _verts.Count;
@@ -88,11 +90,13 @@ namespace MadMaps.Common.Painter
                 _tris.Add(_verts.Count - 1);
                 _tris.Add(_verts.Count - 1);
                 _colors.Add(cell.Color);
-            }            
+            }
+            Profiler.EndSample();
         }
 
         public void Clear()
         {
+            Profiler.BeginSample("Clear");
             if (Mesh)
             {
                 Mesh.Clear();
@@ -101,30 +105,37 @@ namespace MadMaps.Common.Painter
             _tris.Clear();
             _colors.Clear();
             _uvs.Clear();
+            Profiler.EndSample();
         }
 
         public void Finalise()
         {
+            Profiler.BeginSample("Finalise");
             Initialise();
             Mesh.Clear();
             Mesh.SetVertices(_verts);
             Mesh.SetTriangles(_tris, 0);
             Mesh.SetColors(_colors);
-            if(EditorCellHelper.UseCPU())
+            if(EditorCellHelper.UseCPU)
             {
                 Mesh.SetUVs(0, _uvs);
-            }            
+            }
+            Profiler.EndSample();
         }
 
         public void SetData(Matrix4x4 trs, Material material)
         {
+            Profiler.BeginSample("SetData");
             Initialise();
             transform.ApplyTRSMatrix(trs);
             Renderer.sharedMaterial = material;
+            Profiler.EndSample();
+            //Debug.LogFormat("Position: {0} Scale {1} Rotation {2}", trs.GetPosition(), trs.GetScale(), trs.GetRotation().eulerAngles);
         }
 
         public void Update()
         {
+            Profiler.BeginSample("Update");
             EditorCellHelper.Register(this);
         #if UNITY_EDITOR
             var t = UnityEditor.EditorApplication.timeSinceStartup;
@@ -142,6 +153,7 @@ namespace MadMaps.Common.Painter
                     DestroyImmediate(gameObject);
                 }
             }
+            Profiler.EndSample();
         }
 
         public void OnDestroy()

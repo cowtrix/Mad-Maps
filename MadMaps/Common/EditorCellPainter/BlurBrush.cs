@@ -15,13 +15,14 @@ namespace MadMaps.Common.Painter
         private double _lastPaint;
         public EBrushShape BrushShape;
         public AnimationCurve Falloff = new AnimationCurve(new Keyframe(0, 1), new Keyframe(1, 1));
-        public float Flow = 3;
+        public float Flow = .1f;
         public int Radius = 2;
         [Range(0, 1)]
         public float Strength = 1;
         public int Iterations = 1;
 
-        public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
+        public override bool Paint(float dt, IPaintable canvas, IGridManager gridManager, 
+            Painter.InputState inputState, float minVal, float maxVal, Rect rect, Matrix4x4 TRS)
         {
             var dirty = false;
             var scaledRad = gridManager.GetGridSize()*Radius;
@@ -97,15 +98,18 @@ namespace MadMaps.Common.Painter
             Flow = Mathf.Max(0, EditorGUILayout.FloatField("Flow", Flow));
         }
 
-        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IGridManager gridManager, MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
+        protected override void DrawSceneGizmos(MadMaps.Common.Painter.IPaintable canvas, 
+            MadMaps.Common.Painter.IGridManager gridManager, 
+            MadMaps.Common.Painter.Painter.InputState inputState, Rect rect, Matrix4x4 TRS)
         {
             Radius = Mathf.Clamp(Radius, 0, 32);
             //var scaledRad = gridManager.GetGridSize()*Radius;
+            Handles.matrix = TRS;
 
-            var translatedPlanePos = TRS.MultiplyPoint(inputState.PlanePosition);
-            var translatedGridPos = TRS.MultiplyPoint(inputState.GridPosition);
-            var planeUp = TRS.GetRotation()*Vector3.up;
-            var planeForward = TRS.GetRotation()*Vector3.forward;
+            var translatedPlanePos = (inputState.PlanePosition);
+            var translatedGridPos = (inputState.GridPosition);
+            var planeUp = Vector3.up;
+            var planeForward = Vector3.forward;
             var planeRot = Quaternion.LookRotation(planeUp, planeForward);
 
             Handles.color = Color.white*0.5f;
@@ -130,6 +134,7 @@ namespace MadMaps.Common.Painter
                 Handles.RectangleHandleCap(-1, translatedGridPos, planeRot,
                     gridManager.GetGridSize()*Mathf.Max(.5f, Radius), EventType.Repaint);
             }
+            Handles.matrix = Matrix4x4.identity;
         }
     }
 }

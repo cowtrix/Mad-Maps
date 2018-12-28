@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine.Rendering;
+using UnityEngine.Profiling;
 
 namespace MadMaps.Common.Painter
 {
@@ -12,6 +13,7 @@ namespace MadMaps.Common.Painter
 
         private const int MAX_VERTS = 65534;
         private const string ForceCPUKey = "MadMaps_PainteForceGPU";
+        public static bool UseCPU;
         public static bool ForceCPU {
             get
             {
@@ -22,18 +24,7 @@ namespace MadMaps.Common.Painter
                 EditorPrefs.SetBool(ForceCPUKey, value);
             }
         }
-        public static bool UseCPU()
-        {
-            if(EditorCellHelper.ForceCPU)
-            {
-                return true;
-            }
-            if(SystemInfo.graphicsShaderLevel < 45)
-            {
-                return true;
-            }
-            return SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
-        }
+        
         public static float CellSize
         {
             get { return __cellSize; }
@@ -71,8 +62,24 @@ namespace MadMaps.Common.Painter
             SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
 
+        private static void UpdateUseCPU()
+        {
+            if(EditorCellHelper.ForceCPU)
+            {
+                UseCPU = true;
+                return;
+            }
+            if(SystemInfo.graphicsShaderLevel < 45)
+            {
+                UseCPU = true;
+                return;
+            }
+            UseCPU = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore;
+        }
+
         private static void OnSceneGUIDelegate(SceneView sceneview)
         {
+            UpdateUseCPU();
             var t = EditorApplication.timeSinceStartup;
             
             if (_dirty)
@@ -114,9 +121,10 @@ namespace MadMaps.Common.Painter
                 Color = color,
             });
             _dirty = true;
-            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
-            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
+            //SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            //SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
+
 
         public static void Register(EditorCellRenderer r)
         {
@@ -124,13 +132,14 @@ namespace MadMaps.Common.Painter
             {
                 _rendererList.Add(r);
             }
-            SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
-            SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
+            //SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
+            //SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
         }
 
         // Change to invalidation
-        public static void Invalidate()
+        private static void Invalidate()
         {
+            Profiler.BeginSample("Invalidate");
             if (_cells.Count == 0)
             {
                 for (int i = 0; i < _rendererList.Count; i++)
@@ -141,6 +150,7 @@ namespace MadMaps.Common.Painter
                     }                    
                 }
                 _rendererList.Clear();
+                Profiler.EndSample();
                 return;
             }
 
@@ -150,6 +160,7 @@ namespace MadMaps.Common.Painter
                 if (shader == null)
                 {
                     Debug.LogError("Failed to find shader " + ShaderName);
+                    Profiler.EndSample();
                     return;
                 }
                 _material = new Material(shader) { hideFlags = HideFlags.DontSave };
@@ -164,7 +175,7 @@ namespace MadMaps.Common.Painter
                 }
             }
 
-            int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)(UseCPU() ? (MAX_VERTS-4) / 4 : MAX_VERTS));
+            int requiredRendererCount = Mathf.CeilToInt(_cells.Count / (float)(UseCPU ? (MAX_VERTS-4) / 4 : MAX_VERTS));
 
             //Debug.Log(string.Format("{0} = {1}", _cells.Count, requiredRendererCount));
             for (int i = 0; i < requiredRendererCount; i++)
@@ -190,6 +201,7 @@ namespace MadMaps.Common.Painter
 
             if(requiredRendererCount == 0)
             {
+                Profiler.EndSample();
                 return;
             }
 
@@ -200,7 +212,7 @@ namespace MadMaps.Common.Painter
             {
                 var cell = _cells[i];
                 activeRenderer.QueueCell(cell);
-                if (activeRenderer.VertCount > (UseCPU() ? MAX_VERTS - 4 : MAX_VERTS))
+                if (activeRenderer.VertCount > (UseCPU ? MAX_VERTS - 4 : MAX_VERTS))
                 {
                     index++;
                     activeRenderer = _rendererList[index];
@@ -218,6 +230,7 @@ namespace MadMaps.Common.Painter
             SceneView.onSceneGUIDelegate -= OnSceneGUIDelegate;
             SceneView.onSceneGUIDelegate += OnSceneGUIDelegate;
             SceneView.RepaintAll();
+            Profiler.EndSample();
         }
 
 
