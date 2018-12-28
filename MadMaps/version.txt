@@ -1,4 +1,14 @@
-Current Version: v 0.1.5
+Current Version: v 0.1.6
+
+- Improved Mask Editor performance
+- Fixed Fill brush in Mask Editor
+- Fixed editing mask in Maske Editor on scaled World Stamps
+- Fixed issue where the first splat on the terrain wasn't assumed to be full which would cause issues when using stamps without a base layer. 
+- Improved terrain data resolution detection
+
+== History ==
+
+v 0.1.5
 
 - MapMagic Integration: The Mad Maps Object Output can now better place World Stamps. You now have a tickbox of whether you want to reapply stamps after mapmagic is done generating.
 - ProceduralTerrainModifier has been renamed to TerrainPlane (as it's not quite as simple anymore).
@@ -11,8 +21,6 @@ Current Version: v 0.1.5
 - World stamps will no longer remove stamp objects in underlying layers.
 - Added startup window with links to demo assets, support email, and online documentation.
 - Fixed issue where terrain managed objects could be duplicated occasionally
-
-== History ==
 
 v 0.1.4
 
