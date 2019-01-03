@@ -648,7 +648,7 @@ namespace MadMaps.WorldStamps
                         switch (SplatBlendMode)
                         {
                             case ESplatBlendMode.Set:
-                                newValue = Mathf.Lerp(layerVal, 1, maskValue * stampValue);
+                                newValue = Mathf.Lerp(layerVal, stampValue, maskValue);
                                 break;
                             case ESplatBlendMode.Add:
                                 stampValue *= maskValue;
@@ -680,9 +680,10 @@ namespace MadMaps.WorldStamps
                             layerData[arrayU, arrayV] = byteAmount;
                         }
                     }
-                    //Debug.DrawLine(wPos, wPos + Vector3.up * delta, Color.green, 5);
+                    
                     if (delta != 0)
                     {
+                        //Debug.DrawLine(wPos, wPos + Vector3.up * delta, Color.green, 5);
                         float fDelta = 1 - (delta/255f);     
                         //Debug.Log(string.Format("fDelta: {0} ", fDelta));                   
                         foreach (var serializable2DByteArray in thisLayerSplatData)
