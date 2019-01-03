@@ -584,6 +584,7 @@ namespace MadMaps.WorldStamps
             var layerIndex = terrainWrapper.GetLayerIndex(baseLayer);
             var thisLayerSplatData = layer.GetSplatMaps(targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, sRes);
             UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
+            HashSet<SplatPrototypeWrapper> wrapperMem = new HashSet<SplatPrototypeWrapper>();
             Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z);
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
@@ -616,6 +617,7 @@ namespace MadMaps.WorldStamps
                     }
 
                     int delta = 0;
+                    wrapperMem.Clear();
                     foreach (var splatPair in Data.SplatData)
                     {
                         if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
@@ -646,7 +648,7 @@ namespace MadMaps.WorldStamps
                         switch (SplatBlendMode)
                         {
                             case ESplatBlendMode.Set:
-                                newValue = Mathf.Lerp(layerVal, stampValue, maskValue);
+                                newValue = Mathf.Lerp(layerVal, 1, maskValue * stampValue);
                                 break;
                             case ESplatBlendMode.Add:
                                 stampValue *= maskValue;
@@ -664,41 +666,41 @@ namespace MadMaps.WorldStamps
                             
                         var byteAmount = (byte)Mathf.Clamp(newValue * 255, 0, 255);
                             
-                        delta += byteAmount - layerValByte;
-                        layerData[arrayU, arrayV] = byteAmount;
+                        if(SplatBlendMode == ESplatBlendMode.Set)
+                        {
+                            delta += byteAmount;
+                        }
+                        else{
+                            delta += byteAmount - layerValByte;
+                        }                        
+                        
+                        if(delta != 0)
+                        {
+                            wrapperMem.Add(splatPair.Wrapper);
+                            layerData[arrayU, arrayV] = byteAmount;
+                        }
                     }
-                    
+                    //Debug.DrawLine(wPos, wPos + Vector3.up * delta, Color.green, 5);
                     if (delta != 0)
                     {
-                        float floatSum = delta/255f;
+                        float fDelta = 1 - (delta/255f);     
+                        //Debug.Log(string.Format("fDelta: {0} ", fDelta));                   
                         foreach (var serializable2DByteArray in thisLayerSplatData)
                         {
-                            if (!IgnoredSplats.Contains(serializable2DByteArray.Key) 
-                                && Data.SplatData.Any(data => data.Wrapper == serializable2DByteArray.Key))
+                            // We only want to renormalize unwritten to splats
+                            if (wrapperMem.Contains(serializable2DByteArray.Key))
                             {
                                 continue;
                             }
 
                             var readByte = serializable2DByteArray.Value[arrayU, arrayV];
-                            if(readByte == 0)
-                            {
-                                continue;
-                            }
                             var read = readByte / 255f;
                             
-                            if (floatSum < 1)
-                            {
-                                var newCompoundVal = read * (1 - floatSum);
-                                var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
-                                serializable2DByteArray.Value[arrayU, arrayV] = newCompoundByteVal;
-                            }
-                            else
-                            {
-                                serializable2DByteArray.Value[arrayU, arrayV] = 0;
-                            }
-                            //DebugHelper.DrawPoint(wPos, 1, Color.white * floatSum, 10);
+                            var newCompoundVal = read * fDelta;
+                            var newCompoundByteVal = (byte)Mathf.Clamp(newCompoundVal * 255, 0, 255);
+                            serializable2DByteArray.Value[arrayU, arrayV] = newCompoundByteVal;                            
                         }
-                        layer.Stencil[u, v] = MiscUtilities.CompressStencil(stencilKey, 1);
+                        //layer.Stencil[u, v] = MiscUtilities.CompressStencil(stencilKey, 1);
                     }
                 }
             }
