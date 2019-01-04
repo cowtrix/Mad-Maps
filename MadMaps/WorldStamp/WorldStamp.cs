@@ -455,17 +455,22 @@ namespace MadMaps.WorldStamps
             var tSize = terrainWrapper.Terrain.terrainData.size;
 
             var scaledSize = (Size / 2);
-            scaledSize.Scale(transform.lossyScale);
+            //scaledSize.Scale(transform.lossyScale);
             var stampBounds = new ObjectBounds(transform.position, scaledSize, transform.rotation);
             stampBounds.Expand((tSize / res));
             stampBounds.Expand(Vector3.up * 5000);
             var axisStampBounds = stampBounds.ToAxisBounds();
+            //DebugHelper.DrawCube(stampBounds.center, stampBounds.extents, stampBounds.Rotation, Color.cyan, 5);
+            //DebugHelper.DrawCube(axisStampBounds.center, axisStampBounds.extents, Quaternion.identity, Color.green, 5);
 
             var targetMinCoord = terrain.WorldToHeightmapCoord(axisStampBounds.min, TerrainX.RoundType.Ceil);
             targetMinCoord = targetMinCoord.Clamp(0, terrain.terrainData.heightmapResolution);
             var targetMaxCoord = terrain.WorldToHeightmapCoord(axisStampBounds.max, TerrainX.RoundType.Ceil);
             targetMaxCoord = targetMaxCoord.Clamp(0, terrain.terrainData.heightmapResolution);
             var stampHeight = (transform.position.y - terrainWrapper.transform.position.y);
+
+            //DebugHelper.DrawPoint(terrain.HeightmapCoordToWorldPos(targetMinCoord), 1, Color.yellow, 5);
+            //DebugHelper.DrawPoint(terrain.HeightmapCoordToWorldPos(targetMaxCoord), 1, Color.yellow, 5);
 
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
@@ -474,6 +479,7 @@ namespace MadMaps.WorldStamps
                     var wPos = terrain.HeightmapCoordToWorldPos(new Common.Coord(u, v));
                     if (!stampBounds.Contains(wPos))
                     {
+                        //DebugHelper.DrawPoint(wPos, 1, Color.yellow, 5);
                         continue;
                     }
 
@@ -574,18 +580,28 @@ namespace MadMaps.WorldStamps
             var tSize = terrainWrapper.Terrain.terrainData.size;
             var sRes = terrainWrapper.Terrain.terrainData.alphamapResolution;
             var stampBounds = new ObjectBounds(transform.position, Size/2, transform.rotation);
-            stampBounds.Expand((tSize/sRes));
-            var axisBounds = stampBounds.ToAxisBounds();
+            stampBounds.Expand((tSize/sRes));   // Expand the stampbounds just one step
+            var axisBounds = stampBounds.ToAxisBounds();    // Get the axis-aligned bounds that encapsulate the rotated bounds
+
+            //DebugHelper.DrawCube(axisBounds.center, axisBounds.extents, Quaternion.identity, Color.blue, 5);
+            // Get the max/min of the splat patch we're going to be editing
             var targetMinCoord = terrain.WorldToSplatCoord(axisBounds.min);
             var targetMaxCoord = terrain.WorldToSplatCoord(axisBounds.max);
             targetMinCoord = targetMinCoord.Clamp(0, sRes - 1);
             targetMaxCoord = targetMaxCoord.Clamp(0, sRes - 1);
+
+            //DebugHelper.DrawPoint(terrain.SplatCoordToWorldPos(targetMinCoord), 1, Color.red, 5);
+            //DebugHelper.DrawPoint(terrain.SplatCoordToWorldPos(targetMaxCoord), 1, Color.cyan, 5);
+
             var arraySize = new Common.Coord(targetMaxCoord.x - targetMinCoord.x, targetMaxCoord.z - targetMinCoord.z);
             var layerIndex = terrainWrapper.GetLayerIndex(baseLayer);
+            // Get the existing splat maps from the layer - this is the data we'll write to, then write back to the terrain
             var thisLayerSplatData = layer.GetSplatMaps(targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, sRes);
-            UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
+            
             HashSet<SplatPrototypeWrapper> wrapperMem = new HashSet<SplatPrototypeWrapper>();
-            Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z);
+            Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z); // This map will act as a mask to reapply the splat to
+
+            UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
             for (var u = targetMinCoord.x; u < targetMaxCoord.x; ++u)
             {
                 var arrayU = u - targetMinCoord.x;
@@ -605,9 +621,7 @@ namespace MadMaps.WorldStamps
                     {
                         var stencilPos = new Vector2(u / (float)(sRes + 1), v / (float)(sRes + 1));
                         maskValue *= layer.GetStencilStrength(stencilPos, stencilKey);
-                    }
-
-                    applyStencil[arrayU, arrayV] = maskValue > 0 ? 1 : 0;
+                    }                    
 
                     normalisedStampPosition = new Vector3(normalisedStampPosition.x / Size.x, normalisedStampPosition.y / Size.y, normalisedStampPosition.z / Size.z);
                     if (normalisedStampPosition.x < 0 || normalisedStampPosition.x > 1 ||
@@ -618,6 +632,16 @@ namespace MadMaps.WorldStamps
 
                     int delta = 0;
                     wrapperMem.Clear();
+                    float sum = 0;
+                    foreach (var splatPair in Data.SplatData)
+                    {
+                        if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
+                        {
+                            continue;
+                        }
+                        sum += splatPair.Data.BilinearSample(normalisedStampPosition.xz()) / 255f;
+                    }
+                    sum = Mathf.Clamp01(sum);
                     foreach (var splatPair in Data.SplatData)
                     {
                         if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
@@ -648,7 +672,7 @@ namespace MadMaps.WorldStamps
                         switch (SplatBlendMode)
                         {
                             case ESplatBlendMode.Set:
-                                newValue = Mathf.Lerp(layerVal, stampValue, maskValue);
+                                newValue = Mathf.Lerp(layerVal, stampValue, maskValue * sum);
                                 break;
                             case ESplatBlendMode.Add:
                                 stampValue *= maskValue;
@@ -665,34 +689,33 @@ namespace MadMaps.WorldStamps
                         }
                             
                         var byteAmount = (byte)Mathf.Clamp(newValue * 255, 0, 255);
-                            
-                        if(SplatBlendMode == ESplatBlendMode.Set)
+                        var diff = byteAmount - layerValByte;
+                                           
+                        if(diff != 0)
                         {
-                            delta += byteAmount;
-                        }
-                        else{
-                            delta += byteAmount - layerValByte;
-                        }                        
-                        
-                        if(delta != 0)
-                        {
+                            if(SplatBlendMode == ESplatBlendMode.Set)
+                            {
+                                delta += byteAmount;
+                            }
+                            else
+                            {
+                                delta += diff;
+                            }     
                             wrapperMem.Add(splatPair.Wrapper);
                             layerData[arrayU, arrayV] = byteAmount;
-                        }
+                        }                        
                     }
                     
                     if (delta != 0)
-                    {
-                        //Debug.DrawLine(wPos, wPos + Vector3.up * delta, Color.green, 5);
-                        float fDelta = 1 - (delta/255f);     
-                        //Debug.Log(string.Format("fDelta: {0} ", fDelta));                   
+                    {                        
+                        float fDelta = 1 - (delta/255f);                  
                         foreach (var serializable2DByteArray in thisLayerSplatData)
                         {
                             // We only want to renormalize unwritten to splats
                             if (wrapperMem.Contains(serializable2DByteArray.Key))
                             {
                                 continue;
-                            }
+                            }                            
 
                             var readByte = serializable2DByteArray.Value[arrayU, arrayV];
                             var read = readByte / 255f;
@@ -703,6 +726,12 @@ namespace MadMaps.WorldStamps
                         }
                         //layer.Stencil[u, v] = MiscUtilities.CompressStencil(stencilKey, 1);
                     }
+                    /* var sum = 0;
+                    foreach(var splatPair in layer.SplatData)
+                    {
+                        sum += splatPair.Value[u, v];
+                    }*/
+                    applyStencil[arrayU, arrayV] = maskValue > 0 ? 1 : 0;
                 }
             }
             

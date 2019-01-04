@@ -295,7 +295,7 @@ namespace MadMaps.Terrains
             var terrain = wrapper.Terrain;
             var splatRes = terrain.terrainData.alphamapResolution;
             var stencilSize = new Common.Coord(Stencil.Width, Stencil.Height);
-            if (BlendMode == EMMTerrainLayerBlendMode.Stencil)
+            /*if (BlendMode == EMMTerrainLayerBlendMode.Stencil)
             {
                 // Remove Stencil Values
                 foreach (var pair in wrapper.CompoundTerrainData.SplatData)
@@ -304,7 +304,7 @@ namespace MadMaps.Terrains
                     BlendMMTerrainLayerUtility.StencilEraseArray(ref data, Stencil, Common.Coord.Zero, new Common.Coord(splatRes, splatRes),
                         stencilSize, false, true);
                 }
-            }
+            }*/
 
             foreach (var keyValuePair in SplatData)
             {
