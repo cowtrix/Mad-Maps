@@ -43,7 +43,7 @@ namespace MadMaps.Roads
         
         public ComponentConfigurationRef Configuration;
         public NodeConnection NodeConnection;
-        [Min(1)]
+        [Common.GenericEditor.Min(1)]
         public int Priority = 1;
 
         public override bool GetEnabled()

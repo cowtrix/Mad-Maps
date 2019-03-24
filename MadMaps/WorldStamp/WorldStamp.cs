@@ -64,7 +64,7 @@ namespace MadMaps.WorldStamps
         public float SnapToTerrainHeightOffset;
         public bool DisableStencil;
         public string LayerName = "StampLayer";
-        [Min(1)]
+        [Common.GenericEditor.Min(1)]
         public int Priority = 1;
         
 
@@ -95,6 +95,13 @@ namespace MadMaps.WorldStamps
         public bool StencilSplats = false;
         [Tooltip("How to blend with existing splats on terrain")]
         public ESplatBlendMode SplatBlendMode = ESplatBlendMode.Set;
+
+#if UNITY_2018_3_OR_NEWER
+        public List<TerrainLayer> IgnoredSplatLayers = new List<TerrainLayer>();
+
+        [HideInInspector]
+        [Obsolete]
+#endif
         public List<SplatPrototypeWrapper> IgnoredSplats = new List<SplatPrototypeWrapper>();
 
         //======================================
@@ -563,11 +570,19 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
+#if UNITY_2018_3_OR_NEWER
+            var missingLayerCount = Data.SplatData.Count(data => data.Layer == null);
+            if (missingLayerCount > 0)
+            {
+                Debug.LogWarning(string.Format("Stamp {0} had {1} missing SplatPrototypes", name, missingLayerCount), this);
+            }
+#else
             var missingWrapperCount = Data.SplatData.Count(data => data.Wrapper == null);
             if (missingWrapperCount > 0)
             {
                 Debug.LogWarning(string.Format("Stamp {0} had {1} missing SplatPrototypes", name, missingWrapperCount), this);
             }
+#endif
 
             UnityEngine.Profiling.Profiler.BeginSample("StampSplats");
             if (SplatBlendMode > ESplatBlendMode.Average)
@@ -597,8 +612,11 @@ namespace MadMaps.WorldStamps
             var layerIndex = terrainWrapper.GetLayerIndex(baseLayer);
             // Get the existing splat maps from the layer - this is the data we'll write to, then write back to the terrain
             var thisLayerSplatData = layer.GetSplatMaps(targetMinCoord.x, targetMinCoord.z, arraySize.x, arraySize.z, sRes);
-            
+#if UNITY_2018_3_OR_NEWER
+            HashSet<TerrainLayer> wrapperMem = new HashSet<TerrainLayer>();
+#else
             HashSet<SplatPrototypeWrapper> wrapperMem = new HashSet<SplatPrototypeWrapper>();
+#endif
             Serializable2DFloatArray applyStencil = new Serializable2DFloatArray(arraySize.x, arraySize.z); // This map will act as a mask to reapply the splat to
 
             UnityEngine.Profiling.Profiler.BeginSample("MainLoop");
@@ -635,22 +653,51 @@ namespace MadMaps.WorldStamps
                     float sum = 0;
                     foreach (var splatPair in Data.SplatData)
                     {
+#if UNITY_2018_3_OR_NEWER
+                        if (IgnoredSplatLayers.Contains(splatPair.Layer) || splatPair.Layer == null)
+                        {
+                            continue;
+                        }
+#else
                         if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
                         {
                             continue;
                         }
+#endif
                         sum += splatPair.Data.BilinearSample(normalisedStampPosition.xz()) / 255f;
                     }
                     sum = Mathf.Clamp01(sum);
                     foreach (var splatPair in Data.SplatData)
                     {
+#if UNITY_2018_3_OR_NEWER
+                        if (IgnoredSplatLayers.Contains(splatPair.Layer) || splatPair.Layer == null)
+                        {
+                            continue;
+                        }
+#else
                         if (IgnoredSplats.Contains(splatPair.Wrapper) || splatPair.Wrapper == null)
                         {
                             continue;
                         }
+#endif
 
                         var stampValue = splatPair.Data.BilinearSample(normalisedStampPosition.xz()) / 255f;
                         Serializable2DByteArray layerData;
+#if UNITY_2018_3_OR_NEWER
+                        if (!thisLayerSplatData.TryGetValue(splatPair.Layer, out layerData))
+                        {
+                            layerData = new Serializable2DByteArray(arraySize.x, arraySize.z);
+                            //Debug.LogFormat("Created new splat in splatdata {0} {1}", layer.name, splatPair.Wrapper);
+                            if (layerIndex == terrainWrapper.Layers.Count - 1 && layer.TerrainLayerSplatData.Count == 0)
+                            {
+                                // We're adding the first splat on the first layer, so fill it
+                                var data = new Serializable2DByteArray(sRes, sRes);
+                                data.Fill(255);
+                                layer.TerrainLayerSplatData.Add(splatPair.Layer, data);
+                            }
+                            thisLayerSplatData[splatPair.Layer] = layerData;
+                        }
+#else
                         if (!thisLayerSplatData.TryGetValue(splatPair.Wrapper, out layerData))
                         {
                             layerData = new Serializable2DByteArray(arraySize.x, arraySize.z);
@@ -660,10 +707,11 @@ namespace MadMaps.WorldStamps
                                 // We're adding the first splat on the first layer, so fill it
                                 var data = new Serializable2DByteArray(sRes, sRes);
                                 data.Fill(255);
-                                layer.SplatData.Add(splatPair.Wrapper, data);
+                                layer.SplatData.Add(splatPair.Layer, data);
                             }
-                            thisLayerSplatData[splatPair.Wrapper] = layerData;                            
+                            thisLayerSplatData[splatPair.Layer] = layerData;                            
                         }
+#endif
 
                         byte layerValByte =  (byte)(layerData != null ? layerData[arrayU, arrayV] : 0);
                         var layerVal = layerValByte / 255f;
@@ -700,8 +748,12 @@ namespace MadMaps.WorldStamps
                             else
                             {
                                 delta += diff;
-                            }     
+                            }
+#if UNITY_2018_3_OR_NEWER
+                            wrapperMem.Add(splatPair.Layer);
+#else
                             wrapperMem.Add(splatPair.Wrapper);
+#endif
                             layerData[arrayU, arrayV] = byteAmount;
                         }                        
                     }
@@ -1037,7 +1089,11 @@ namespace MadMaps.WorldStamps
                 }
 
 #if UNITY_EDITOR
+#if UNITY_2018_3_OR_NEWER
+                if (UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(prefabObjectData.Prefab) != prefabObjectData.Prefab)
+#else
                 if (UnityEditor.PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab) != prefabObjectData.Prefab)
+#endif
                 {
                     Debug.LogWarning("Referencing inner prefab object somehow!", this);
                     continue;
@@ -1175,12 +1231,12 @@ namespace MadMaps.WorldStamps
             {
                 WriteDetails = false;
             }
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             if (Data.VSData.Count == 0)
             {
                 VegetationStudioEnabled = false;
             }
-            #endif
+#endif
         }
     }
 }

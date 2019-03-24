@@ -4,6 +4,7 @@ using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.WorldStamps;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace MadMaps.Terrains.Lookups
 {
@@ -15,7 +16,15 @@ namespace MadMaps.Terrains.Lookups
     [Serializable]
     public class CompressedSplatData
     {
+#if UNITY_2018_3_OR_NEWER
+        public TerrainLayer Layer;
+
+        [FormerlySerializedAs("Wrapper")]
+        [Obsolete]
+        public SplatPrototypeWrapper LegacyWrapper;
+#else
         public SplatPrototypeWrapper Wrapper;
+#endif
         public Serializable2DByteArray Data;
     }
 
@@ -25,7 +34,10 @@ namespace MadMaps.Terrains.Lookups
         public DetailPrototypeWrapper Wrapper;
         public Serializable2DByteArray Data;
     }
-    
+
+#if UNITY_2018_3_OR_NEWER
+    [Obsolete]
+#endif
     [Serializable]
     public class CompressedSplatDataLookup : MadMaps.Common.Collections.CompositionDictionary<SplatPrototypeWrapper, Serializable2DByteArray>
     {
@@ -39,6 +51,22 @@ namespace MadMaps.Terrains.Lookups
             }
         }
     }
+
+#if UNITY_2018_3_OR_NEWER
+    [Serializable]
+    public class CompressedTerrainLayerSplatDataLookup : MadMaps.Common.Collections.CompositionDictionary<TerrainLayer, Serializable2DByteArray>
+    {
+        public CompressedTerrainLayerSplatDataLookup() : base() { }
+
+        public CompressedTerrainLayerSplatDataLookup(Dictionary<TerrainLayer, Serializable2DByteArray> data) : base()
+        {
+            foreach (var pair in data)
+            {
+                Add(pair.Key, pair.Value);
+            }
+        }
+    }
+#endif
 
     /*[Serializable]
     public class DetailDataLookup : CompositionDictionary<DetailPrototypeWrapper, Serializable2DIntArray>

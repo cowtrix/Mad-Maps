@@ -22,9 +22,9 @@ namespace MadMaps.Terrains.MapMagicIntegration
         public override IEnumerable<Input> Inputs() { yield return input; }
         public override IEnumerable<Output> Outputs() { if (output == null) output = new Output(InoutType.Map); yield return output; }
 
-        public override Action<global::MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float, bool>> GetProces() { return Process; }
+        public override MapMagic.Action<global::MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float, bool>> GetProces() { return Process; }
         public override Func<global::MapMagic.CoordRect, Terrain, object, Func<float, bool>, IEnumerator> GetApply() { return Apply; }
-        public override Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
+        public override MapMagic.Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
 
         public void Process(global::MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float, bool> stop = null)
         {

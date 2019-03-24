@@ -255,20 +255,29 @@ namespace MadMaps.Terrains
                 }
 
                 var go = transform.gameObject;
+#if UNITY_2018_3_OR_NEWER
+                var prefabRoot = PrefabUtility.GetPrefabInstanceHandle(go);
+#else
                 var prefabRoot = PrefabUtility.GetPrefabObject(go);
+#endif
                 if (prefabRoot == null)
                 {
                     //Debug.LogError("Unable to collect non-prefab object: " + go.name, go);
                     continue;
                 }
 
-#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
+                var rootInScene = PrefabUtility.GetOutermostPrefabInstanceRoot(go);
+                var prefabAsset = PrefabUtility.GetOutermostPrefabInstanceRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
+#elif UNITY_2018_2_OR_NEWER
+                var rootInScene = PrefabUtility.FindPrefabRoot(go);
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
 #else
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
-#endif
                 var rootInScene = PrefabUtility.FindPrefabRoot(go);
-                
+#endif
+
+
                 var relativePos = rootInScene.transform.position - terrainPos;
                 relativePos = new Vector3(relativePos.x / terrainSize.x,
                     (rootInScene.transform.position.y - terrain.SampleHeight(rootInScene.transform.position)) -
@@ -292,7 +301,7 @@ namespace MadMaps.Terrains
                 }
             }
 #endif
-        }
+            }
 
         public static void SnapshotTrees(this MMTerrainLayer layer, Terrain terrain)
         {

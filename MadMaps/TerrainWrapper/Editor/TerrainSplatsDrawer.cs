@@ -13,7 +13,11 @@ namespace MadMaps.Terrains
         public TerrainSplatsDrawer(TerrainWrapper wrapper)
         {
             _wrapper = wrapper;
+#if UNITY_2018_3_OR_NEWER
+            List = new ReorderableList(wrapper.SplatPrototypes, typeof(TerrainLayer), false, false, true, false);
+#else
             List = new ReorderableList(wrapper.SplatPrototypes, typeof(SplatPrototypeWrapper), false, false, true, false);
+#endif
             List.drawHeaderCallback += DrawLayerHeaderCallback;
             List.drawElementCallback += DrawLayerElementCallback;
             List.elementHeightCallback += LayerElementHeightCallback;
@@ -76,6 +80,20 @@ namespace MadMaps.Terrains
             EditorGUI.LabelField(layerNumberRect, index.ToString());
 
             var nameRect = new Rect(layerNumberRect.xMax + 4, rect.y, objFieldWidth, headerHeight);
+#if UNITY_2018_3_OR_NEWER
+            var newKey = (TerrainLayer)EditorGUI.ObjectField(nameRect, _wrapper.TerrainLayerSplatPrototypes[index], typeof(TerrainLayer), false);
+            if (newKey != _wrapper.TerrainLayerSplatPrototypes[index])
+            {
+                _wrapper.TerrainLayerSplatPrototypes[index] = newKey;
+                _wrapper.RefreshSplats();
+                //_wrapper.Dirty = true;
+            }
+
+            if (_wrapper.TerrainLayerSplatPrototypes[index] == null)
+            {
+                return;
+            }
+#else
             var newKey = (SplatPrototypeWrapper)EditorGUI.ObjectField(nameRect, _wrapper.SplatPrototypes[index], typeof(SplatPrototypeWrapper), false);
             if (newKey != _wrapper.SplatPrototypes[index])
             {
@@ -88,7 +106,8 @@ namespace MadMaps.Terrains
             {
                 return;
             }
-            
+#endif
+
             var previewRect = new Rect(layerNumberRect.xMax + 4 + objFieldWidth + 4, rect.y, previewTexSize, previewTexSize);
             var tex = _wrapper.SplatPrototypes[index] != null ? _wrapper.SplatPrototypes[index].Texture : null;
             GUI.DrawTexture(previewRect, tex);
@@ -99,7 +118,11 @@ namespace MadMaps.Terrains
             foreach (var layer in _wrapper.Layers)
             {
                 var wrappers = layer.GetSplatPrototypeWrappers();
+#if UNITY_2018_3_OR_NEWER
+                if (wrappers != null && wrappers.Contains(_wrapper.TerrainLayerSplatPrototypes[index]))
+#else
                 if (wrappers != null && wrappers.Contains(_wrapper.SplatPrototypes[index]))
+#endif
                 {
                     sb.Append(layer.name);
                     sb.Append("    ");

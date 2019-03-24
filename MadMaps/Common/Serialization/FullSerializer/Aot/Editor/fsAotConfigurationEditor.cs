@@ -12,8 +12,12 @@ namespace FullSerializer {
 	[InitializeOnLoad]
 	public static class PlayStateNotifier {
 		static PlayStateNotifier() {
-			EditorApplication.playmodeStateChanged += ModeChanged;
-		}
+#if UNITY_2018_1_OR_NEWER
+            EditorApplication.playModeStateChanged += (state) => { ModeChanged(); };
+#else
+            EditorApplication.playmodeStateChanged += ModeChanged;
+#endif
+        }
 
 		private static void ModeChanged () {
 			if (!EditorApplication.isPlayingOrWillChangePlaymode && EditorApplication.isPlaying) {

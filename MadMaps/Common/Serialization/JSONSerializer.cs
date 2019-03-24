@@ -72,12 +72,20 @@ namespace MadMaps.Common.Serialization
             static StartUp(){
                 //set to false since this is always called in editor start.
                 JSONSerializer.applicationPlaying = false;
-                UnityEditor.EditorApplication.playmodeStateChanged += ()=>{ JSONSerializer.applicationPlaying = Application.isPlaying; };
+#if UNITY_2018_1_OR_NEWER
+                UnityEditor.EditorApplication.playModeStateChanged += (state) => {
+                    applicationPlaying = Application.isPlaying;
+                };
+#else
+                UnityEditor.EditorApplication.playmodeStateChanged += ()=>{ 
+                JSONSerializer.applicationPlaying = Application.isPlaying; };
+#endif
+
             }
         }
 #endif
 
-        private static Dictionary<string, fsData> cache = new Dictionary<string, fsData>();
+            private static Dictionary<string, fsData> cache = new Dictionary<string, fsData>();
         private static object serializerLock = new object();
         private static fsSerializer serializer = new fsSerializer();
         private static bool init = false;

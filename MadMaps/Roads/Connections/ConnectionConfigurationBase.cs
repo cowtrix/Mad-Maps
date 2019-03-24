@@ -6,7 +6,7 @@ namespace MadMaps.Roads
 {
     public abstract class ConnectionConfigurationBase
     {
-        [Min(1)]
+        [Common.GenericEditor.Min(1)]
         public int Priority = 1;
         public bool Enabled = true;
         

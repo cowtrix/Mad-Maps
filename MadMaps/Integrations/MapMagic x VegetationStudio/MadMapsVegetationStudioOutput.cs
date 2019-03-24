@@ -27,7 +27,7 @@ namespace MadMaps.Integration
 	[GeneratorMenu(menu = "Mad Maps", name = "MM Vegetation Studio", disengageable = true, helpLink = "https://gitlab.com/denispahunov/mapmagic/wikis/output_generators/VegetationStudio")]
 	public class MadMapsVSOutput : OutputGenerator
 	{
-		#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 		public VegetationPackage package;
 		private static float cellSize = 10f;
 		public string LayerName = "MapMagic";
@@ -35,7 +35,7 @@ namespace MadMaps.Integration
 		public static byte VS_MM_id { get {return TerrainWrapper.VegetationStudio_ID;}}
 
 		public static ObjectOutput.BiomeBlendType biomeBlendType = ObjectOutput.BiomeBlendType.AdditiveRandom;
-		#endif
+#endif
 
 		//layer
 		public class Layer
@@ -77,13 +77,13 @@ namespace MadMaps.Integration
 		}
 
 		//get static actions using instance
-		public override Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
+		public override MapMagic.Action<CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float,bool>> GetProces () { return Process; }
 		public override Func<CoordRect, Terrain, object, Func<float,bool>, IEnumerator> GetApply () { return Apply; }
-		public override Action<CoordRect, Terrain> GetPurge () { return Purge; }
+		public override MapMagic.Action<CoordRect, Terrain> GetPurge () { return Purge; }
 
 		public void Process(CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float,bool> stop = null)
 		{
-			#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 			if (stop!=null && stop(0)) return;
 			Noise noise = new Noise(12345, permutationCount:128); //to pick objects based on biome
 
@@ -299,7 +299,7 @@ namespace MadMaps.Integration
 			//BillboardSystem billboardSys = billboardComponents[rect];
 			//if (billboardSys != null)
 			//	 billboardSys.RefreshBillboards();
-			#endif
+#endif
 
 			//pushing anything to apply
 			if (stop!=null && stop(0)) return;
@@ -312,7 +312,7 @@ namespace MadMaps.Integration
 		{
 			Profiler.BeginSample("VS Apply");
 
-			#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 
 			var instances = (List<VegetationStudioInstance>)dataBox;
 			var wrapper = terrain.gameObject.GetOrAddComponent<TerrainWrapper>();
@@ -324,7 +324,7 @@ namespace MadMaps.Integration
 			global::MapMagic.MapMagic.OnApplyCompleted -= MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
             global::MapMagic.MapMagic.OnApplyCompleted += MapMagicIntegrationUtilities.MapMagicOnOnApplyCompleted;
 
-			#endif
+#endif
 
 			
 
@@ -349,7 +349,7 @@ namespace MadMaps.Integration
 		{
 			layout.Field(ref LayerName, "Layer");
 
-			#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 			layout.Par(30); layout.Icon("VegetationStudioSplashSmall", layout.Inset(), Layout.IconAligment.resize, Layout.IconAligment.resize);
 			layout.Par(5);
 			layout.fieldSize = 0.6f;
@@ -392,12 +392,12 @@ namespace MadMaps.Integration
 				}
 			}
 
-			#endif
+#endif
 		}
 
 		public void OnLayerGUI (Layout layout, bool selected, int num) 
 		{
-			#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 			layout.margin = 20; layout.rightMargin = 5; layout.fieldSize = 1f;
 			layout.Par(36);
 
@@ -444,13 +444,13 @@ namespace MadMaps.Integration
 				layout.margin += 10;
 			}
 
-			#endif
+#endif
 		}
 
-		#if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 		public Texture2D GetPreview (VegetationPackage package, int i)
 		{
-			#if UNITY_EDITOR
+#if UNITY_EDITOR
 			if (package.VegetationInfoList[i].PrefabType == VegetationPrefabType.Mesh)
 				//return AssetPreviewCache.GetAssetPreview(package.VegetationInfoList[i].VegetationPrefab);
 				return UnityEditor.AssetPreview.GetAssetPreview( package.VegetationInfoList[i].VegetationPrefab );
@@ -458,11 +458,11 @@ namespace MadMaps.Integration
 			else
 				//return AssetPreviewCache.GetAssetPreview(package.VegetationInfoList[i].VegetationTexture);
 				return UnityEditor.AssetPreview.GetAssetPreview( package.VegetationInfoList[i].VegetationTexture );
-			#else
+#else
 			return null;
-			#endif
+#endif
 		}
-		#endif
+#endif
 	}
 }
 #endif

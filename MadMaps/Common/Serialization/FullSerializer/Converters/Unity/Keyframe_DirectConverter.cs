@@ -1,3 +1,4 @@
+#pragma warning disable 0618
 #if !NO_UNITY
 using System;
 using System.Collections.Generic;

@@ -192,8 +192,13 @@ namespace MadMaps.WorldStamps.Authoring
             GameObject go  = null;
             if(stampToReplace != null)
             {
+#if UNITY_2018_3_OR_NEWER
+                var prefabType = PrefabUtility.GetPrefabAssetType(stampToReplace);
+                if (prefabType != PrefabAssetType.NotAPrefab)
+#else
                 var prefabType = PrefabUtility.GetPrefabType(stampToReplace);
-                if(prefabType == PrefabType.Prefab)
+                if (prefabType == PrefabType.Prefab)
+#endif
                 {
                     go = (GameObject)PrefabUtility.InstantiatePrefab(stampToReplace.gameObject);
                     go.DestroyChildren();
@@ -227,7 +232,12 @@ namespace MadMaps.WorldStamps.Authoring
 
             if(isWritingToPrefab)
             {
+#if UNITY_2018_3_OR_NEWER
+                var path = AssetDatabase.GetAssetPath(stampToReplace.gameObject);
+                stamp = PrefabUtility.SaveAsPrefabAsset(stamp.gameObject, path).GetComponent<WorldStamp>();
+#else
                 stamp = PrefabUtility.ReplacePrefab(stamp.gameObject, stampToReplace.gameObject).GetComponent<WorldStamp>();
+#endif
                 DestroyImmediate(go);
             }
             

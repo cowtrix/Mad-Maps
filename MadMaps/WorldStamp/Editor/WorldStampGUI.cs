@@ -21,7 +21,11 @@ namespace MadMaps.WorldStamps
     [CanEditMultipleObjects]
     public partial class WorldStampGUI : LayerComponentBaseGUI
     {
+#if UNITY_2018_1_OR_NEWER
+        BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle();
+#else
         BoxBoundsHandle _boxBoundsHandle = new BoxBoundsHandle(-1);
+#endif
         private SerializedProperty _size;
         private SerializedProperty _snapToTerrain;
         private SerializedProperty _snapToTerrainOffset;
@@ -67,11 +71,11 @@ namespace MadMaps.WorldStamps
 
         void OnEnable()
         {
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             _vegetationStudioEnabled = serializedObject.FindProperty("VegetationStudioEnabled");
             _stencilVSData = serializedObject.FindProperty("StencilVSData");
             _removeExistingVSData = serializedObject.FindProperty("RemoveExistingVSData");
-            #endif
+#endif
 
             _size = serializedObject.FindProperty("ExplicitSize");
             _snapToTerrain = serializedObject.FindProperty("SnapToTerrainHeight");
@@ -250,9 +254,9 @@ namespace MadMaps.WorldStamps
 
             DoDetailsSection();
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             DoVegetationStudioSection();
-            #endif
+#endif
 
 
 
@@ -297,7 +301,11 @@ namespace MadMaps.WorldStamps
                         {
                             keyValuePair.Wrapper = newPicked;
                             EditorUtility.SetDirty(stamp);
+#if UNITY_2018_3_OR_NEWER
+                            var prefab = PrefabUtility.GetPrefabInstanceHandle(stamp);
+#else
                             var prefab = PrefabUtility.GetPrefabObject(stamp);
+#endif
                             if (prefab)
                             {
                                 EditorUtility.SetDirty(prefab);
@@ -348,6 +356,34 @@ namespace MadMaps.WorldStamps
                     var stamp = target as WorldStamp;
                     foreach (var keyValuePair in stamp.Data.SplatData)
                     {
+#if UNITY_2018_3_OR_NEWER
+                        var layer = keyValuePair.Layer;
+                        var ignored = stamp.IgnoredSplatLayers.Contains(layer);
+                        GUILayout.BeginHorizontal();
+                        GUI.color = ignored ? Color.red : Color.green;
+                        var newPicked = (TerrainLayer)EditorGUILayout.ObjectField(layer, typeof(TerrainLayer), false);
+                        if (newPicked != null && newPicked != layer)
+                        {
+                            keyValuePair.Layer = newPicked;
+                            EditorUtility.SetDirty(stamp);
+                            var prefab = PrefabUtility.GetPrefabInstanceHandle(stamp);
+                            if (prefab)
+                            {
+                                EditorUtility.SetDirty(prefab);
+                            }
+                        }
+                        if (EditorGUILayoutX.IndentedButton(ignored ? "Unmute" : "Mute"))
+                        {
+                            if (stamp.IgnoredSplatLayers.Contains(layer))
+                            {
+                                stamp.IgnoredSplatLayers.Remove(layer);
+                            }
+                            else
+                            {
+                                stamp.IgnoredSplatLayers.Add(layer);
+                            }
+                        }
+#else
                         var splatWrapper = keyValuePair.Wrapper;
                         var ignored = stamp.IgnoredSplats.Contains(splatWrapper);
                         GUILayout.BeginHorizontal();
@@ -374,6 +410,7 @@ namespace MadMaps.WorldStamps
                                 stamp.IgnoredSplats.Add(splatWrapper);
                             }
                         }
+#endif
                         GUILayout.EndHorizontal();
                     }
                     GUI.color = Color.white;
@@ -385,7 +422,7 @@ namespace MadMaps.WorldStamps
 
         private void DoObjectsSection()
         {
-            #region KILL ME ASAP
+#region KILL ME ASAP
             foreach(var t in targets)
             {
                 var stamp = t as WorldStamp;
@@ -400,7 +437,7 @@ namespace MadMaps.WorldStamps
                     EditorUtility.SetDirty(stamp);
                 }
             }
-            #endregion
+#endregion
 
             WorldStamp singleInstance = targets.Length == 1 ? target as WorldStamp : null;
             bool canWrite = !singleInstance || singleInstance.Data.Objects.Count > 0;
@@ -470,7 +507,11 @@ namespace MadMaps.WorldStamps
                         {
                             prototype = newPicked;
                             EditorUtility.SetDirty(stamp);
+#if UNITY_2018_3_OR_NEWER
+                            var prefab = PrefabUtility.GetPrefabInstanceHandle(stamp);
+#else
                             var prefab = PrefabUtility.GetPrefabObject(stamp);
+#endif
                             if (prefab)
                             {
                                 EditorUtility.SetDirty(prefab);
@@ -522,7 +563,9 @@ namespace MadMaps.WorldStamps
 
         UnityEngine.Object GetPrefab(UnityEngine.Object source)
         {
-#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
+            return PrefabUtility.GetOutermostPrefabInstanceRoot(PrefabUtility.GetCorrespondingObjectFromSource(source) as GameObject);
+#elif UNITY_2018_2_OR_NEWER
             return PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(source) as GameObject);
 #else
             return PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(source) as GameObject);
@@ -574,7 +617,11 @@ namespace MadMaps.WorldStamps
                 }
                 EditorGUILayout.EndHorizontal();
             }
+#if UNITY_2018_3_OR_NEWER
+            if (stamp.Data.Objects.Exists(data => PrefabUtility.GetOutermostPrefabInstanceRoot(data.Prefab) != data.Prefab))
+#else
             if (stamp.Data.Objects.Exists(data => PrefabUtility.FindPrefabRoot(data.Prefab) != data.Prefab))
+#endif
             {
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
                 EditorGUILayout.LabelField("Stamp contains references to prefab subobjects");
@@ -583,7 +630,11 @@ namespace MadMaps.WorldStamps
                     for (int i = 0; i < stamp.Data.Objects.Count; i++)
                     {
                         var obj = stamp.Data.Objects[i];
+#if UNITY_2018_3_OR_NEWER
+                        obj.Prefab = PrefabUtility.GetOutermostPrefabInstanceRoot(obj.Prefab);
+#else
                         obj.Prefab = PrefabUtility.FindPrefabRoot(obj.Prefab);
+#endif
                         stamp.Data.Objects[i] = obj;
                         EditorUtility.SetDirty(stamp);
                         var prefab = GetPrefab(stamp);
@@ -595,7 +646,7 @@ namespace MadMaps.WorldStamps
                 }
                 EditorGUILayout.EndHorizontal();
             }
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             if (stamp.Data.VSData.Exists(data => data.Package == null))
             {
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
@@ -614,7 +665,7 @@ namespace MadMaps.WorldStamps
                 }
                 EditorGUILayout.EndHorizontal();
             }
-            #endif
+#endif
             // END FIX ISSUES
 
             var previewContent = new GUIContent(GUIResources.EyeOpenIcon, "Preview");
@@ -624,8 +675,13 @@ namespace MadMaps.WorldStamps
                 return;
             }
 
+#if UNITY_2018_3_OR_NEWER
+            bool isPrefab = PrefabUtility.GetPrefabAssetType(target) != PrefabAssetType.NotAPrefab;
+            bool hasPrefab = PrefabUtility.GetPrefabInstanceHandle(target);
+#else
             bool isPrefab = PrefabUtility.GetPrefabType(target) == PrefabType.Prefab;
             bool hasPrefab = PrefabUtility.GetPrefabObject(target);
+#endif
             //var dc = stamp.GetComponentInChildren<WorldStampDataContainer>();
             //bool isProxy = !isPrefab && dc.Redirect != null;
 
@@ -646,7 +702,11 @@ namespace MadMaps.WorldStamps
                 foreach (var splatData in stamp.Data.SplatData)
                 {
                     data.Add(splatData.Data);
+#if UNITY_2018_3_OR_NEWER
+                    context.Add(splatData.Layer);
+#else
                     context.Add(splatData.Wrapper);
+#endif
                 }
                 DataInspector.SetData(data, context);
             }
@@ -684,7 +744,7 @@ namespace MadMaps.WorldStamps
             }
             EditorGUILayout.EndHorizontal();
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Vegetation Studio Instances", stamp.Data.VSData.Count.ToString());
             if (GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
@@ -701,7 +761,7 @@ namespace MadMaps.WorldStamps
                 DataInspector.SetData(data.Values.ToList(), data.Keys.ToList(), true);
             }
             EditorGUILayout.EndHorizontal();
-            #endif
+#endif
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", stamp.Data.Objects.Count.ToString());

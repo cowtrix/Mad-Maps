@@ -36,6 +36,11 @@ namespace MadMaps.Terrains
 
         public List<LayerBase> Layers = new List<LayerBase>();
 
+#if UNITY_2018_3_OR_NEWER
+        public List<TerrainLayer> TerrainLayerSplatPrototypes = new List<TerrainLayer>();
+
+        [Obsolete]
+#endif
         public List<SplatPrototypeWrapper> SplatPrototypes = new List<SplatPrototypeWrapper>();
             // Canon list of splat prototypes (can contain more than in compound data, e.g. user added)
 
@@ -262,13 +267,18 @@ namespace MadMaps.Terrains
                     continue;
                 }
 #if UNITY_EDITOR
-#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
+                var prefab = UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(instantiatedObject.gameObject) as GameObject);
+                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject, UnityEditor.InteractionMode.AutomatedAction);
+#elif UNITY_2018_1_OR_NEWER
                 var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(instantiatedObject.gameObject) as GameObject);
+                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
 #else
                 var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject);
-#endif
                 UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
-                
+#endif
+
+
 #else
                 GameObject prefab = null;
 #endif
@@ -338,7 +348,11 @@ namespace MadMaps.Terrains
                 }
 
 #if UNITY_EDITOR
+#if UNITY_2018_3_OR_NEWER
+                var root = UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(prefabObjectData.Prefab);
+#else
                 var root = UnityEditor.PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab);
+#endif
                 if (root != prefabObjectData.Prefab)
                 {
                     Debug.LogError("Layer {0} references a prefab sub object! This is not supported.");
@@ -865,6 +879,27 @@ namespace MadMaps.Terrains
             return result;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public Serializable2DByteArray GetCompoundSplat(LayerBase terminatingLayer, TerrainLayer splat,
+            int x, int z, int width, int height, bool includeTerminatingLayer)
+        {
+            var aRes = Terrain.terrainData.alphamapResolution;
+            if (terminatingLayer != null && _compoundDataCache.ContainsKey(terminatingLayer))
+            {
+                var data = _compoundDataCache[terminatingLayer].TerrainLayerSplatData;
+                Serializable2DByteArray splatLayer;
+                if (data.TryGetValue(splat, out splatLayer))
+                {
+                    var layerCopy = data[splat].Select(x, z, width, height);
+                    if (!includeTerminatingLayer)
+                    {
+                        return layerCopy;
+                    }
+                    return terminatingLayer.BlendSplats(splat, x, z, width, height, aRes, layerCopy);
+                }
+                return null;
+            }
+#else
         public Serializable2DByteArray GetCompoundSplat(LayerBase terminatingLayer, SplatPrototypeWrapper splat,
             int x, int z, int width, int height, bool includeTerminatingLayer)
         {
@@ -884,6 +919,7 @@ namespace MadMaps.Terrains
                 }
                 return null;
             }
+#endif
 
             UnityEngine.Profiling.Profiler.BeginSample("GetCompoundSplat");
             Serializable2DByteArray result = null;
@@ -911,6 +947,26 @@ namespace MadMaps.Terrains
             return result;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public Dictionary<TerrainLayer, Serializable2DByteArray> GetCompoundSplats(
+            LayerBase terminatingLayer, int x, int z, int width, int height, bool includeTerminatingLayer)
+        {
+            UnityEngine.Profiling.Profiler.BeginSample("GetCompoundSplats");
+            var result = new Dictionary<TerrainLayer, Serializable2DByteArray>();
+            var allLayers = GetCompoundSplatPrototypes(terminatingLayer, includeTerminatingLayer);
+            foreach (var terrainLayer in allLayers)
+            {
+                var data = GetCompoundSplat(terminatingLayer, terrainLayer, x, z, width,
+                    height, includeTerminatingLayer);
+                if (data != null)
+                {
+                    result[terrainLayer] = data;
+                }
+            }
+            UnityEngine.Profiling.Profiler.EndSample();
+            return result;
+        }
+#else
         public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> GetCompoundSplats(
             LayerBase terminatingLayer, int x, int z, int width, int height, bool includeTerminatingLayer)
         {
@@ -929,7 +985,39 @@ namespace MadMaps.Terrains
             UnityEngine.Profiling.Profiler.EndSample();
             return result;
         }
+#endif
 
+#if UNITY_2018_3_OR_NEWER
+        public List<TerrainLayer> GetCompoundSplatPrototypes(LayerBase terminatingLayer,
+            bool includeTerminatingLayer)
+        {
+            var result = new List<TerrainLayer>();
+            for (var i = Layers.Count - 1; i >= 0; i--)
+            {
+                if (!includeTerminatingLayer && Layers[i] == terminatingLayer)
+                {
+                    break;
+                }
+                var layers = Layers[i].GetSplatPrototypeWrappers();
+                if (layers != null)
+                {
+                    for (int j = 0; j < layers.Count; j++)
+                    {
+                        var layer = layers[j];
+                        if (!result.Contains(layer))
+                        {
+                            result.Add(layer);
+                        }
+                    }
+                }
+                if (Layers[i] == terminatingLayer)
+                {
+                    break;
+                }
+            }
+            return result;
+        }
+#else
         public List<SplatPrototypeWrapper> GetCompoundSplatPrototypes(LayerBase terminatingLayer,
             bool includeTerminatingLayer)
         {
@@ -959,6 +1047,7 @@ namespace MadMaps.Terrains
             }
             return result;
         }
+#endif
 
         public List<DetailPrototypeWrapper> GetCompoundDetailPrototypes(LayerBase terminatingLayer,
             bool includeTerminatingLayer)
@@ -1181,6 +1270,26 @@ namespace MadMaps.Terrains
             return result.Values.ToList();
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public List<TerrainLayer> RefreshSplats()
+        {
+            if (!WriteSplats)
+            {
+                Debug.LogWarning("Refreshing splats, but Write Splats is disabled in the Info tab. This will have no effect.", this);
+                return new List<TerrainLayer>();
+            }
+            var notNullSplats = TerrainLayerSplatPrototypes.Where(wrapper => wrapper != null && wrapper.diffuseTexture != null).ToList();
+            var sp = new TerrainLayer[notNullSplats.Count];
+            for (var i = 0; i < notNullSplats.Count; i++)
+            {
+                sp[i] = notNullSplats[i];
+            }
+
+            Terrain.terrainData.terrainLayers = sp;
+            Terrain.Flush();
+            return notNullSplats;
+        }
+#else
         public List<SplatPrototypeWrapper> RefreshSplats()
         {
             if(!WriteSplats)
@@ -1199,6 +1308,7 @@ namespace MadMaps.Terrains
             Terrain.Flush();
             return notNullSplats;
         }
+#endif
 
         public List<DetailPrototypeWrapper> RefreshDetails()
         {
@@ -1255,7 +1365,11 @@ namespace MadMaps.Terrains
             var aRes = Terrain.terrainData.alphamapResolution;
             var dRes = Terrain.terrainData.detailResolution;
             result.Heights = GetCompoundHeights(layer, 0, 0, hRes, hRes, hRes);
+#if UNITY_2018_3_OR_NEWER
+            result.TerrainLayerSplatData = GetCompoundSplats(layer, 0, 0, aRes, aRes, false);
+#else
             result.SplatData = GetCompoundSplats(layer, 0, 0, aRes, aRes, false);
+#endif
             result.DetailData = GetCompoundDetails(layer, 0, 0, dRes, dRes, false);
             result.Objects = GetCompoundObjects(layer);
             result.Trees = GetCompoundTrees(layer);

@@ -51,7 +51,18 @@ namespace MadMaps.WorldStamps
         public List<DetailPrototypeWrapper> IgnoredDetails = new List<DetailPrototypeWrapper>();
 
         public bool SetSplat = false;
+
+#if UNITY_2018_3_OR_NEWER
+        [FormerlySerializedAs("Splat")]
+        [Obsolete]
+        public SplatPrototypeWrapper LegacySplat;
+
+        public TerrainLayer Splat;
+        
+#else
         public SplatPrototypeWrapper Splat;
+#endif
+
         [Range(0, 1)]
         public float SplatStrength = 1;
         [FormerlySerializedAs("Size")]

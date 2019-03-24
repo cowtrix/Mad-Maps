@@ -26,22 +26,31 @@ namespace MadMaps.Common
 
         public static Gradient GradientField(string label, Gradient gradient, params GUILayoutOption[] options)
         {
+#if UNITY_2018_3_OR_NEWER
+            return EditorGUILayout.GradientField(label, gradient, options);
+#else
+
             if (gradient == null)
                 gradient = new Gradient();
 
             gradient = (Gradient)s_miGradientField1.Invoke(null, new object[] { label, gradient, options });
 
             return gradient;
+#endif
         }
 
         public static Gradient GradientField(Gradient gradient, params GUILayoutOption[] options)
         {
+#if UNITY_2018_3_OR_NEWER
+            return EditorGUILayout.GradientField(gradient, options);
+#else
             if (gradient == null)
                 gradient = new Gradient();
 
             gradient = (Gradient)s_miGradientField1.Invoke(null, new object[] { gradient, options });
 
             return gradient;
+#endif
         }
 
     }

@@ -17,14 +17,17 @@ namespace MadMaps.WorldStamps.Authoring
     {
         [NonSerialized]
         public List<CompressedSplatData> SplatData = new List<CompressedSplatData>();
-
+#if UNITY_2018_3_OR_NEWER
+        public List<TerrainLayer> IgnoredSplats = new List<TerrainLayer>();
+#else
         public List<SplatPrototypeWrapper> IgnoredSplats = new List<SplatPrototypeWrapper>();
+#endif
 
         public override GUIContent Label
         {
             get
             {
-                var nullCount = SplatData.Count(data => data.Wrapper == null);
+                var nullCount = SplatData.Count(data => data.Layer == null);
                 if (nullCount > 0)
                     return new GUIContent(string.Format("Splats ({0}) ({1} need resolving)", SplatData.Count, nullCount));
                 return new GUIContent(string.Format("Splats ({0})", SplatData.Count));
@@ -45,19 +48,22 @@ namespace MadMaps.WorldStamps.Authoring
             int width = max.x - min.x;
             int height = max.z - min.z;
 
+#if UNITY_2018_3_OR_NEWER
+            var prototypes = terrain.terrainData.terrainLayers;
+#else
             var prototypes = terrain.terrainData.splatPrototypes;
             var wrappers = MMTerrainLayerUtilities.ResolvePrototypes(prototypes);
-
+#endif
             var sampleSplats = terrain.terrainData.GetAlphamaps(min.x, min.z, width, height);
 
             for (var i = 0; i < prototypes.Length; ++i)
             {
+#if !UNITY_2018_3_OR_NEWER
                 SplatPrototypeWrapper wrapper;
                 wrappers.TryGetValue(prototypes[i], out wrapper);
-                /*if (IgnoredSplats.Contains(wrapper))
-                {
-                    continue;
-                }*/
+#else
+                var wrapper = prototypes[i];
+#endif
                 var data = new byte[width, height];
                 float sum = 0;
                 for (var dx = 0; dx < width; ++dx)
@@ -75,7 +81,7 @@ namespace MadMaps.WorldStamps.Authoring
                     continue;
                 }
 
-                SplatData.Add(new CompressedSplatData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
+                SplatData.Add(new CompressedSplatData { Layer = wrapper, Data = new Serializable2DByteArray(data) });
             }
         }
 
@@ -117,6 +123,7 @@ namespace MadMaps.WorldStamps.Authoring
             foreach (var compressedDetailData in SplatData)
             {
                 EditorGUILayout.BeginHorizontal();
+#if !UNITY_2018_3_OR_NEWER
                 compressedDetailData.Wrapper = (SplatPrototypeWrapper)EditorGUILayout.ObjectField(compressedDetailData.Wrapper,
                     typeof(SplatPrototypeWrapper), false);
                 GUI.color = compressedDetailData.Wrapper != null && IgnoredSplats.Contains(compressedDetailData.Wrapper) ? Color.red : Color.white;
@@ -132,6 +139,24 @@ namespace MadMaps.WorldStamps.Authoring
                         IgnoredSplats.Add(compressedDetailData.Wrapper);
                     }
                 }
+#else
+                compressedDetailData.Layer = (TerrainLayer)EditorGUILayout.ObjectField(compressedDetailData.Layer,
+                    typeof(TerrainLayer), false);
+                GUI.color = compressedDetailData.Layer != null && IgnoredSplats.Contains(compressedDetailData.Layer) ? Color.red : Color.white;
+                GUI.enabled = compressedDetailData.Layer != null;
+                if (GUILayout.Button("Ignore", EditorStyles.miniButton, GUILayout.Width(60)))
+                {
+                    if (IgnoredSplats.Contains(compressedDetailData.Layer))
+                    {
+                        IgnoredSplats.Remove(compressedDetailData.Layer);
+                    }
+                    else
+                    {
+                        IgnoredSplats.Add(compressedDetailData.Layer);
+                    }
+                }
+#endif
+
                 GUI.enabled = true;
                 GUI.color = Color.white;
                 EditorGUILayout.EndHorizontal();
@@ -140,7 +165,11 @@ namespace MadMaps.WorldStamps.Authoring
 
         public override void PreviewInDataInspector()
         {
+#if UNITY_2018_3_OR_NEWER
+            DataInspector.SetData(SplatData.Select(x => (IDataInspectorProvider)x.Data).ToList(), SplatData.Select(x => (object)x.Layer).ToList());
+#else
             DataInspector.SetData(SplatData.Select(x => (IDataInspectorProvider)x.Data).ToList(), SplatData.Select(x => (object)x.Wrapper).ToList());
+#endif
         }
 
         public override void Clear()
@@ -154,7 +183,11 @@ namespace MadMaps.WorldStamps.Authoring
             for (int i = 0; i < SplatData.Count; i++)
             {
                 var compressedSplatData = SplatData[i];
+#if UNITY_2018_3_OR_NEWER
+                if (IgnoredSplats.Contains(compressedSplatData.Layer))
+#else
                 if (IgnoredSplats.Contains(compressedSplatData.Wrapper))
+#endif
                 {
                     continue;
                 }

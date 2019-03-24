@@ -93,7 +93,11 @@ namespace MadMaps.WorldStamps.Authoring
                     continue;
                 }
 
+#if UNITY_2018_3_OR_NEWER
+                var prefabRoot = PrefabUtility.GetPrefabInstanceHandle(go);
+#else
                 var prefabRoot = PrefabUtility.GetPrefabObject(go);
+#endif
                 if (prefabRoot == null)
                 {
                     //DebugHelper.DrawCube(collider.bounds.center, collider.bounds.extents, Quaternion.identity, Color.red, 30);
@@ -107,12 +111,17 @@ namespace MadMaps.WorldStamps.Authoring
                     done.Add(childTransform);
                 }
 
-#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
+                var prefabAsset = PrefabUtility.GetOutermostPrefabInstanceRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
+                var root = PrefabUtility.GetOutermostPrefabInstanceRoot(go);
+#elif UNITY_2018_2_OR_NEWER
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetCorrespondingObjectFromSource(go) as GameObject);
+                var root = PrefabUtility.FindPrefabRoot(go);
 #else
                 var prefabAsset = PrefabUtility.FindPrefabRoot(PrefabUtility.GetPrefabParent(go) as GameObject);
-#endif
                 var root = PrefabUtility.FindPrefabRoot(go);
+#endif
+
 
                 var relativePos = root.transform.position - bounds.min;
                 relativePos = new Vector3(relativePos.x / bounds.size.x, 0, relativePos.z / bounds.size.z);
@@ -161,7 +170,7 @@ namespace MadMaps.WorldStamps.Authoring
                 Objects.Add(newData);
             }
 #endif
-        }
+            }
 
 #if UNITY_EDITOR
         protected override void OnExpandedGUI(WorldStampCreator parent)

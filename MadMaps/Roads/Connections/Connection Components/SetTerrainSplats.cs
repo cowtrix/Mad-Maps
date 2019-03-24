@@ -18,6 +18,9 @@ namespace MadMaps.Roads.Connections
             [Name("Splat Configuration")]
             public class SplatConfig
             {
+                public TerrainLayer TerrainLayer;
+                [Obsolete]
+                [HideInInspector]
                 public SplatPrototypeWrapper SplatPrototype;
                 public float SplatStrength = 1;
             }
@@ -97,6 +100,15 @@ namespace MadMaps.Roads.Connections
                 floatArraySize.z);
             foreach (var splatConfiguration in config.SplatConfigurations)
             {
+#if UNITY_2018_3_OR_NEWER
+                var splatPrototypeWrapper = splatConfiguration.TerrainLayer;
+                Serializable2DByteArray baseLayerSplat;
+                if (!baseData.TryGetValue(splatPrototypeWrapper, out baseLayerSplat))
+                {
+                    baseLayerSplat = new Serializable2DByteArray(floatArraySize.x, floatArraySize.z);
+                    baseData[splatPrototypeWrapper] = baseLayerSplat;
+                }
+#else
                 var splatPrototypeWrapper = splatConfiguration.SplatPrototype;
                 Serializable2DByteArray baseLayerSplat;
                 if (!baseData.TryGetValue(splatPrototypeWrapper, out baseLayerSplat))
@@ -104,6 +116,7 @@ namespace MadMaps.Roads.Connections
                     baseLayerSplat = new Serializable2DByteArray(floatArraySize.x, floatArraySize.z);
                     baseData[splatPrototypeWrapper] = baseLayerSplat;
                 }
+#endif
 
                 for (var dz = 0; dz < floatArraySize.z; ++dz)
                 {
@@ -143,6 +156,21 @@ namespace MadMaps.Roads.Connections
                                 {
                                     continue;
                                 }
+                                if (currentPrototype == splatPrototypeWrapper)
+                                {
+                                    continue;
+                                }
+                                var otherSplatFloatValue = baseData[currentPrototype][dx, dz] / 255f;
+                                var otherSplatFloatWriteVal = (otherSplatFloatValue * (1 - (delta / 255f)));
+                                var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
+                                baseData[currentPrototype][dx, dz] = write;
+#if UNITY_2018_3_OR_NEWER
+
+#else
+                                if (!baseData.ContainsKey(currentPrototype))
+                                {
+                                    continue;
+                                }
                                 if(currentPrototype == splatPrototypeWrapper)
                                 {
                                     continue;
@@ -151,6 +179,7 @@ namespace MadMaps.Roads.Connections
                                 var otherSplatFloatWriteVal = (otherSplatFloatValue * (1 - (delta / 255f)));
                                 var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
                                 baseData[currentPrototype][dx, dz] = write;
+#endif
                             }
                             //DebugHelper.DrawPoint(worldPos, 1, Color.red, 10);
                             baseLayerSplat[dx, dz] = newVal;

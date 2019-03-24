@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using MadMaps.Common.Collections;
 using MadMaps.Terrains.Lookups;
@@ -18,6 +19,11 @@ namespace MadMaps.Terrains
         // Baked data
         public ObjectPrefabDataLookup Objects = new ObjectPrefabDataLookup();
         public TreeLookup Trees = new TreeLookup();
+#if UNITY_2018_3_OR_NEWER
+        public CompressedTerrainLayerSplatDataLookup TerrainLayerSplatData = new CompressedTerrainLayerSplatDataLookup();
+
+        [Obsolete]
+#endif
         public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public Serializable2DFloatArray Heights;
@@ -62,11 +68,15 @@ namespace MadMaps.Terrains
     {
         public Serializable2DFloatArray Heights;
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
-        public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> SplatData = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
+        public Dictionary<TerrainLayer, Serializable2DByteArray> TerrainLayerSplatData = new Dictionary<TerrainLayer, Serializable2DByteArray>();
         public Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> DetailData = new Dictionary<DetailPrototypeWrapper, Serializable2DByteArray>();
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
-         #if VEGETATION_STUDIO
+
+        [Obsolete]
+        public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> SplatData = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
+
+#if VEGETATION_STUDIO
         public List<VegetationStudioInstance> VegetationStudio = new List<VegetationStudioInstance>();
-        #endif
+#endif
     }
 }

@@ -28,10 +28,15 @@ namespace MadMaps.Terrains
         public Serializable2DFloatArray Heights;
         public List<string> ObjectRemovals = new List<string>();
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
-        public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
         public CompressedDetailDataLookup DetailData = new CompressedDetailDataLookup();
         public List<string> TreeRemovals = new List<string>();
-        public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();     
+        public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
+#if UNITY_2018_3_OR_NEWER
+        public CompressedTerrainLayerSplatDataLookup TerrainLayerSplatData = new CompressedTerrainLayerSplatDataLookup();
+
+        [Obsolete]
+#endif
+        public CompressedSplatDataLookup SplatData = new CompressedSplatDataLookup();
 
         /// <summary>
         /// Go and capture all of the data on a given terrain and store it in this layer.
@@ -635,6 +640,27 @@ namespace MadMaps.Terrains
 #endif
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public void SetSplatmap(TerrainLayer prototype, int x, int z,
+            Serializable2DByteArray splats, int splatRes, Serializable2DFloatArray stencil = null)
+        {
+            if (splats == null || prototype == null)
+            {
+                return;
+            }
+            if (SplatData == null)
+            {
+                SplatData = new CompressedSplatDataLookup();
+            }
+
+            Serializable2DByteArray existingSplats;
+            if (!TerrainLayerSplatData.TryGetValue(prototype, out existingSplats) || existingSplats.Width != splatRes ||
+                existingSplats.Height != splatRes)
+            {
+                existingSplats = new Serializable2DByteArray(splatRes, splatRes);
+                TerrainLayerSplatData[prototype] = existingSplats;
+            }
+#else
         public void SetSplatmap(SplatPrototypeWrapper prototype, int x, int z, 
             Serializable2DByteArray splats, int splatRes, Serializable2DFloatArray stencil = null)
         {
@@ -654,6 +680,7 @@ namespace MadMaps.Terrains
                 existingSplats = new Serializable2DByteArray(splatRes, splatRes);
                 SplatData[prototype] = existingSplats;
             }
+#endif
 
             var width = splats.Width;
             var height = splats.Height;
@@ -698,6 +725,27 @@ namespace MadMaps.Terrains
 #endif
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public void SetSplatmap(TerrainLayer prototype, int x, int z,
+            float[,] splats, int splatRes, Serializable2DFloatArray stencil = null)
+        {
+            if (splats == null || prototype == null)
+            {
+                return;
+            }
+            if (TerrainLayerSplatData == null)
+            {
+                TerrainLayerSplatData = new CompressedTerrainLayerSplatDataLookup();
+            }
+
+            Serializable2DByteArray existingSplats;
+            if (!TerrainLayerSplatData.TryGetValue(prototype, out existingSplats) || existingSplats.Width != splatRes ||
+                existingSplats.Height != splatRes)
+            {
+                existingSplats = new Serializable2DByteArray(splatRes, splatRes);
+                TerrainLayerSplatData[prototype] = existingSplats;
+            }
+#else
         public void SetSplatmap(SplatPrototypeWrapper prototype, int x, int z,
             float[,] splats, int splatRes, Serializable2DFloatArray stencil = null)
         {
@@ -717,7 +765,7 @@ namespace MadMaps.Terrains
                 existingSplats = new Serializable2DByteArray(splatRes, splatRes);
                 SplatData[prototype] = existingSplats;
             }
-
+#endif
             var width = splats.GetLength(0);
             var height = splats.GetLength(1);
             for (var u = x; u < x + width; ++u)
@@ -761,8 +809,11 @@ namespace MadMaps.Terrains
 #endif
         }
 
-
+#if UNITY_2018_3_OR_NEWER
+        public override Serializable2DByteArray GetSplatmap(TerrainLayer prototype, int x, int z, int width, int height, int splatResolution)
+#else
         public override Serializable2DByteArray GetSplatmap(SplatPrototypeWrapper prototype, int x, int z, int width, int height, int splatResolution)
+#endif
         {
             if (SplatData == null)
             {
@@ -770,14 +821,22 @@ namespace MadMaps.Terrains
             }
 
             Serializable2DByteArray data;
+#if UNITY_2018_3_OR_NEWER
+            if (!TerrainLayerSplatData.TryGetValue(prototype, out data))
+#else
             if (!SplatData.TryGetValue(prototype, out data))
+#endif
             {
                 return null;
             }
 
             if (data.Width != splatResolution || data.Height != splatResolution)
             {
+#if UNITY_2018_3_OR_NEWER
+                TerrainLayerSplatData.Remove(prototype);
+#else
                 SplatData.Remove(prototype);
+#endif
                 return null;
             }
 
@@ -1034,11 +1093,17 @@ namespace MadMaps.Terrains
             return Trees;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public override List<TerrainLayer> GetSplatPrototypeWrappers()
+        {
+            return TerrainLayerSplatData.GetKeys();
+        }
+#else
         public override List<SplatPrototypeWrapper> GetSplatPrototypeWrappers()
         {
             return SplatData.GetKeys();
         }
-
+#endif
         public override List<DetailPrototypeWrapper> GetDetailPrototypeWrappers()
         {
             return DetailData.GetKeys();
@@ -1102,8 +1167,13 @@ namespace MadMaps.Terrains
             return strength;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public override Serializable2DByteArray BlendSplats(TerrainLayer splat, int x, int z, int width, int height, int aRes,
+            Serializable2DByteArray result)
+#else
         public override Serializable2DByteArray BlendSplats(SplatPrototypeWrapper splat, int x, int z, int width, int height, int aRes,
             Serializable2DByteArray result)
+#endif
         {
             var layerSplats = GetSplatmap(splat, x, z, width, height, aRes);
             if (layerSplats == null)

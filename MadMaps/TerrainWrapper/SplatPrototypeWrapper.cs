@@ -1,9 +1,13 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace MadMaps.Terrains
 {
     [CreateAssetMenu(menuName = "Mad Maps/Splat Prototype")]
+#if UNITY_2018_3_OR_NEWER
+    [Obsolete]
+#endif
     public partial class SplatPrototypeWrapper : ScriptableObject
     {
         public Texture2D Texture;

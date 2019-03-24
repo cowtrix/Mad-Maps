@@ -32,11 +32,19 @@ namespace MadMaps.Terrains
             return null;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public virtual Serializable2DByteArray GetSplatmap(TerrainLayer prototype, int x, int z, int width,
+            int height, int splatResolution)
+        {
+            return null;
+        }
+#else
         public virtual Serializable2DByteArray GetSplatmap(SplatPrototypeWrapper prototype, int x, int z, int width,
             int height, int splatResolution)
         {
             return null;
         }
+#endif
 
         public virtual Serializable2DByteArray GetDetailMap(DetailPrototypeWrapper detailWrapper, int x, int z,
             int width, int height, int detailResolution)
@@ -74,10 +82,17 @@ namespace MadMaps.Terrains
             return null;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public virtual List<TerrainLayer> GetSplatPrototypeWrappers()
+        {
+            return null;
+        }
+#else
         public virtual List<SplatPrototypeWrapper> GetSplatPrototypeWrappers()
         {
             return null;
         }
+#endif
 
         public virtual List<DetailPrototypeWrapper> GetDetailPrototypeWrappers()
         {
@@ -104,8 +119,13 @@ namespace MadMaps.Terrains
             return 0;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public virtual Serializable2DByteArray BlendSplats(TerrainLayer splat,
+            int x, int z, int width, int height, int aRes, Serializable2DByteArray result)
+#else
         public virtual Serializable2DByteArray BlendSplats(SplatPrototypeWrapper splat,
             int x, int z, int width, int height, int aRes, Serializable2DByteArray result)
+#endif
         {
             //throw new NotImplementedException();
             //Debug.LogErrorFormat("BlendSplats is not implemented for {0} ({1})", name, GetType());
@@ -120,6 +140,26 @@ namespace MadMaps.Terrains
             return result;
         }
 
+#if UNITY_2018_3_OR_NEWER
+        public virtual Dictionary<TerrainLayer, Serializable2DByteArray> GetSplatMaps(int x, int z, int width,
+            int height, int splatResolution)
+        {
+            var ret = new Dictionary<TerrainLayer, Serializable2DByteArray>();
+            var prototypeWrappers = GetSplatPrototypeWrappers();
+            if (prototypeWrappers != null)
+            {
+                foreach (var splatPrototype in prototypeWrappers)
+                {
+                    var result = GetSplatmap(splatPrototype, x, z, width, height, splatResolution);
+                    if (result != null)
+                    {
+                        ret.Add(splatPrototype, result);
+                    }
+                }
+            }
+            return ret;
+        }
+#else
         public virtual Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> GetSplatMaps(int x, int z, int width,
             int height, int splatResolution)
         {
@@ -138,6 +178,7 @@ namespace MadMaps.Terrains
             }
             return ret;
         }
+#endif
 
         public virtual Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> GetDetailMaps(int x, int z, int width,
             int height, int detailResolution)
