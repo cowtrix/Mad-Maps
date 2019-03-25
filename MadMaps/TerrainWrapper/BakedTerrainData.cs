@@ -48,19 +48,23 @@ namespace MadMaps.Terrains
             }
             if (terrainWrapper.WriteSplats)
             {
+#if UNITY_2018_3_OR_NEWER
+                TerrainLayerSplatData.Clear();
+#else
                 SplatData.Clear();
+#endif
             }
             if (terrainWrapper.WriteHeights && Heights != null)
             {
                 Heights.Clear();
             }
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             if(terrainWrapper.WriteVegetationStudio)
             {
                 VegetationStudio.Clear();
             }
-            #endif
+#endif
         }
     }
 
@@ -68,11 +72,13 @@ namespace MadMaps.Terrains
     {
         public Serializable2DFloatArray Heights;
         public List<PrefabObjectData> Objects = new List<PrefabObjectData>();
-        public Dictionary<TerrainLayer, Serializable2DByteArray> TerrainLayerSplatData = new Dictionary<TerrainLayer, Serializable2DByteArray>();
         public Dictionary<DetailPrototypeWrapper, Serializable2DByteArray> DetailData = new Dictionary<DetailPrototypeWrapper, Serializable2DByteArray>();
         public List<MadMapsTreeInstance> Trees = new List<MadMapsTreeInstance>();
 
+#if UNITY_2018_3_OR_NEWER
+        public Dictionary<TerrainLayer, Serializable2DByteArray> TerrainLayerSplatData = new Dictionary<TerrainLayer, Serializable2DByteArray>();
         [Obsolete]
+#endif
         public Dictionary<SplatPrototypeWrapper, Serializable2DByteArray> SplatData = new Dictionary<SplatPrototypeWrapper, Serializable2DByteArray>();
 
 #if VEGETATION_STUDIO

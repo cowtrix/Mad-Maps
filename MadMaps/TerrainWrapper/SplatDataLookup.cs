@@ -1,8 +1,8 @@
-using System;
-using System.Collections.Generic;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.WorldStamps;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -68,11 +68,6 @@ namespace MadMaps.Terrains.Lookups
     }
 #endif
 
-    /*[Serializable]
-    public class DetailDataLookup : CompositionDictionary<DetailPrototypeWrapper, Serializable2DIntArray>
-    {
-    }*/
-
     [Serializable]
     public class CompressedDetailDataLookup : MadMaps.Common.Collections.CompositionDictionary<DetailPrototypeWrapper, Serializable2DByteArray>
     {
@@ -93,15 +88,15 @@ namespace MadMaps.Terrains.Lookups
         private const int Partitioning = 256;
 
         [Serializable]
-        public class SpatialMapping : MadMaps.Common.Collections.CompositionDictionary<Coord, List<string>>{}
+        public class SpatialMapping : MadMaps.Common.Collections.CompositionDictionary<Coord, List<string>> { }
 
         [SerializeField]
         private SpatialMapping _mapping = new SpatialMapping();
 
         public Coord PositionToCoord(Vector3 pos)
         {
-            int x = Mathf.FloorToInt(Mathf.Clamp01(pos.x)*Partitioning);
-            int z = Mathf.FloorToInt(Mathf.Clamp01(pos.z)*Partitioning);
+            var x = Mathf.FloorToInt(Mathf.Clamp01(pos.x) * Partitioning);
+            var z = Mathf.FloorToInt(Mathf.Clamp01(pos.z) * Partitioning);
             return new Coord(x, z);
         }
 
@@ -116,7 +111,7 @@ namespace MadMaps.Terrains.Lookups
             {
                 toAppend.AddRange(partitionList);
             }
-        } 
+        }
 
         public override void Add(string key, MadMapsTreeInstance value)
         {
@@ -175,7 +170,7 @@ namespace MadMaps.Terrains.Lookups
             InstantiatedObject = instantiatedObj;
         }
     }
-    
+
     [Serializable]
     public class ObjectPrefabDataLookup : MadMaps.Common.Collections.CompositionDictionary<string, InstantiatedObjectData>
     {

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using MadMaps.Common;
+﻿using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEditorInternal;
@@ -44,11 +44,11 @@ namespace MadMaps.Terrains
         private void DrawLayerFooterCallback(Rect rect)
         {
             float buttonWidth = 96;
-            float xMax = rect.xMax;
-            float num = xMax - 58f - buttonWidth * 1;
+            var xMax = rect.xMax;
+            var num = xMax - 58f - buttonWidth * 1;
             rect = new Rect(num, rect.y, xMax - num, rect.height);
-            Rect rect2 = new Rect(rect.xMax - 50, rect.y - 3f, 25f, 16f);
-            Rect position = new Rect(xMax - 29f, rect.y - 3f, 25f, 16f);
+            var rect2 = new Rect(rect.xMax - 50, rect.y - 3f, 25f, 16f);
+            var position = new Rect(xMax - 29f, rect.y - 3f, 25f, 16f);
             if (Event.current.type == EventType.Repaint)
             {
                 GUIStyle footerBackground = "RL Footer";
@@ -73,8 +73,8 @@ namespace MadMaps.Terrains
                     }
                 }
             }
-            Rect reapplyRect = new Rect(rect.xMax - 50 - buttonWidth, rect.y - 3f, buttonWidth, 16f);
-            if(!EditorGUIUtility.isProSkin)
+            var reapplyRect = new Rect(rect.xMax - 50 - buttonWidth, rect.y - 3f, buttonWidth, 16f);
+            if (!EditorGUIUtility.isProSkin)
             {
                 GUI.color = Color.black;
             }
@@ -91,8 +91,8 @@ namespace MadMaps.Terrains
         {
             var obj = list.list[list.index] as MMTerrainLayer;
             if (obj != null)
-            {                
-                bool inLevel = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj));
+            {
+                var inLevel = string.IsNullOrEmpty(AssetDatabase.GetAssetPath(obj));
                 if (!EditorUtility.DisplayDialog(
                     string.Format("Are you sure you want to delete layer {0}?", obj.name),
                     inLevel
@@ -115,23 +115,23 @@ namespace MadMaps.Terrains
 
         private void OnLayerAddCallback(ReorderableList list)
         {
-            var menu = Common.EditorGUILayoutX.GetTypeSelectionMenu(typeof (LayerBase), type =>
-            {
-                var newLayer = ScriptableObject.CreateInstance(type);
-                int counter = 1;
-                while (_wrapper.GetLayer<LayerBase>(string.Format("New Layer {0}", counter)) != null)
-                {
-                    counter++;
-                }
-                newLayer.name = string.Format("New Layer {0}", counter);
-                list.list.Insert(0, newLayer);
+            var menu = Common.EditorGUILayoutX.GetTypeSelectionMenu(typeof(LayerBase), type =>
+           {
+               var newLayer = ScriptableObject.CreateInstance(type);
+               var counter = 1;
+               while (_wrapper.GetLayer<LayerBase>(string.Format("New Layer {0}", counter)) != null)
+               {
+                   counter++;
+               }
+               newLayer.name = string.Format("New Layer {0}", counter);
+               list.list.Insert(0, newLayer);
 
                 /*var dLayer = newLayer as DeltaLayer;
                 if(dLayer)
                 {
                     dLayer.BlendMode = MMTerrainLayer.EMMTerrainLayerBlendMode.Additive;
                 }*/
-            });
+           });
             menu.ShowAsContext();
         }
 
@@ -159,7 +159,7 @@ namespace MadMaps.Terrains
                 layer.Locked = !layer.Locked;
             }
             GUI.enabled = !layer.Locked;
-            var reapplyRect = new Rect(lockedRect.xMax + 1, rect.y, headerHeight, headerHeight); 
+            var reapplyRect = new Rect(lockedRect.xMax + 1, rect.y, headerHeight, headerHeight);
             if (GUI.Button(reapplyRect, EditorGUIUtility.IconContent("TreeEditor.Refresh", "Reapply all components on this layer."), "RL FooterButton"))
             {
                 LayerComponentApplyManager.ApplyAllLayerComponents(_wrapper, layer.name);
@@ -167,14 +167,14 @@ namespace MadMaps.Terrains
                 return;
             }
             GUI.enabled = true;
-            var dirtyRect = new Rect(reapplyRect.xMax+ 3, rect.y - 2, headerHeight + 4, headerHeight + 4);
+            var dirtyRect = new Rect(reapplyRect.xMax + 3, rect.y - 2, headerHeight + 4, headerHeight + 4);
             GUI.color = layer.Dirty ? Color.white : Color.gray.WithAlpha(.1f);
-            if(GUI.Button(dirtyRect, new GUIContent(GUIResources.WarningIcon, layer.Dirty ? "This layer is dirty. Click to manually reset this." : "This layer is not dirty."), EditorStyles.label))
+            if (GUI.Button(dirtyRect, new GUIContent(GUIResources.WarningIcon, layer.Dirty ? "This layer is dirty. Click to manually reset this." : "This layer is not dirty."), EditorStyles.label))
             {
                 layer.Dirty = false;
             }
             GUI.color = Color.white;
-            
+
             var enabledRect = new Rect(rect.xMax - 20, rect.y, 20, rect.height);
             layer.Enabled = GUI.Toggle(enabledRect, layer.Enabled, GUIContent.none);
         }
@@ -195,26 +195,26 @@ namespace MadMaps.Terrains
             if (MMTerrainLayer != null)
             {
                 layer = DrawExpandedGUI(wrapper, MMTerrainLayer);
-            }            
+            }
             else if (procLayer != null)
             {
-                GenericEditor.DrawGUI(procLayer.Components, "Components", 
+                GenericEditor.DrawGUI(procLayer.Components, "Components",
                     typeof(List<ProceduralLayerComponent>), typeof(ProceduralLayer).GetField("Components"), procLayer);
             }
             else
             {
-                EditorGUILayout.HelpBox(string.Format("Attempting to draw GUI for {0}, but type {1} is not implemented", 
+                EditorGUILayout.HelpBox(string.Format("Attempting to draw GUI for {0}, but type {1} is not implemented",
                     layer.name, layer.GetType()), MessageType.Info);
             }
             EditorGUI.indentLevel--;
             EditorGUILayout.EndVertical();
-            
+
             return layer;
         }
 
         public static MMTerrainLayer DrawExpandedGUI(TerrainWrapper wrapper, MMTerrainLayer layer)
         {
-            bool isInScene = layer != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(layer));
+            var isInScene = layer != null && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(layer));
             EditorGUILayout.BeginHorizontal();
             layer = (MMTerrainLayer)EditorGUILayout.ObjectField(isInScene ? "Asset (In-Scene)" : "Asset", layer, typeof(MMTerrainLayer), true);
             if (layer != null && isInScene && GUILayout.Button(_saveContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
@@ -258,7 +258,7 @@ namespace MadMaps.Terrains
                 {
                     layer.Heights = new Serializable2DFloatArray(tRes, tRes);
                 }
-                
+
                 EditorUtility.SetDirty(layer);
                 EditorGUIUtility.ExitGUI();
                 return layer;
@@ -267,6 +267,27 @@ namespace MadMaps.Terrains
             EditorExtensions.Seperator();
 
             EditorGUILayout.BeginHorizontal();
+#if UNITY_2018_3_OR_NEWER
+            EditorGUILayout.LabelField("Splats", layer.TerrainLayerSplatData != null ? string.Format("{0}", layer.TerrainLayerSplatData.Count) : "null");
+            if (layer.TerrainLayerSplatData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
+            {
+                var data = new List<IDataInspectorProvider>();
+                var context = new List<object>();
+                foreach (var keyValuePair in layer.TerrainLayerSplatData)
+                {
+                    data.Add(keyValuePair.Value);
+                    context.Add(keyValuePair.Key);
+                }
+                DataInspector.SetData(data, context);
+            }
+            if (GUILayout.Button(GenericEditor.DeleteContent, EditorStyles.label, GUILayout.Width(20)) && EditorUtility.DisplayDialog("Really Clear?", "", "Yes", "No"))
+            {
+                layer.TerrainLayerSplatData.Clear();
+                EditorUtility.SetDirty(layer);
+                GUIUtility.ExitGUI();
+                return layer;
+            }
+#else
             EditorGUILayout.LabelField("Splats", layer.SplatData != null ? string.Format("{0}", layer.SplatData.Count) : "null");
             if (layer.SplatData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
@@ -286,6 +307,7 @@ namespace MadMaps.Terrains
                 EditorGUIUtility.ExitGUI();
                 return layer;
             }
+#endif
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
 
@@ -293,8 +315,8 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("Details", layer.DetailData != null ? string.Format("{0}", layer.DetailData.Count) : "null");
             if (layer.DetailData != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                List<IDataInspectorProvider> data = new List<IDataInspectorProvider>();
-                List<object> context = new List<object>();
+                var data = new List<IDataInspectorProvider>();
+                var context = new List<object>();
                 foreach (var keyValuePair in layer.DetailData)
                 {
                     data.Add(keyValuePair.Value);
@@ -316,10 +338,10 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("Trees", layer.Trees != null ? string.Format("{0}", layer.Trees.Count) : "null");
             if (layer.Trees != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var data = new Dictionary<object, IDataInspectorProvider>();
                 foreach (var tree in layer.Trees)
                 {
-                    if(!data.ContainsKey(tree.Prototype))
+                    if (!data.ContainsKey(tree.Prototype))
                     {
                         data[tree.Prototype] = new PositionList();
                     }
@@ -340,26 +362,26 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("➥Removals", layer.TreeRemovals != null ? string.Format("{0}", layer.TreeRemovals.Count) : "null");
             if (layer.TreeRemovals != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var data = new Dictionary<object, IDataInspectorProvider>();
                 var compoundTrees = wrapper.GetCompoundTrees(layer, false);
                 compoundTrees.AddRange(layer.Trees);
                 foreach (var guid in layer.TreeRemovals)
                 {
                     MadMapsTreeInstance tree = null;
-                    foreach(var t in compoundTrees)
+                    foreach (var t in compoundTrees)
                     {
-                        if(t.Guid == guid)
+                        if (t.Guid == guid)
                         {
                             tree = t;
                             break;
                         }
                     }
-                    if(tree == null)
+                    if (tree == null)
                     {
                         Debug.LogError("Couldn't find tree removal " + guid, layer);
                         continue;
                     }
-                    if(!data.ContainsKey(tree.Prototype))
+                    if (!data.ContainsKey(tree.Prototype))
                     {
                         data[tree.Prototype] = new PositionList();
                     }
@@ -377,7 +399,7 @@ namespace MadMaps.Terrains
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Vegetation Studio", layer.VSInstances != null ? string.Format("{0}", layer.VSInstances.Count) : "null");
             if (layer.VSInstances != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
@@ -442,16 +464,16 @@ namespace MadMaps.Terrains
             }
             EditorGUILayout.EndHorizontal();
             EditorExtensions.Seperator();
-            #endif
+#endif
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Objects", layer.Objects != null ? string.Format("{0}", layer.Objects.Count) : "null");
             if (layer.Objects != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var data = new Dictionary<object, IDataInspectorProvider>();
                 foreach (var obj in layer.Objects)
                 {
-                    if(!data.ContainsKey(obj.Prefab))
+                    if (!data.ContainsKey(obj.Prefab))
                     {
                         data[obj.Prefab] = new PositionList();
                     }
@@ -471,26 +493,26 @@ namespace MadMaps.Terrains
             EditorGUILayout.LabelField("➥Removals", layer.ObjectRemovals != null ? string.Format("{0}", layer.ObjectRemovals.Count) : "null");
             if (layer.ObjectRemovals != null && GUILayout.Button(previewContent, EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
-                Dictionary<object, IDataInspectorProvider> data = new Dictionary<object, IDataInspectorProvider>();
+                var data = new Dictionary<object, IDataInspectorProvider>();
                 var compoundObjs = wrapper.GetCompoundObjects(layer, false);
                 compoundObjs.AddRange(layer.Objects);
                 foreach (var guid in layer.ObjectRemovals)
                 {
                     WorldStamps.PrefabObjectData? obj = null;
-                    foreach(var t in compoundObjs)
+                    foreach (var t in compoundObjs)
                     {
-                        if(t.Guid == guid)
+                        if (t.Guid == guid)
                         {
                             obj = t;
                             break;
                         }
                     }
-                    if(obj == null)
+                    if (obj == null)
                     {
                         Debug.LogError("Couldn't find object removal " + guid, layer);
                         continue;
                     }
-                    if(!data.ContainsKey(obj.Value.Prefab))
+                    if (!data.ContainsKey(obj.Value.Prefab))
                     {
                         data[obj.Value.Prefab] = new PositionList();
                     }
@@ -509,9 +531,9 @@ namespace MadMaps.Terrains
             EditorExtensions.Seperator();
 
             EditorGUILayout.BeginHorizontal();
-            bool hasStencil = layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0;;
+            var hasStencil = layer.Stencil != null && layer.Stencil.Width > 0 && layer.Stencil.Height > 0; ;
             EditorGUILayout.LabelField("Stencil" + (hasStencil ? "" : " (null)"), layer.Stencil != null ? string.Format("{0}", string.Format("{0}x{1}", layer.Stencil.Width, layer.Stencil.Height)) : "null");
-            
+
             GUI.enabled = hasStencil;
             if (GUILayout.Button(EditorGUIUtility.IconContent("Terrain Icon"), EditorStyles.label, GUILayout.Width(20), GUILayout.Height(16)))
             {
@@ -554,7 +576,7 @@ namespace MadMaps.Terrains
             EditorGUILayout.Space();
             if (GUILayout.Button("Apply To Terrain"))
             {
-                if(wrapper.PrepareApply())
+                if (wrapper.PrepareApply())
                 {
                     layer.WriteToTerrain(wrapper);
                     wrapper.FinaliseApply();
@@ -564,7 +586,7 @@ namespace MadMaps.Terrains
 
                     EditorGUIUtility.ExitGUI();
                     return layer;
-                }                
+                }
             }
             EditorGUILayout.Space();
             if (GUILayout.Button("Clear Layer"))
@@ -579,11 +601,11 @@ namespace MadMaps.Terrains
                     EditorGUIUtility.ExitGUI();
                     return layer;
                 }
-                
+
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.Space();
-            
+
             return layer;
         }
     }

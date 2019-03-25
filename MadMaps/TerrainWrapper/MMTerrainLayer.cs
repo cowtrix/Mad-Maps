@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Text;
 using MadMaps.Common;
 using MadMaps.Common.Collections;
 using MadMaps.Common.GenericEditor;
-using MadMaps.Common.Serialization;
 using MadMaps.Terrains.Lookups;
 using MadMaps.WorldStamps;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 namespace MadMaps.Terrains
 {
@@ -49,7 +44,7 @@ namespace MadMaps.Terrains
             {
                 this.SnapshotHeights(terrain);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e, terrain);
             }
@@ -57,7 +52,7 @@ namespace MadMaps.Terrains
             {
                 this.SnapshotSplats(terrain);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e, terrain);
             }
@@ -65,7 +60,7 @@ namespace MadMaps.Terrains
             {
                 this.SnapshotDetails(terrain);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e, terrain);
             }
@@ -73,7 +68,7 @@ namespace MadMaps.Terrains
             {
                 this.SnapshotTrees(terrain);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e, terrain);
             }
@@ -81,11 +76,11 @@ namespace MadMaps.Terrains
             {
                 this.SnapshotObjects(terrain);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogException(e, terrain);
             }
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             try
             {
                 this.SnapshotVegetationStudioData(terrain);
@@ -94,7 +89,7 @@ namespace MadMaps.Terrains
             {
                 Debug.LogException(e, terrain);
             }
-            #endif
+#endif
         }
 
         /// <summary>
@@ -104,7 +99,7 @@ namespace MadMaps.Terrains
         public override void WriteToTerrain(TerrainWrapper wrapper)
         {
             var terrain = wrapper.Terrain;
-            var bounds = new Bounds(terrain.GetPosition() + terrain.terrainData.size/2, terrain.terrainData.size);
+            var bounds = new Bounds(terrain.GetPosition() + terrain.terrainData.size / 2, terrain.terrainData.size);
             // TerrainCollider bounds is unreliable as it can be slow to update
             WriteToTerrain(wrapper, bounds);
         }
@@ -120,11 +115,11 @@ namespace MadMaps.Terrains
                 BlendMode = MMTerrainLayer.EMMTerrainLayerBlendMode.Stencil;
             }
 
-            int bestRes = 0;
+            var bestRes = 0;
             var hRes = terrainWrapper.Terrain.terrainData.heightmapResolution;
-            if(Heights != null && Heights.Width > 0 && Heights.Height > 0 && hRes != Heights.Width)
+            if (Heights != null && Heights.Width > 0 && Heights.Height > 0 && hRes != Heights.Width)
             {
-                if(index == terrainWrapper.Layers.Count - 1)
+                if (index == terrainWrapper.Layers.Count - 1)
                 {
                     terrainWrapper.Terrain.terrainData.heightmapResolution = Heights.Width;
                 }
@@ -135,32 +130,38 @@ namespace MadMaps.Terrains
                 bestRes = hRes;
             }
 
-            if(DetailData.Count > 0)
+            if (DetailData.Count > 0)
             {
                 var firstMap = DetailData.First();
                 var detailRes = firstMap.Value.Width;
-                if(index == terrainWrapper.Layers.Count - 1)
+                if (index == terrainWrapper.Layers.Count - 1)
                 {
-                    if(detailRes != terrainWrapper.Terrain.terrainData.detailResolution)
+                    if (detailRes != terrainWrapper.Terrain.terrainData.detailResolution)
                     {
-                        terrainWrapper.Terrain.terrainData.SetDetailResolution (detailRes, 
+                        terrainWrapper.Terrain.terrainData.SetDetailResolution(detailRes,
                             terrainWrapper.Terrain.terrainData.GetDetailResolutionPerPatch());
                     }
                 }
             }
+#if UNITY_2018_3_OR_NEWER
+            if (TerrainLayerSplatData.Count > 0)
+            {
+                var splatRes = TerrainLayerSplatData.First().Value.Width;
+#else
             if(SplatData.Count > 0)
             {
                 var splatRes = SplatData.First().Value.Width;
-                if(index == terrainWrapper.Layers.Count - 1)
+#endif
+                if (index == terrainWrapper.Layers.Count - 1)
                 {
-                    if(terrainWrapper.Terrain.terrainData.alphamapResolution != splatRes)
+                    if (terrainWrapper.Terrain.terrainData.alphamapResolution != splatRes)
                     {
                         terrainWrapper.Terrain.terrainData.alphamapResolution = splatRes;
                     }
                 }
             }
-                        
-            if(bestRes > 0 && (Stencil == null || Stencil.Width != bestRes || Stencil.Height != bestRes))
+
+            if (bestRes > 0 && (Stencil == null || Stencil.Width != bestRes || Stencil.Height != bestRes))
             {
                 Stencil = new Stencil(bestRes, bestRes);
             }
@@ -198,7 +199,7 @@ namespace MadMaps.Terrains
                 WriteObjectsToTerrain(wrapper, bounds);
             }
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
 
             if (wrapper.WriteVegetationStudio)
             {
@@ -206,14 +207,14 @@ namespace MadMaps.Terrains
                 WriteVegetationStudioToTerrain(wrapper, bounds);
             }
 
-            #endif
+#endif
 
             GC.Collect();
         }
 
         private void WriteObjectsToTerrain(TerrainWrapper wrapper, Bounds bounds)
         {
-            bounds.Expand(Vector3.up*5000);
+            bounds.Expand(Vector3.up * 5000);
             var tPos = wrapper.transform.position;
             var tSize = wrapper.Terrain.terrainData.size;
             for (var i = 0; i < Objects.Count; i++)
@@ -225,7 +226,7 @@ namespace MadMaps.Terrains
                 }
 
                 var worldPos = tPos +
-                               new Vector3(prefabObjectData.Position.x*tSize.x, 0, prefabObjectData.Position.z*tSize.z);
+                               new Vector3(prefabObjectData.Position.x * tSize.x, 0, prefabObjectData.Position.z * tSize.z);
                 worldPos.y = wrapper.transform.position.y + prefabObjectData.Position.y;
                 if (!bounds.Contains(worldPos))
                 {
@@ -275,42 +276,61 @@ namespace MadMaps.Terrains
             var max = terrain.WorldToHeightmapCoord(bounds.max, TerrainX.RoundType.Floor);
             min = new Common.Coord(Mathf.Clamp(min.x, 0, heightmapRes), Mathf.Clamp(min.z, 0, heightmapRes));
             max = new Common.Coord(Mathf.Clamp(max.x, 0, heightmapRes), Mathf.Clamp(max.z, 0, heightmapRes));
-            
+
             BlendMMTerrainLayerUtility.BlendArray(ref existingHeights, Heights, IsValidStencil(Stencil) ? Stencil : null,
                 BlendMode, min, max, new Common.Coord(heightmapRes, heightmapRes));
         }
 
         private void WriteSplatsToTerrain(TerrainWrapper wrapper, Bounds bounds)
         {
+#if UNITY_2018_3_OR_NEWER
+            if (TerrainLayerSplatData == null || TerrainLayerSplatData.Count == 0)
+            {
+                return;
+            }
+            if (BlendMode == EMMTerrainLayerBlendMode.Set)
+            {
+                wrapper.CompoundTerrainData.TerrainLayerSplatData.Clear();
+            }
+            var terrain = wrapper.Terrain;
+            var splatRes = terrain.terrainData.alphamapResolution;
+            var stencilSize = new Common.Coord(Stencil.Width, Stencil.Height);
+            foreach (var keyValuePair in TerrainLayerSplatData)
+            {
+                var terrainLayer = keyValuePair.Key;
+                var readData = keyValuePair.Value;
+
+                if (readData == null || readData.Width != splatRes || readData.Height != splatRes)
+                {
+                    Debug.LogWarning(
+                        string.Format(
+                            "Failed to write splat layer {0} for layer '{3}' as it was the wrong resolution. Expected {1}x{1}, got {2}x{2}",
+                            terrainLayer.name, splatRes, readData.Width, name), wrapper);
+                    continue;
+                }
+                Serializable2DByteArray data;
+                if (!wrapper.CompoundTerrainData.TerrainLayerSplatData.TryGetValue(terrainLayer, out data)
+                    || data.Width != splatRes || data.Height != splatRes)
+                {
+                    data = new Serializable2DByteArray(splatRes, splatRes);
+                }
+                BlendMMTerrainLayerUtility.BlendArray(ref data, readData,
+                        IsValidStencil(Stencil) ? Stencil : null,
+                        BlendMode, Common.Coord.Zero, stencilSize);
+                wrapper.CompoundTerrainData.TerrainLayerSplatData[terrainLayer] = data;
+            }
+#else
             if (SplatData == null || SplatData.Count == 0)
             {
                 return;
             }
-            
             if (BlendMode == EMMTerrainLayerBlendMode.Set)
             {
-                wrapper.CompoundTerrainData.SplatData.Clear();
-                /*if(SplatData.Count > 0)
-                {
-                    var firstSplat = SplatData.First();
-                    SplatData[firstSplat] = new Serializable2DByteArray()
-                }    */             
+                wrapper.CompoundTerrainData.SplatData.Clear();       
             }
-
             var terrain = wrapper.Terrain;
             var splatRes = terrain.terrainData.alphamapResolution;
             var stencilSize = new Common.Coord(Stencil.Width, Stencil.Height);
-            /*if (BlendMode == EMMTerrainLayerBlendMode.Stencil)
-            {
-                // Remove Stencil Values
-                foreach (var pair in wrapper.CompoundTerrainData.SplatData)
-                {
-                    var data = pair.Value;
-                    BlendMMTerrainLayerUtility.StencilEraseArray(ref data, Stencil, Common.Coord.Zero, new Common.Coord(splatRes, splatRes),
-                        stencilSize, false, true);
-                }
-            }*/
-
             foreach (var keyValuePair in SplatData)
             {
                 var splatPrototypeWrapper = keyValuePair.Key;
@@ -324,20 +344,18 @@ namespace MadMaps.Terrains
                             splatPrototypeWrapper.name, splatRes, readData.Width, name), wrapper);
                     continue;
                 }
-
                 Serializable2DByteArray data;
                 if (!wrapper.CompoundTerrainData.SplatData.TryGetValue(splatPrototypeWrapper, out data)
                     || data.Width != splatRes || data.Height != splatRes)
                 {
                     data = new Serializable2DByteArray(splatRes, splatRes);                    
                 }
-
                 BlendMMTerrainLayerUtility.BlendArray(ref data, readData,
                         IsValidStencil(Stencil) ? Stencil : null,
                         BlendMode, Common.Coord.Zero, stencilSize);
-
                 wrapper.CompoundTerrainData.SplatData[splatPrototypeWrapper] = data;
             }
+#endif
             GC.Collect();
         }
 
@@ -499,7 +517,7 @@ namespace MadMaps.Terrains
                     var hz = v - z;
                     try
                     {
-                        var heightsSample = heights[hx, hz];                        
+                        var heightsSample = heights[hx, hz];
                         if (stencil == null)
                         {
                             Heights[u, v] = heightsSample;
@@ -591,6 +609,24 @@ namespace MadMaps.Terrains
                     Heights = new Serializable2DFloatArray(tRes, tRes);
                 }
             }
+#if UNITY_2018_3_OR_NEWER
+            TerrainLayer firstSplat = null;
+            if (BlendMode == EMMTerrainLayerBlendMode.Set)
+            {
+                if (TerrainLayerSplatData.Count > 0)
+                {
+                    firstSplat = TerrainLayerSplatData.First().Key;
+                }
+            }
+            TerrainLayerSplatData.Clear();
+            if (firstSplat && BlendMode == EMMTerrainLayerBlendMode.Set)
+            {
+                var aRes = wrapper.Terrain.terrainData.alphamapResolution;
+                var data = new Serializable2DByteArray(aRes, aRes);
+                data.Fill(255);
+                TerrainLayerSplatData.Add(firstSplat, data);
+            }
+#else
             SplatPrototypeWrapper firstSplat = null;            
             if(BlendMode == EMMTerrainLayerBlendMode.Set)
             {
@@ -600,13 +636,14 @@ namespace MadMaps.Terrains
                 }
             }
             SplatData.Clear();
-            if(firstSplat && BlendMode == EMMTerrainLayerBlendMode.Set)
+            if (firstSplat && BlendMode == EMMTerrainLayerBlendMode.Set)
             {
                 var aRes = wrapper.Terrain.terrainData.alphamapResolution;
                 var data = new Serializable2DByteArray(aRes, aRes);
                 data.Fill(255);
                 SplatData.Add(firstSplat, data);
             }
+#endif
 
             Objects.Clear();
             ObjectRemovals.Clear();
@@ -634,7 +671,7 @@ namespace MadMaps.Terrains
 #endif
 
             GC.Collect();
-            
+
 #if UNITY_EDITOR
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
@@ -648,9 +685,9 @@ namespace MadMaps.Terrains
             {
                 return;
             }
-            if (SplatData == null)
+            if (TerrainLayerSplatData == null)
             {
-                SplatData = new CompressedSplatDataLookup();
+                TerrainLayerSplatData = new CompressedTerrainLayerSplatDataLookup();
             }
 
             Serializable2DByteArray existingSplats;
@@ -811,9 +848,16 @@ namespace MadMaps.Terrains
 
 #if UNITY_2018_3_OR_NEWER
         public override Serializable2DByteArray GetSplatmap(TerrainLayer prototype, int x, int z, int width, int height, int splatResolution)
+        {
+            if (TerrainLayerSplatData == null)
+            {
+                return null;
+            }
+
+            Serializable2DByteArray data;
+            if (!TerrainLayerSplatData.TryGetValue(prototype, out data))
 #else
         public override Serializable2DByteArray GetSplatmap(SplatPrototypeWrapper prototype, int x, int z, int width, int height, int splatResolution)
-#endif
         {
             if (SplatData == null)
             {
@@ -821,9 +865,6 @@ namespace MadMaps.Terrains
             }
 
             Serializable2DByteArray data;
-#if UNITY_2018_3_OR_NEWER
-            if (!TerrainLayerSplatData.TryGetValue(prototype, out data))
-#else
             if (!SplatData.TryGetValue(prototype, out data))
 #endif
             {
@@ -909,7 +950,7 @@ namespace MadMaps.Terrains
             UnityEditor.EditorUtility.SetDirty(this);
 #endif
         }
-        
+
         public void SetDetailMap(DetailPrototypeWrapper prototype, int x, int z, Serializable2DByteArray details, int dRes, Serializable2DFloatArray stencil = null)
         {
             if (DetailData == null)
@@ -943,7 +984,7 @@ namespace MadMaps.Terrains
                         }
                         else
                         {
-                            existingDetails[u, v] = (byte)splatSample;
+                            existingDetails[u, v] = splatSample;
                         }
                     }
                     catch (Exception)
@@ -998,7 +1039,7 @@ namespace MadMaps.Terrains
             }
             return detailMap;
         }
-        
+
         public void SetTrees(List<TreeInstance> trees, List<TreePrototype> prototypeList)
         {
             Trees.Clear();
@@ -1147,10 +1188,6 @@ namespace MadMaps.Terrains
 
         public override float GetStencilStrength(Vector2 vector2, bool ignoreNegativeKeys = true)
         {
-            /*if (BlendMode != EMMTerrainLayerBlendMode.Stencil || Stencil == null)
-            {
-                return 1;
-            }*/
             float strength;
             Stencil.StencilBilinearSample(vector2, out strength, ignoreNegativeKeys);
             return strength;
@@ -1158,10 +1195,6 @@ namespace MadMaps.Terrains
 
         public override float GetStencilStrength(Vector2 vector2, int stencilKey)
         {
-            /*if (BlendMode != EMMTerrainLayerBlendMode.Stencil || Stencil == null)
-            {
-                return 1;
-            }*/
             float strength;
             Stencil.StencilBilinearSample(vector2, stencilKey, out strength, stencilKey > 0);
             return strength;
@@ -1223,10 +1256,17 @@ namespace MadMaps.Terrains
         {
             base.ForceDirty();
             Heights.ForceDirty();
+#if UNITY_2018_3_OR_NEWER
+            foreach (var pair in TerrainLayerSplatData)
+            {
+                pair.Value.ForceDirty();
+            }
+#else
             foreach (var pair in SplatData)
             {
                 pair.Value.ForceDirty();
             }
+#endif
             foreach (var pair in DetailData)
             {
                 pair.Value.ForceDirty();

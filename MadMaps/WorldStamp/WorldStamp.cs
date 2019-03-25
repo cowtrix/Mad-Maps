@@ -558,7 +558,11 @@ namespace MadMaps.WorldStamps
 
         public override void ProcessSplats(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+#if UNITY_2018_3_OR_NEWER
+            if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplatLayers.Count == Data.SplatData.Count)
+#else
             if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplats.Count == Data.SplatData.Count)
+#endif
             {
                 return;
             }
@@ -707,9 +711,9 @@ namespace MadMaps.WorldStamps
                                 // We're adding the first splat on the first layer, so fill it
                                 var data = new Serializable2DByteArray(sRes, sRes);
                                 data.Fill(255);
-                                layer.SplatData.Add(splatPair.Layer, data);
+                                layer.SplatData.Add(splatPair.Wrapper, data);
                             }
-                            thisLayerSplatData[splatPair.Layer] = layerData;                            
+                            thisLayerSplatData[splatPair.Wrapper] = layerData;                            
                         }
 #endif
 

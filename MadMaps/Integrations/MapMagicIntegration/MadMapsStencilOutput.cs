@@ -24,7 +24,7 @@ namespace MadMaps.Terrains.MapMagicIntegration
 
         public override MapMagic.Action<global::MapMagic.CoordRect, Chunk.Results, GeneratorsAsset, Chunk.Size, Func<float, bool>> GetProces() { return Process; }
         public override Func<global::MapMagic.CoordRect, Terrain, object, Func<float, bool>, IEnumerator> GetApply() { return Apply; }
-        public override MapMagic.Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
+        public override Action<global::MapMagic.CoordRect, Terrain> GetPurge() { return Purge; }
 
         public void Process(global::MapMagic.CoordRect rect, Chunk.Results results, GeneratorsAsset gens, Chunk.Size terrainSize, Func<float, bool> stop = null)
         {

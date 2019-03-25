@@ -27,7 +27,11 @@ namespace MadMaps.WorldStamps.Authoring
         {
             get
             {
+#if UNITY_2018_3_OR_NEWER
                 var nullCount = SplatData.Count(data => data.Layer == null);
+#else
+                var nullCount = SplatData.Count(data => data.Wrapper == null);
+#endif
                 if (nullCount > 0)
                     return new GUIContent(string.Format("Splats ({0}) ({1} need resolving)", SplatData.Count, nullCount));
                 return new GUIContent(string.Format("Splats ({0})", SplatData.Count));
@@ -81,7 +85,11 @@ namespace MadMaps.WorldStamps.Authoring
                     continue;
                 }
 
+#if UNITY_2018_3_OR_NEWER
                 SplatData.Add(new CompressedSplatData { Layer = wrapper, Data = new Serializable2DByteArray(data) });
+#else
+                SplatData.Add(new CompressedSplatData { Wrapper = wrapper, Data = new Serializable2DByteArray(data) });
+#endif
             }
         }
 

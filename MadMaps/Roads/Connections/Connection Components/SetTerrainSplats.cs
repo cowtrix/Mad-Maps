@@ -18,9 +18,11 @@ namespace MadMaps.Roads.Connections
             [Name("Splat Configuration")]
             public class SplatConfig
             {
+#if UNITY_2018_3_OR_NEWER
                 public TerrainLayer TerrainLayer;
                 [Obsolete]
                 [HideInInspector]
+#endif
                 public SplatPrototypeWrapper SplatPrototype;
                 public float SplatStrength = 1;
             }
@@ -152,6 +154,7 @@ namespace MadMaps.Roads.Connections
 
                             foreach (var currentPrototype in currentPrototypes)
                             {
+#if UNITY_2018_3_OR_NEWER
                                 if (!baseData.ContainsKey(currentPrototype))
                                 {
                                     continue;
@@ -164,8 +167,6 @@ namespace MadMaps.Roads.Connections
                                 var otherSplatFloatWriteVal = (otherSplatFloatValue * (1 - (delta / 255f)));
                                 var write = (byte)Mathf.Clamp(Mathf.RoundToInt(otherSplatFloatWriteVal * 255), 0, 255);
                                 baseData[currentPrototype][dx, dz] = write;
-#if UNITY_2018_3_OR_NEWER
-
 #else
                                 if (!baseData.ContainsKey(currentPrototype))
                                 {
