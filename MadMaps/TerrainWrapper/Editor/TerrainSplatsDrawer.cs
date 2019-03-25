@@ -14,7 +14,7 @@ namespace MadMaps.Terrains
         {
             _wrapper = wrapper;
 #if UNITY_2018_3_OR_NEWER
-            List = new ReorderableList(wrapper.SplatPrototypes, typeof(TerrainLayer), false, false, true, false);
+            List = new ReorderableList(wrapper.TerrainLayerSplatPrototypes, typeof(TerrainLayer), false, false, true, false);
 #else
             List = new ReorderableList(wrapper.SplatPrototypes, typeof(SplatPrototypeWrapper), false, false, true, false);
 #endif
@@ -24,7 +24,6 @@ namespace MadMaps.Terrains
             List.onAddCallback += OnLayerAddCallback;
             List.onRemoveCallback += OnLayerRemoveCallback;
             List.drawFooterCallback += DrawLayerFooterCallback;
-            //List.onCanRemoveCallback += OnCanRemoveCallback;
             List.onChangedCallback += RefreshSplats;
         }
 
@@ -33,33 +32,22 @@ namespace MadMaps.Terrains
             _wrapper.RefreshSplats();
         }
 
-        /*private bool OnCanRemoveCallback(ReorderableList list)
-        {
-            var splat = _wrapper.SplatPrototypes[list.index];
-            if (splat == null)
-            {
-                return true;
-            }
-            foreach (var MMTerrainLayer in _wrapper.Layers)
-            {
-                if (MMTerrainLayer.SplatData.ContainsKey(splat))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }*/
-
         private void OnLayerRemoveCallback(ReorderableList list)
         {
+#if UNITY_2018_3_OR_NEWER
+            _wrapper.TerrainLayerSplatPrototypes.RemoveAt(list.index);
+#else
             _wrapper.SplatPrototypes.RemoveAt(list.index);
-            //_wrapper.Dirty = true;
+#endif
         }
 
         private void OnLayerAddCallback(ReorderableList list)
         {
+#if UNITY_2018_3_OR_NEWER
+            _wrapper.TerrainLayerSplatPrototypes.Add(null);
+#else
             _wrapper.SplatPrototypes.Add(null);
-            //_wrapper.Dirty = true;
+#endif
         }
 
         private float LayerElementHeightCallback(int index)
@@ -74,7 +62,7 @@ namespace MadMaps.Terrains
 
             float headerHeight = 18;
             float previewTexSize = 57;
-            float objFieldWidth = rect.width - previewTexSize - previewTexSize/2;
+            var objFieldWidth = rect.width - previewTexSize - previewTexSize / 2;
 
             var layerNumberRect = new Rect(rect.x, rect.y, 10, headerHeight);
             EditorGUI.LabelField(layerNumberRect, index.ToString());
@@ -93,6 +81,8 @@ namespace MadMaps.Terrains
             {
                 return;
             }
+            var previewRect = new Rect(layerNumberRect.xMax + 4 + objFieldWidth + 4, rect.y, previewTexSize, previewTexSize);
+            var tex = _wrapper.TerrainLayerSplatPrototypes[index] != null ? _wrapper.TerrainLayerSplatPrototypes[index].diffuseTexture : null;
 #else
             var newKey = (SplatPrototypeWrapper)EditorGUI.ObjectField(nameRect, _wrapper.SplatPrototypes[index], typeof(SplatPrototypeWrapper), false);
             if (newKey != _wrapper.SplatPrototypes[index])
@@ -106,15 +96,13 @@ namespace MadMaps.Terrains
             {
                 return;
             }
-#endif
-
             var previewRect = new Rect(layerNumberRect.xMax + 4 + objFieldWidth + 4, rect.y, previewTexSize, previewTexSize);
             var tex = _wrapper.SplatPrototypes[index] != null ? _wrapper.SplatPrototypes[index].Texture : null;
+#endif
             GUI.DrawTexture(previewRect, tex);
-
             var infoRect = new Rect(layerNumberRect.xMax + 4, rect.y + headerHeight, objFieldWidth, rect.height - headerHeight);
-            StringBuilder sb = new StringBuilder("Written to by: ");
-            bool any = false;
+            var sb = new StringBuilder("Written to by: ");
+            var any = false;
             foreach (var layer in _wrapper.Layers)
             {
                 var wrappers = layer.GetSplatPrototypeWrappers();
@@ -145,11 +133,11 @@ namespace MadMaps.Terrains
         private void DrawLayerFooterCallback(Rect rect)
         {
             float buttonWidth = 25;
-            float xMax = rect.xMax;
-            float num = xMax - 58f - buttonWidth * 1;
+            var xMax = rect.xMax;
+            var num = xMax - 58f - buttonWidth * 1;
             rect = new Rect(num, rect.y, xMax - num, rect.height);
-            Rect rect2 = new Rect(rect.xMax - 50, rect.y - 3f, 25f, 16f);
-            Rect position = new Rect(xMax - 29f, rect.y - 3f, 25f, 16f);
+            var rect2 = new Rect(rect.xMax - 50, rect.y - 3f, 25f, 16f);
+            var position = new Rect(xMax - 29f, rect.y - 3f, 25f, 16f);
             if (Event.current.type == EventType.Repaint)
             {
                 GUIStyle footerBackground = "RL Footer";
@@ -174,13 +162,17 @@ namespace MadMaps.Terrains
                     }
                 }
             }
-            Rect reapplyRect = new Rect(rect.xMax - 50 - buttonWidth, rect.y - 3f, buttonWidth, 16f);
+            var reapplyRect = new Rect(rect.xMax - 50 - buttonWidth, rect.y - 3f, buttonWidth, 16f);
             if (GUI.Button(reapplyRect, EditorGUIUtility.IconContent("TreeEditor.Refresh", "Refresh All Layers"), "RL FooterButton"))
             {
                 _wrapper.RefreshSplats();
             }
+#if UNITY_2018_3_OR_NEWER
+            List.list = _wrapper.TerrainLayerSplatPrototypes;
+#else
             List.list = _wrapper.SplatPrototypes;
+#endif
         }
-        
+
     }
 }

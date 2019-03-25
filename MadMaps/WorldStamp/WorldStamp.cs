@@ -558,7 +558,11 @@ namespace MadMaps.WorldStamps
 
         public override void ProcessSplats(TerrainWrapper terrainWrapper, LayerBase baseLayer, int stencilKey)
         {
+#if UNITY_2018_3_OR_NEWER
+            if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplatLayers.Count == Data.SplatData.Count)
+#else
             if (!WriteSplats || Data.SplatData.Count == 0 || IgnoredSplats.Count == Data.SplatData.Count)
+#endif
             {
                 return;
             }

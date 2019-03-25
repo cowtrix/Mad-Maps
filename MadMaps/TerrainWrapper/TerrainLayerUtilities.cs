@@ -50,7 +50,7 @@ namespace MadMaps.Terrains
 
             return Vector3.Cross(p2 - p4, p1 - p3).normalized;
         }
-
+#if !UNITY_2018_3_OR_NEWER
         public static Dictionary<SplatPrototype, SplatPrototypeWrapper> ResolvePrototypes(SplatPrototype[] prototypes)
         {
             var ret = new Dictionary<SplatPrototype, SplatPrototypeWrapper>(new SplatPrototypeWrapper.SplatPrototypeComparer());
@@ -117,6 +117,7 @@ namespace MadMaps.Terrains
 #endif
             return ret;
         }
+#endif
 
         public static Dictionary<DetailPrototype, DetailPrototypeWrapper> ResolvePrototypes(DetailPrototype[] prototypes)
         {
@@ -132,7 +133,7 @@ namespace MadMaps.Terrains
                 var unityProto = detailWrapper.GetPrototype();
                 if (detailWrapperLookup.ContainsKey(unityProto))
                 {
-                    Debug.LogWarning(String.Format("Duplicate DetailPrototypeWrappers detected: {0} : {1}", detailWrapper, detailWrapperLookup[unityProto]), detailWrapper);
+                    Debug.LogWarning(string.Format("Duplicate DetailPrototypeWrappers detected: {0} : {1}", detailWrapper, detailWrapperLookup[unityProto]), detailWrapper);
                     continue;
                 }
                 detailWrapperLookup.Add(unityProto, detailWrapper);
@@ -149,19 +150,19 @@ namespace MadMaps.Terrains
                 if (!detailWrapperLookup.TryGetValue(prototype, out wrapper))
                 {
                     var promptResult = EditorUtility.DisplayDialogComplex(
-                            String.Format("Unable to find DetailPrototype for {0}", prototype.prototypeTexture),
+                            string.Format("Unable to find DetailPrototype for {0}", prototype.prototypeTexture),
                             "What would you like to do?", "Create New Wrapper", "Select Existing Wrapper", "Skip For Now");
                     if (promptResult == 0)
                     {
                         var rootAsset = (((UnityEngine.Object)prototype.prototypeTexture ?? prototype.prototype));
-                        string rootAssetPath = "NullTexture";
-                        if(rootAsset != null)
+                        var rootAssetPath = "NullTexture";
+                        if (rootAsset != null)
                         {
                             rootAssetPath = rootAsset.name;
                         }
-                        var path = EditorExtensions.SaveFilePanel("Create New DetailPrototype Wrapper", 
+                        var path = EditorExtensions.SaveFilePanel("Create New DetailPrototype Wrapper",
                             rootAssetPath + "Wrapper", "asset");
-                        if (!String.IsNullOrEmpty(path))
+                        if (!string.IsNullOrEmpty(path))
                         {
                             wrapper = ScriptableObject.CreateInstance<DetailPrototypeWrapper>();
                             wrapper.SetFromPrototype(prototype);
@@ -194,7 +195,7 @@ namespace MadMaps.Terrains
 #endif
             return ret;
         }
-        
+
         public static void SnapshotObjects(this MMTerrainLayer layer, Terrain terrain)
         {
 #if UNITY_EDITOR
@@ -207,7 +208,7 @@ namespace MadMaps.Terrains
             var allTransforms = UnityEngine.Object.FindObjectsOfType<Transform>();
             var done = new HashSet<Transform>();
             allTransforms = allTransforms.OrderBy(transform => TransformExtensions.GetHierarchyDepth(transform)).ToArray();
-            HashSet<Transform> ignores = new HashSet<Transform>();
+            var ignores = new HashSet<Transform>();
 
             layer.Objects.Clear();
             for (var i = 0; i < allTransforms.Length; i++)
@@ -301,7 +302,7 @@ namespace MadMaps.Terrains
                 }
             }
 #endif
-            }
+        }
 
         public static void SnapshotTrees(this MMTerrainLayer layer, Terrain terrain)
         {
@@ -337,7 +338,7 @@ namespace MadMaps.Terrains
                 var data = new Serializable2DByteArray(dRes, dRes);
                 var detailMap = terrain.terrainData.GetDetailLayer(0, 0, terrain.terrainData.detailWidth,
                     terrain.terrainData.detailHeight, i);
-                int sum = 0;
+                var sum = 0;
                 for (var u = 0; u < detailMap.GetLength(0); u++)
                 {
                     for (var v = 0; v < detailMap.GetLength(1); v++)
@@ -359,6 +360,12 @@ namespace MadMaps.Terrains
         {
             var rawSplats = terrain.terrainData.GetAlphamaps(0, 0, terrain.terrainData.alphamapWidth,
                 terrain.terrainData.alphamapHeight);
+#if UNITY_2018_3_OR_NEWER
+            layer.TerrainLayerSplatData.Clear();
+            for (var k = 0; k < rawSplats.GetLength(2); ++k)
+            {
+                var wrapper = terrain.terrainData.terrainLayers[k];
+#else
             layer.SplatData.Clear();
 
             var splatWrapperLookup = ResolvePrototypes(terrain.terrainData.splatPrototypes);
@@ -371,6 +378,7 @@ namespace MadMaps.Terrains
                 {
                     continue;
                 }
+#endif
                 var data = new Serializable2DByteArray(terrain.terrainData.alphamapResolution,
                     terrain.terrainData.alphamapResolution);
                 float sum = 0;
@@ -385,7 +393,11 @@ namespace MadMaps.Terrains
                 }
                 if (sum > 0)
                 {
+#if UNITY_2018_3_OR_NEWER
+                    layer.TerrainLayerSplatData[wrapper] = data;
+#else
                     layer.SplatData[wrapper] = data;
+#endif
                 }
             }
         }

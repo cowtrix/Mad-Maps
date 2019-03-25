@@ -48,19 +48,23 @@ namespace MadMaps.Terrains
             }
             if (terrainWrapper.WriteSplats)
             {
+#if UNITY_2018_3_OR_NEWER
+                TerrainLayerSplatData.Clear();
+#else
                 SplatData.Clear();
+#endif
             }
             if (terrainWrapper.WriteHeights && Heights != null)
             {
                 Heights.Clear();
             }
 
-            #if VEGETATION_STUDIO
+#if VEGETATION_STUDIO
             if(terrainWrapper.WriteVegetationStudio)
             {
                 VegetationStudio.Clear();
             }
-            #endif
+#endif
         }
     }
 
