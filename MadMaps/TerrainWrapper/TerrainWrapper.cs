@@ -37,6 +37,7 @@ namespace MadMaps.Terrains
         public List<LayerBase> Layers = new List<LayerBase>();
 
 #if UNITY_2018_3_OR_NEWER
+        public bool HasUpgraded_2018_3;
         public List<TerrainLayer> TerrainLayerSplatPrototypes = new List<TerrainLayer>();
 
         [Obsolete]
@@ -265,22 +266,24 @@ namespace MadMaps.Terrains
                 }
 #if UNITY_EDITOR
 #if UNITY_2018_3_OR_NEWER
-                var prefab = UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(instantiatedObject.gameObject) as GameObject);
-                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject, UnityEditor.InteractionMode.AutomatedAction);
+                var prefab = UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(instantiatedObject);
+                if (prefab != null)
+                {
+                    UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject, UnityEditor.InteractionMode.AutomatedAction);
 #elif UNITY_2018_1_OR_NEWER
                 var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetCorrespondingObjectFromSource(instantiatedObject.gameObject) as GameObject);
-                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
+                if (prefab != null)
+                {
+                    UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
 #else
                 var prefab = UnityEditor.PrefabUtility.FindPrefabRoot(UnityEditor.PrefabUtility.GetPrefabParent(instantiatedObject.gameObject) as GameObject);
-                UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
+                if (prefab != null)
+                { 
+                    UnityEditor.PrefabUtility.RevertPrefabInstance(instantiatedObject.gameObject);
 #endif
-
-
 #else
                 GameObject prefab = null;
 #endif
-                if (prefab != null)
-                {
                     Queue<GameObject> queue;
                     if (!cache.TryGetValue(prefab, out queue))
                     {
@@ -346,15 +349,17 @@ namespace MadMaps.Terrains
 
 #if UNITY_EDITOR
 #if UNITY_2018_3_OR_NEWER
-                var root = UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(prefabObjectData.Prefab);
+                var root = prefabObjectData.Prefab;
 #else
                 var root = UnityEditor.PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab);
-#endif
                 if (root != prefabObjectData.Prefab)
                 {
-                    Debug.LogError("Layer {0} references a prefab sub object! This is not supported.");
+                    Debug.LogError(string.Format("Layer references a prefab sub {0} object! This is not supported.", prefabObjectData.Prefab), this);
                     continue;
                 }
+#endif
+#else
+                var root = prefabObjectData.Prefab;
 #endif
 
                 var worldPos = tPos + new Vector3(prefabObjectData.Position.x * tSize.x,
@@ -553,6 +558,7 @@ namespace MadMaps.Terrains
                     wrapperLayers.Add(compoundSplat.Key);
                 }
             }
+            TerrainLayerSplatPrototypes = RefreshSplats();
 #else
             var compoundLayers = CompoundTerrainData.SplatData;
             var wrapperLayers = SplatPrototypes;
@@ -624,19 +630,8 @@ namespace MadMaps.Terrains
                             normalizeShader.SetVector("_Size", new Vector4(subRes, subRes, wrapperLayers.Count));
                             normalizeShader.Dispatch(normalizeShaderKernel, subRes, subRes, wrapperLayers.Count);
                             dataBuffer.GetData(splats);
-                            //splats.Normalize();
-
                             Terrain.terrainData.SetAlphamaps(u * subRes, v * subRes, splats);
-
-                            /*for (int index00 = 0; index00 < splats.GetLength(0); index00++)
-                                for (int index01 = 0; index01 < splats.GetLength(1); index01++)
-                                    for (int index02 = 0; index02 < splats.GetLength(2); index02++)
-                                    {
-                                        splats[index00, index01, index02] = 0;
-                                    }*/
-                            //break;
                         }
-                        //break;
                     }
                     dataBuffer.Dispose();
                     splatLayerData.Dispose();

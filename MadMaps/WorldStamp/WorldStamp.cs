@@ -97,6 +97,7 @@ namespace MadMaps.WorldStamps
         public ESplatBlendMode SplatBlendMode = ESplatBlendMode.Set;
 
 #if UNITY_2018_3_OR_NEWER
+        public bool HasUpgraded_2018_3;
         public List<TerrainLayer> IgnoredSplatLayers = new List<TerrainLayer>();
 
         [HideInInspector]
@@ -1092,12 +1093,9 @@ namespace MadMaps.WorldStamps
                     continue;
                 }
 
-#if UNITY_EDITOR
-#if UNITY_2018_3_OR_NEWER
-                if (UnityEditor.PrefabUtility.GetOutermostPrefabInstanceRoot(prefabObjectData.Prefab) != prefabObjectData.Prefab)
-#else
+#if UNITY_EDITOR && !UNITY_2018_3_OR_NEWER
+
                 if (UnityEditor.PrefabUtility.FindPrefabRoot(prefabObjectData.Prefab) != prefabObjectData.Prefab)
-#endif
                 {
                     Debug.LogWarning("Referencing inner prefab object somehow!", this);
                     continue;

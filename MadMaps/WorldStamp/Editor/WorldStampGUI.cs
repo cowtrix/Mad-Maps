@@ -105,6 +105,21 @@ namespace MadMaps.WorldStamps
             //_overrideRelativeObjectMode = serializedObject.FindProperty("OverrideObjectRelativeMode");
             _relativeObjectMode = serializedObject.FindProperty("RelativeMode");
             _disableStencil = serializedObject.FindProperty("DisableStencil");
+
+#if UNITY_2018_3_OR_NEWER
+            if (Updater2018_3.LiveUpgraderEnabled.Value)
+            {
+                foreach (var t in targets)
+                {
+                    var stamp = t as WorldStamp;
+                    if (stamp.HasUpgraded_2018_3)
+                    {
+                        continue;
+                    }
+                    Updater2018_3.UpgradeStamp(stamp, true);
+                }
+            }
+#endif
         }
 
         void OnDisable()

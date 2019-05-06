@@ -59,6 +59,21 @@ namespace MadMaps.Terrains
                 new GUIContent("Details") {image = EditorGUIUtility.FindTexture("TerrainInspector.TerrainToolPlants")},
                 new GUIContent("Info") {image = EditorGUIUtility.FindTexture("_Help")},
             };
+
+#if UNITY_2018_3_OR_NEWER
+            if(Updater2018_3.LiveUpgraderEnabled.Value)
+            {
+                foreach (var t in targets)
+                {
+                    var stamp = t as TerrainWrapper;
+                    if (stamp.HasUpgraded_2018_3)
+                    {
+                        continue;
+                    }
+                    Updater2018_3.UpgradeWrapper(stamp, true);
+                }
+            }
+#endif
         }
 
         void OnDisable()
