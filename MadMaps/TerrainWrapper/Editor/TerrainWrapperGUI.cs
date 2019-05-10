@@ -19,7 +19,7 @@ namespace MadMaps.Terrains
 
         public static MMTerrainLayer StencilLayerDisplay
         {
-            get => __stencilLayerDisplay;
+            get { return __stencilLayerDisplay; }
             set
             {
                 __stencilLayerDisplay = value;

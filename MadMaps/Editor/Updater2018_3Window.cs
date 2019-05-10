@@ -18,13 +18,9 @@ namespace MadMaps
             LOG,
         }
         EWindowState WindowState = EWindowState.INTRO;
-        const string GuiContent = @"This tool will upgrade pre-2018.3 Mad Maps prefabs to support the new terrain system. ";
+        const string GuiContent = @"This tool will upgrade pre-2018.3 Mad Maps prefabs to support the new terrain system.\nYou can rerun this tool at any time through the menu: Tools > Mad Maps > Run 2018.3 Updater";
         bool _howDoIWorkExpanded;
-        const string HowDoIWork = "1. The tool will find every prefab in the project that has a WorldStamp or TerrainWrapper component. \n" +
-            "2. It will look in those components for Splat Layer information.\n" +
-            "3. For each splat layer that is still inked to a SplatPrototypeWrapper, the tool will attempt to find a good candidate TerrainLayer object in your project.\n" +
-            "4. The tool will ask you if you'd like to use the reccomended TerrainLayer, manually pick a TerrainLayer, or create a new TerrainLayer.\n" +
-            "5. By default this will create a link between the SplatPrototypeWrapper and the TerrainLayer, and will replace any other SplatPrototypeWrapper references of that SplatPrototypeWrapper with that TerrainLayer.\n";
+        const string HowDoIWork = "We search through all prefabs in the project, and replace references to your SplatPrototypeWrappers with Terrain Layers. In the next screen, you'll be able to specify which Terrain Layers you want to swap with which SplatPrototypeWrappers.";
         const string Warning = @"It is strongly reccomended that you backup the project before running this tool.";
         bool _whatIsLiveUpgraderExpanded;
         const string WhatIsLiveUpgrader = "Live Upgrader will run in the background of your editor and upgrade assets as they are loaded in scenes. This is important for upgrading the assets that live in your Unity scenes. Disabling the Live Updater will risk losing splat information in components that are not in prefabs.";
@@ -69,6 +65,7 @@ namespace MadMaps
         void FirstWindowGUI()
         {
             EditorGUILayout.LabelField(GuiContent, EditorStyles.wordWrappedLabel);
+            EditorGUILayout.LabelField("The Upgrader will effect these assets:", EditorStyles.boldLabel);
             _firstWindowScroll = EditorGUILayout.BeginScrollView(_firstWindowScroll, EditorStyles.textArea, GUILayout.MaxHeight(250));
             EditorGUILayout.SelectableLabel(_assetsToUpgrade.Aggregate("", (current, next) => current + "\n" + next), GUILayout.ExpandHeight(true));
             EditorGUILayout.EndScrollView();
@@ -98,6 +95,7 @@ namespace MadMaps
         void SetupLinksGUI()
         {
             _linksScroll = EditorGUILayout.BeginScrollView(_linksScroll);
+            EditorGUILayout.HelpBox("Here you can specify which Terrain Layers you would like to replace the SplatPrototypeWrappers in your project.", MessageType.None);
             bool layerFailedToLoad = false;
             var wrapperGuidsToClear = new List<string>();
             var wrapperGuids = Updater2018_3.UpdateLinks.Keys;
